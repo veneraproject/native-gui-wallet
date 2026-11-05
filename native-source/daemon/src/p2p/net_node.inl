@@ -1,36 +1,3 @@
-                                       
-                                              
-  
-                       
-  
-                                                                                       
-                                                            
-  
-                                                                                         
-                                              
-  
-                                                                                         
-                                                                                  
-                                               
-  
-                                                                                       
-                                                                                     
-                               
-  
-                                                                                      
-                                                                                          
-                                                                                         
-                                                                                       
-                                                                               
-                                                                                          
-                                                                                    
-                                                                                          
-                                                                               
-  
-                                                                                      
-
- 
-
 #include <algorithm>
 #include <numeric>
 #include <unordered_set>
