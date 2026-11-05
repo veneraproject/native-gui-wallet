@@ -2,8 +2,7 @@
 const fs=require('node:fs');const path=require('node:path');const crypto=require('node:crypto');const {spawn}=require('node:child_process');
 const {NativeTransport}=require('./native-transport.cjs');
 const ORIGIN='https://wallet.veneralabs.org';
-const STAKING='VENeRa1zWhh2AWLi78SUg2HApA6SF69cKRTNsf7YrKxZSmXMCe1mSZyT41SPV8u1h2KJEeSCB6B4iUzHSVeAqwEkYYummpduFj218';
-const ROUTES={info:'/api/v2/info',challenge:'/api/v2/wallet/challenge',profile:'/api/v2/wallet/session',logout:'/api/v2/wallet/logout',burn:'/api/v2/burns/register',burn_stats:'/api/v2/burns/stats',stake:'/api/v2/stakes/register',stake_stats:'/api/v2/stakes/stats',details:'/api/v2/stakes/details',claim_burn_yield:'/api/v2/yield/claim',claim_status:'/api/v2/yield/status'};
+const ROUTES={info:'/api/v2/info',challenge:'/api/v2/wallet/challenge',profile:'/api/v2/wallet/session',logout:'/api/v2/wallet/logout',burn:'/api/v2/burns/register',burn_stats:'/api/v2/burns/stats',stake:'/api/v2/stakes/register',stake_stats:'/api/v2/stakes/stats',claim_burn_yield:'/api/v2/yield/claim',claim_status:'/api/v2/yield/status'};
 const delay=ms=>new Promise(r=>setTimeout(r,ms));
 const assert=(v,message)=>{if(!v)throw new Error(message);};
 const decimalKey=value=>{let [whole,fraction='']=value.split('.');whole=whole.replace(/^0+(?=\d)/,'');fraction=fraction.replace(/0+$/,'');return whole+(fraction?'.'+fraction:'');};
@@ -58,7 +57,7 @@ class Controller {
   if(action==='claim_burn_yield'||action==='claim_status')await this.connect();
   const payload={audience:ORIGIN,action,wallet_address:this.accounts.vnr,txid:'',lock_days:0,erc20_address:'',request_id:'',...extra};
   const challenge=await this.backend(ROUTES.challenge,payload);assert(typeof challenge.challenge_id==='string'&&challenge.challenge_id.length<=4096,'Invalid backend challenge');
-  const fields={...payload,nonce:challenge.nonce,expires_at:challenge.expires_at,message:challenge.message,staking_address:STAKING};const proof=await this.native.call('authorize_reward',fields);return this.backend(ROUTES[action],{challenge_id:challenge.challenge_id,...proof},action==='claim_burn_yield'||action==='claim_status'?this.backendToken:'');
+  const fields={...payload,nonce:challenge.nonce,expires_at:challenge.expires_at,message:challenge.message};const proof=await this.native.call('authorize_reward',fields);return this.backend(ROUTES[action],{challenge_id:challenge.challenge_id,...proof},action==='claim_burn_yield'||action==='claim_status'?this.backendToken:'');
  }
  async connect(){if(this.backendToken&&this.backendExpiry>Date.now()/1000+60)return;const response=await this.signed('profile',{erc20_address:this.accounts.evm.toLowerCase()});assert(response.wallet_address===this.accounts.vnr&&response.erc20_address.toLowerCase()===this.accounts.evm.toLowerCase(),'Backend account mismatch');this.backendToken=response.token;this.backendExpiry=response.expires_at;}
  async authBackend(route,data={}){await this.connect();try{return await this.backend(route,data,this.backendToken);}catch(e){if(e.status!==401)throw e;this.backendToken='';await this.connect();return this.backend(route,data,this.backendToken);}}
@@ -68,7 +67,7 @@ class Controller {
   assert(this.accounts&&!this.busy,'Wait for the current local wallet request');if(String(p.asset||'vnr').toLowerCase()==='vnr')assert(!this.walletScanning,'Wallet must finish scanning before VNR spending');assert(!this.prepared,'Confirm or cancel the previous transfer');
   let asset=String(p.asset||'vnr').toLowerCase(),action=p.action||'send',amount=String(p.amount||''),recipient=String(p.recipient||'');assert(/^[0-9]+(\.[0-9]+)?$/.test(amount)&&amount.length<120,'Enter a positive decimal amount');
   if(recipient.startsWith('@'))recipient=(await this.authBackend('/api/v2/usernames/resolve',{username:recipient})).address;
-  if(action==='stake'||action==='burn'){const info=await this.backend(ROUTES.info);assert(info.network==='mainnet','Wrong rewards network');if(action==='burn')assert(info.burn_policy,'Burn reward policy is unavailable');if(action==='stake'){const details=await this.backend(ROUTES.details);const mask=crypto.createHash('sha256').update('Venera staking details obfuscation v1:'+details.nonce).digest();const bytes=Buffer.from(details.payload,'hex');for(let i=0;i<bytes.length;i++)bytes[i]^=mask[i%32];const d=JSON.parse(bytes.toString('utf8'));assert(d.network==='mainnet'&&d.address===STAKING&&d.expires_at>=Date.now()/1000&&d.lock_days.includes(Number(p.lock_days)),'Invalid staking details');recipient=STAKING;}}
+  if(action==='stake'||action==='burn'){const info=await this.backend(ROUTES.info);assert(info.network==='mainnet','Wrong rewards network');if(action==='burn')assert(info.burn_policy,'Burn reward policy is unavailable');if(action==='stake')recipient='';}
   if(asset==='vnr'){const info=await this.daemon('get_info');assert(!info.target_height||info.height>=info.target_height,'Local daemon is still synchronizing');}
   const key=this.accounts.vnr+':'+JSON.stringify({asset,action,amount:decimalKey(amount),recipient:asset==='vnr'?recipient:recipient.toLowerCase()});const previous=this.state.unknownTransfers[key];assert(!previous,'A previous broadcast is uncertain. Check history for '+previous?.tx_hash+' before sending again.');
   this.prepared=await this.native.call('prepare',{asset,action,amount,recipient,lock_days:Number(p.lock_days)||0});this.preparedKey=key;return this.prepared;
@@ -99,7 +98,7 @@ class Controller {
    case 'backend.sweeperStart':return this.mutation('/api/v2/games/coinsweeper/start',{},'sweeper:start');case 'backend.sweeperAction':return this.mutation('/api/v2/games/coinsweeper/action',p,'sweeper:'+JSON.stringify(p));
    case 'backend.stakes':return this.stats('stake_stats');case 'backend.burns':return this.stats('burn_stats');case 'backend.claimYield':return this.claimYield();
    case 'backend.claimYieldStatus':{assert(this.accounts,'Wallet is locked');const key=crypto.createHash('sha256').update(this.accounts.vnr+'\nyield').digest('hex');const rid=this.state.operations[key];if(!rid)return {status:'idle'};const result=await this.signed('claim_status',{request_id:rid});if(['paid','failed'].includes(result.status))this.finishOp(key);return result;}
-   case 'backend.settings':return this.authBackend('/api/v2/settings/get');case 'backend.setting':assert(['enhanced','totp_setup','totp_confirm','totp_verify','username'].includes(p.action),'Invalid setting');return this.authBackend('/api/v2/settings/'+p.action,p.data||{});
+   case 'backend.settings':return this.authBackend('/api/v2/settings/get');case 'backend.setting':assert(['enhanced','totp_verify'].includes(p.action),'Invalid setting');return this.authBackend('/api/v2/settings/'+p.action,p.data||{});
    case 'public.lookup':{assert(typeof p.query==='string'&&/^([a-fA-F0-9]{64}|[0-9]{1,12})$/.test(p.query),'Invalid explorer query');const r=await this.fetch('https://veneralabs.org/api/lookup_hash?q='+encodeURIComponent(p.query),{signal:AbortSignal.timeout(15000)});return r.json();}
    case 'public.network':{assert(['network_stats','tokeninfo'].includes(p.resource),'Invalid public resource');const r=await this.fetch('https://veneralabs.org/api/'+p.resource+(p.resource==='network_stats'?'?page='+Math.max(1,Math.min(100000,Number(p.page)||1)):''),{signal:AbortSignal.timeout(15000)});return r.json();}
    case 'public.mining':{if(!this.accounts)return {hashrate:0};const r=await this.fetch('https://pool.veneralabs.org/status',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({wallet_address:this.accounts.vnr}),signal:AbortSignal.timeout(15000)});return r.json();}
@@ -108,4 +107,4 @@ class Controller {
  }
  async close(){clearInterval(this.timer);try{await this.native?.close();}catch{}if(this.daemonChild){try{await this.daemon('',{},'/stop_daemon');}catch{}                                    }}
 }
-module.exports={Controller,ORIGIN,ROUTES,STAKING};
+module.exports={Controller,ORIGIN,ROUTES};

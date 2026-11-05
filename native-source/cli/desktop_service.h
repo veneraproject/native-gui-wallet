@@ -3,7 +3,6 @@
 #include <map>
                                                                                 
 namespace desktop {
-static constexpr const char* STAKING_ADDRESS="VENeRa1zWhh2AWLi78SUg2HApA6SF69cKRTNsf7YrKxZSmXMCe1mSZyT41SPV8u1h2KJEeSCB6B4iUzHSVeAqwEkYYummpduFj218";
 static void boolean(json_object* o,const char* k,bool v){json_object_object_add(o,k,json_object_new_boolean(v));}
 static void scrub(json_object* o,const char* k){json_object* v=nullptr;if(o&&json_object_object_get_ex(o,k,&v)&&v&&json_object_get_type(v)==json_type_string){auto* p=const_cast<char*>(json_object_get_string(v));if(p)OPENSSL_cleanse(p,std::strlen(p));}}
 static void precise(json_object* o){
@@ -65,7 +64,7 @@ public:
         wallet();evm::check(!pending_,"Confirm or cancel the previous transaction first");
         auto id=evm::hex(evm::random(16)),asset=lower(textField(p,"asset")),action=lower(textField(p,"action","send")),value=textField(p,"amount"),to=textField(p,"recipient");
         evm::check(action=="send"||action=="burn"||action=="stake","Unsupported transaction action");
-        if(action=="stake")evm::check(to==STAKING_ADDRESS,"Unexpected staking destination");
+        if(action=="stake"){const auto days=number(p,"lock_days");evm::check(asset=="vnr"&&(days==30||days==60||days==120||days==360),"Invalid staking asset or lock period");to=rewards::stakingAddress(obj().get(),static_cast<unsigned>(days),true);}
         auto pending=obj();str(pending.get(),"id",id);str(pending.get(),"asset",asset);str(pending.get(),"action",action);str(pending.get(),"amount",value);str(pending.get(),"recipient",to);
         if(asset=="vnr"){
             evm::check(!scanning_,"Wallet is still scanning");
@@ -112,7 +111,7 @@ public:
         evm::check((action=="profile"||action=="claim_burn_yield")?recipient==lower(bsc_):recipient.empty(),"Rewards must pay this wallet's local BSC address");evm::check((action=="claim_burn_yield"||action=="claim_status")?std::regex_match(id,std::regex("[0-9a-f]{32}")):id.empty(),"Invalid request ID");
         auto message=std::string("Venera local rewards v1 mainnet\n")+rewards::API_ORIGIN+"\n"+action+"\n"+vnr_+"\n"+tx+"\n"+std::to_string(days)+"\n"+recipient+"\n"+id+"\nNonce: "+nonce+"\nExpires: "+std::to_string(expires)+"\n";evm::check(message==textField(p,"message"),"Backend changed the signed request intent");
         auto sign=obj();str(sign.get(),"data",message);str(sign.get(),"signature_type","spend");auto sig=wallet().call("sign",sign.get());auto out=obj();str(out.get(),"wallet_signature",textField(sig.get(),"signature"));evm::check(textField(out.get(),"wallet_signature").rfind("SigV2",0)==0,"Updated wallet RPC signatures required");
-        if(action=="burn"||action=="stake"){auto proof=obj();str(proof.get(),"txid",tx);str(proof.get(),"message",message);if(action=="stake")str(proof.get(),"address",STAKING_ADDRESS);auto r=wallet().call(action=="burn"?"get_spend_proof":"get_tx_proof",proof.get());str(out.get(),action=="burn"?"spend_proof":"tx_proof",textField(r.get(),"signature"));}return out;
+        if(action=="burn"||action=="stake"){auto proof=obj();str(proof.get(),"txid",tx);str(proof.get(),"message",message);if(action=="stake")str(proof.get(),"address",rewards::stakingAddress(obj().get(),static_cast<unsigned>(days),true));auto r=wallet().call(action=="burn"?"get_spend_proof":"get_tx_proof",proof.get());str(out.get(),action=="burn"?"spend_proof":"tx_proof",textField(r.get(),"signature"));}return out;
     }
     JsonPtr call(const std::string& method,json_object* p){
         if(method=="ping"){auto o=obj();str(o.get(),"protocol","venera-desktop-2");return o;}

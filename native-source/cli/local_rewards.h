@@ -27,7 +27,7 @@ static std::string endpoint(const std::string& action){
         {"burn","/api/local_burn"},{"stake","/api/local_stake"},
         {"burn_stats","/api/local_burn_stats"},{"stake_stats","/api/local_stake_stats"},
         {"claim_burn_yield","/api/claim_burn_yield"},{"claim_status","/api/claim_burn_yield_status"},
-        {"staking_det","/api/staking_det"}})if(action==route.first)return route.second;
+        {"staking_det","/api/staking_det"},{"desktop_staking_det","/api/v2/stakes/details"}})if(action==route.first)return route.second;
     throw std::runtime_error("Unknown rewards endpoint");
 }
 static JsonPtr request(Rpc& api,const std::string& action,json_object* payload) {
@@ -50,8 +50,8 @@ static void preflight(json_object* config,bool burn) {
         std::cout<<ansi::cyan<<"Burn multiplier: "<<textField(policy,"burn_multiplier")<<"; points per VNR: "<<textField(policy,"point_rate")<<ansi::reset<<'\n';
     }
 }
-static std::string stakingAddress(json_object* config,unsigned days) {
-    Rpc api(origin(config),"","",20);auto response=request(api,"staking_det",obj().get());
+static std::string stakingAddress(json_object* config,unsigned days,bool desktop=false) {
+    Rpc api(origin(config),"","",20);auto response=request(api,desktop?"desktop_staking_det":"staking_det",obj().get());
     auto nonce=textField(response.get(),"nonce"),payload=textField(response.get(),"payload");
     evm::check(textField(response.get(),"encoding")=="xor-sha256-hex-v1"&&
         std::regex_match(nonce,std::regex("[0-9a-f]{32}"))&&payload.size()>=2&&payload.size()<=4096&&payload.size()%2==0&&
