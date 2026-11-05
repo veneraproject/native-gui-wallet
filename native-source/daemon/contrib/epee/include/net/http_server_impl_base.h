@@ -1,0 +1,146 @@
+                                                                    
+                       
+   
+                                                                     
+                                                                              
+                                                                   
+                                                                
+                                                                      
+                                                                      
+                                                                       
+                                                         
+                                                                       
+                                                                        
+   
+                                                                                  
+                                                                                
+                                                                         
+                                                                       
+                                                                             
+                                                                               
+                                                                              
+                                                                             
+                                                                                
+                                                               
+   
+
+
+
+
+#pragma once 
+
+
+#include <boost/thread.hpp>
+#include <boost/bind/bind.hpp>
+
+#include "net/abstract_tcp_server2.h"
+#include "http_protocol_handler.h"
+#include "net/http_server_handlers_map2.h"
+
+#undef MONERO_DEFAULT_LOG_CATEGORY
+#define MONERO_DEFAULT_LOG_CATEGORY "net.http"
+
+namespace epee
+{
+
+  template<class t_child_class, class t_connection_context = epee::net_utils::connection_context_base>
+  class http_server_impl_base: public net_utils::http::i_http_server_handler<t_connection_context>
+  {
+
+  public:
+    http_server_impl_base()
+        : m_net_server(epee::net_utils::e_connection_type_RPC)
+    {}
+
+    explicit http_server_impl_base(boost::asio::io_service& external_io_service)
+        : m_net_server(external_io_service)
+    {}
+
+    bool init(std::function<void(size_t, uint8_t*)> rng, const std::string& bind_port = "0", const std::string& bind_ip = "0.0.0.0",
+      const std::string& bind_ipv6_address = "::", bool use_ipv6 = false, bool require_ipv4 = true,
+      std::vector<std::string> access_control_origins = std::vector<std::string>(),
+      boost::optional<net_utils::http::login> user = boost::none,
+      net_utils::ssl_options_t ssl_options = net_utils::ssl_support_t::e_ssl_support_autodetect,
+      size_t max_public_ip_connections = 3, size_t max_private_ip_connections = 25,
+      size_t max_connections = 100, size_t response_soft_limit = 25 * 1024 * 1024)
+    {
+
+       
+      m_net_server.get_config_object().m_phandler = static_cast<t_child_class*>(this);
+      m_net_server.get_config_object().rng = std::move(rng);
+
+       
+      m_net_server.get_config_object().m_folder = "";
+
+       
+      std::sort(access_control_origins.begin(), access_control_origins.end());
+      m_net_server.get_config_object().m_access_control_origins = std::move(access_control_origins);
+
+      m_net_server.get_config_object().m_user = std::move(user);
+      if (!max_connections || !max_public_ip_connections || !max_private_ip_connections ||
+          max_connections < max_public_ip_connections || max_connections < max_private_ip_connections ||
+          !response_soft_limit)
+        throw std::invalid_argument("Invalid RPC connection or response limits");
+      m_net_server.get_config_object().m_max_public_ip_connections = max_public_ip_connections;
+      m_net_server.get_config_object().m_max_private_ip_connections = max_private_ip_connections;
+      m_net_server.get_config_object().m_max_connections = max_connections;
+      m_net_server.set_response_soft_limit(response_soft_limit);
+
+      MGINFO_CYAN("Binding RPC on " << bind_ip << ":" << bind_port);
+      if (use_ipv6)
+      {
+        MGINFO_CYAN("Binding RPC on [" << bind_ipv6_address << "]:" << bind_port);
+      }
+      bool res = m_net_server.init_server(bind_port, bind_ip, bind_port, bind_ipv6_address, use_ipv6, require_ipv4, std::move(ssl_options));
+      if(!res)
+      {
+        LOG_ERROR("Failed to bind server");
+        return false;
+      }
+      return true;
+    }
+
+    bool run(size_t threads_count, bool wait = true)
+    {
+       
+      MINFO("Run net_service loop( " << threads_count << " threads)...");
+      if(!m_net_server.run_server(threads_count, wait))
+      {
+        LOG_ERROR("Failed to run net tcp server!");
+      }
+
+      if(wait)
+        MINFO("net_service loop stopped.");
+      return true;
+    }
+
+    bool deinit()
+    {
+      return m_net_server.deinit_server();
+    }
+
+    bool timed_wait_server_stop(uint64_t ms)
+    {
+      return m_net_server.timed_wait_server_stop(ms);
+    }
+
+    bool send_stop_signal()
+    {
+      m_net_server.send_stop_signal();
+      return true;
+    }
+
+    int get_binded_port()
+    {
+      return m_net_server.get_binded_port();
+    }
+
+    long get_connections_count() const
+    {
+      return m_net_server.get_connections_count();
+    }
+
+  protected: 
+    net_utils::boosted_tcp_server<net_utils::http::http_custom_handler<t_connection_context> > m_net_server;
+  };
+}

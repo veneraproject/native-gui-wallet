@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+    <head>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' https://veneralabs.org https://pool.veneralabs.org; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'"/>
+<link rel="stylesheet" href="assets/css/native.css"/>
+<script src="assets/js/native-api.js"></script>
+<script src="assets/js/wallet-session.js"></script>
+        <script src="assets/js/ui-errors.js"></script>
+        <meta charset="utf-8"/>
+        <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+        <title>Venera GUI</title>
+        <link rel="stylesheet" href="assets/css/tailwind.css"/>
+        
+        <style>body { background-color: #0f0d16; font-family: 'Space Grotesk', sans-serif; } .glass-tonal-shift { background: linear-gradient(to right, #1b1823, transparent); } .liquid-gradient { background: linear-gradient(135deg, #cc97ff, #c088f4); } .bg-radial-gradient { background: radial-gradient(circle at center, var(--tw-gradient-from), transparent 70%); } .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }</style>
+        <style>@keyframes burnCardPending { 0%, 100% {  box-shadow: 0 0 0 1px rgba(204,151,255,.08), 0 22px 65px rgba(0,0,0,.3), 0 0 24px rgba(204,151,255,.08); }  50% {  box-shadow: 0 0 0 1px rgba(255,159,67,.18), 0 22px 65px rgba(0,0,0,.3), 0 0 42px rgba(255,125,45,.17); } } @keyframes burnCardSuccess { 0%, 100% {  box-shadow: 0 0 0 1px rgba(255,159,67,.18), 0 24px 70px rgba(0,0,0,.34), 0 0 28px rgba(255,117,31,.20), 0 0 70px rgba(255,67,18,.07); }  50% {  box-shadow: 0 0 0 1px rgba(255,194,92,.32), 0 24px 70px rgba(0,0,0,.34), 0 0 48px rgba(255,139,35,.32), 0 0 100px rgba(255,68,18,.14); } } @keyframes burnCardError { 0%, 100% {  box-shadow: 0 0 0 1px rgba(255,80,106,.18), 0 24px 70px rgba(0,0,0,.34), 0 0 28px rgba(255,66,91,.15);  transform: translateX(0); }  18% {  transform: translateX(-2px); }  36% {  transform: translateX(2px); }  54% {  transform: translateX(-1px); }  72% {  transform: translateX(1px); } } @keyframes burnEmberRise { 0% {  opacity: 0;  transform: translate3d(0, 14px, 0) scale(.42) rotate(0deg); }  10% {  opacity: .98; }  36% {  opacity: .92;  transform: translate3d(calc(var(--ember-x) * .34), calc(var(--ember-y) * .36), 0) scale(1) rotate(calc(var(--ember-rotate) * .35)); }  72% {  opacity: .62; }  100% {  opacity: 0;  transform: translate3d(var(--ember-x), var(--ember-y), 0) scale(.08) rotate(var(--ember-rotate)); } } @keyframes burnSparkFlicker { 0%, 100% {  filter: brightness(.9) blur(0); }  35% {  filter: brightness(1.65) blur(.2px); }  62% {  filter: brightness(1.15) blur(0); } } @keyframes burnFlameDrift { 0%, 100% {  opacity: .45;  transform: translate3d(-4%, 4%, 0) scale(1); }  50% {  opacity: .88;  transform: translate3d(5%, -5%, 0) scale(1.1); } } #burn-card { transition: border-color .35s ease, background .35s ease, box-shadow .35s ease, transform .25s ease; } #burn-card::before, #burn-card::after { content: ""; position: absolute; pointer-events: none; z-index: 0; border-radius: 9999px; filter: blur(42px); opacity: 0; transition: opacity .35s ease; } #burn-card::before { width: 190px; height: 190px; left: -70px; bottom: -90px; background: radial-gradient(circle, rgba(255,190,76,.36) 0%, rgba(255,111,31,.22) 44%, rgba(255,62,35,0) 72%); } #burn-card::after { width: 220px; height: 220px; right: -85px; top: -100px; background: radial-gradient(circle, rgba(255,106,55,.30) 0%, rgba(255,62,80,.16) 45%, rgba(255,35,60,0) 74%); } #burn-card.burn-pending { border-color: rgba(255,159,67,.18); animation: burnCardPending 1.65s ease-in-out infinite; } #burn-card.burn-success { border-color: rgba(255,166,72,.30); background: linear-gradient(135deg, rgba(255,118,28,.055), rgba(33,30,42,.30) 46%, rgba(204,151,255,.035)); animation: burnCardSuccess 2.2s ease-in-out infinite; } #burn-card.burn-error { border-color: rgba(255,93,117,.28); background: linear-gradient(135deg, rgba(255,58,79,.055), rgba(33,30,42,.30) 48%, rgba(204,151,255,.025)); animation: burnCardError .55s ease-out 1, burnCardPending 2.4s ease-in-out .55s infinite; } #burn-card.burn-success::before, #burn-card.burn-success::after, #burn-card.burn-error::before, #burn-card.burn-error::after { opacity: 1; animation: burnFlameDrift 2.5s ease-in-out infinite; } #burn-card.burn-error::after { background: radial-gradient(circle, rgba(255,76,96,.34) 0%, rgba(255,39,62,.16) 46%, rgba(255,35,60,0) 74%); } .burn-success-flame { background: radial-gradient(circle at center, rgba(255,128,34,.20) 0%, rgba(111,38,12,.21) 22%, rgba(9,5,5,.88) 54%, rgba(1,1,2,.975) 100%),
+                linear-gradient(180deg, rgba(31,10,5,.48), rgba(1,1,2,.78)); backdrop-filter: blur(17px) saturate(1.14); -webkit-backdrop-filter: blur(17px) saturate(1.14); box-shadow: inset 0 0 145px rgba(255,82,15,.07), inset 0 0 38px rgba(0,0,0,.34); } .burn-success-flame-core { position: relative; width: 190px; min-height: 164px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; border-radius: 9999px; color: #ffd28a; opacity: 0; transform: translateY(10px) scale(.68); filter: drop-shadow(0 0 18px rgba(255,116,31,.3)); text-align: center; } .burn-success-flame-core .material-symbols-outlined { position: relative; z-index: 2; font-size: 88px; font-variation-settings: 'FILL' 1, 'wght' 450, 'GRAD' 0, 'opsz' 48; text-shadow: 0 0 15px rgba(255,194,94,.48), 0 0 32px rgba(255,91,24,.38); } .burn-success-flame-copy { position: relative; z-index: 3; margin-top: -3px; color: #fff1da; font-size: 14px; font-weight: 800; letter-spacing: .01em; text-shadow: 0 1px 8px rgba(0,0,0,.72), 0 0 18px rgba(255,118,31,.30); white-space: nowrap; } .burn-success-flame-halo { position: absolute; inset: -2px; border-radius: 9999px; background: radial-gradient(circle, rgba(255,208,112,.26) 0%, rgba(255,128,36,.18) 42%, rgba(255,76,22,.05) 62%, rgba(255,73,26,0) 76%); filter: blur(14px); transform: scale(.72); } .burn-success-flame.is-entering .burn-success-flame-core { animation: burnSuccessFlameIn 1.1s cubic-bezier(.2,.72,.2,1) forwards; } .burn-success-flame.is-entering .burn-success-flame-halo { animation: burnSuccessHaloIn 1.1s cubic-bezier(.2,.72,.2,1) forwards; } .burn-success-flame.is-leaving .burn-success-flame-core { animation: burnSuccessFlameOut .82s cubic-bezier(.35,0,.2,1) forwards; } .burn-success-flame.is-leaving .burn-success-flame-halo { animation: burnSuccessHaloOut .82s ease-out forwards; } @keyframes burnSuccessFlameIn { 0% {  opacity: 0;  transform: translateY(12px) scale(.62);  filter: drop-shadow(0 0 0 rgba(255,116,31,0)); }  58% {  opacity: .88; }  100% {  opacity: 1;  transform: translateY(0) scale(1);  filter: drop-shadow(0 0 32px rgba(255,116,31,.56)); } } @keyframes burnSuccessHaloIn { 0% {  opacity: 0;  transform: scale(.58); }  100% {  opacity: 1;  transform: scale(1.18); } } @keyframes burnSuccessFlameOut { 0% {  opacity: 1;  transform: translateY(0) scale(1); }  55% {  opacity: .72;  transform: translateY(-5px) scale(1.08); }  100% {  opacity: 0;  transform: translateY(-22px) scale(.82); } } @keyframes burnSuccessHaloOut { 0% {  opacity: 1;  transform: scale(1.18); }  100% {  opacity: 0;  transform: scale(1.55); } } @media (prefers-reduced-motion: reduce) { .burn-success-flame.is-entering .burn-success-flame-core, .burn-success-flame.is-entering .burn-success-flame-halo, .burn-success-flame.is-leaving .burn-success-flame-core, .burn-success-flame.is-leaving .burn-success-flame-halo {  animation-duration: .18s; } } .burn-particle { position: absolute; bottom: 14px; width: var(--ember-size); height: var(--ember-size); border-radius: 9999px; background: var(--ember-color); box-shadow: 0 0 var(--ember-glow, 11px) var(--ember-color), 0 0 2px rgba(255,255,255,.35); opacity: 0; animation: burnEmberRise var(--ember-duration) cubic-bezier(.18,.72,.22,1) forwards, burnSparkFlicker .62s ease-in-out infinite; animation-delay: var(--ember-delay), var(--ember-delay); left: var(--ember-left); transform-origin: center; } .burn-particle.is-spark { border-radius: 999px; height: calc(var(--ember-size) * 2.1); width: max(1px, calc(var(--ember-size) * .48)); box-shadow: 0 0 var(--ember-glow, 13px) var(--ember-color); } .burn-status-enter { animation: burnStatusEnter .32s ease-out both; } @keyframes burnStatusEnter { from {  opacity: 0;  transform: translateY(8px) scale(.985); }  to {  opacity: 1;  transform: translateY(0) scale(1); } } #burn-status { transition: opacity .42s ease, transform .42s ease; } #burn-status.burn-status-hiding { opacity: 0; transform: translateY(-6px) scale(.992); } .burn-hash { overflow-wrap: anywhere; word-break: break-all; } #burn-tx-wrap { transition: opacity .35s ease, transform .35s ease; } #burn-tx-wrap.burn-tx-hiding { opacity: 0; transform: translateY(-5px) scale(.992); } .burn-spin { animation: burnSpin .85s linear infinite; } @keyframes burnSpin { to {  transform: rotate(360deg); } } .collect-yield-success { position: relative; overflow: hidden; animation: collectYieldReveal .62s cubic-bezier(.2,.78,.2,1) both; box-shadow: 0 0 28px rgba(101, 255, 178, .08), inset 0 1px 0 rgba(255,255,255,.04); } .collect-yield-success::before { content: ""; position: absolute; width: 120px; height: 120px; right: -38px; top: -58px; border-radius: 9999px; background: radial-gradient(circle, rgba(105,255,177,.22), rgba(105,255,177,0) 70%); filter: blur(10px); animation: collectYieldGlow 1.5s ease-out both; pointer-events: none; } @keyframes collectYieldReveal { 0% {  opacity: 0;  transform: translateY(8px) scale(.975);  filter: blur(4px); }  65% {  opacity: 1;  transform: translateY(-1px) scale(1.012);  filter: blur(0); }  100% {  opacity: 1;  transform: translateY(0) scale(1);  filter: blur(0); } } @keyframes collectYieldGlow { 0% {  opacity: 0;  transform: scale(.7); }  45% {  opacity: 1; }  100% {  opacity: .45;  transform: scale(1.35); } } #burn-stats-card { isolation: isolate; transition: border-color .35s ease, background .35s ease, box-shadow .35s ease; } #burn-stats-card.collect-success { border-color: rgba(38, 208, 124, .28); background: linear-gradient(135deg, rgba(38,208,124,.055), rgba(33,30,42,.30) 48%, rgba(204,151,255,.02)); animation: collectCardSuccess 2.2s ease-in-out infinite; } @keyframes collectCardSuccess { 0%, 100% {  box-shadow: 0 0 0 1px rgba(38,208,124,.14), 0 24px 70px rgba(0,0,0,.34), 0 0 28px rgba(38,208,124,.13), 0 0 70px rgba(0,168,89,.06); }  50% {  box-shadow: 0 0 0 1px rgba(78,232,154,.28), 0 24px 70px rgba(0,0,0,.34), 0 0 48px rgba(38,208,124,.24), 0 0 100px rgba(0,168,89,.11); } } .collect-success-overlay { background: radial-gradient(circle at center, rgba(38,208,124,.20) 0%, rgba(7,75,45,.20) 25%, rgba(5,15,12,.82) 60%, rgba(3,5,5,.94) 100%),
+                linear-gradient(180deg, rgba(5,65,38,.20), rgba(2,5,4,.48)); backdrop-filter: blur(13px) saturate(1.12); -webkit-backdrop-filter: blur(13px) saturate(1.12); box-shadow: inset 0 0 110px rgba(38,208,124,.055); } .collect-success-content { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; text-align: center; } .collect-success-core { position: relative; width: 150px; height: 150px; display: flex; align-items: center; justify-content: center; border-radius: 9999px; color: #72efb4; opacity: 0; transform: translateY(10px) scale(.68); filter: drop-shadow(0 0 20px rgba(38,208,124,.32)); } .collect-success-copy { opacity: 0; transform: translateY(10px); filter: blur(4px); } .collect-success-copy .collect-success-kicker { color: rgba(166, 255, 211, .72); font-size: 10px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; } .collect-success-copy .collect-success-amount { margin-top: 3px; color: #ecfff6; font-size: 20px; line-height: 1.15; font-weight: 800; letter-spacing: -.02em; text-shadow: 0 0 22px rgba(38,208,124,.28); } .collect-success-core .material-symbols-outlined { position: relative; z-index: 2; font-size: 92px; font-variation-settings: 'FILL' 1, 'wght' 460, 'GRAD' 0, 'opsz' 48; text-shadow: 0 0 17px rgba(105,255,177,.48), 0 0 38px rgba(38,208,124,.35); } .collect-success-halo { position: absolute; inset: -5px; border-radius: 9999px; background: radial-gradient(circle, rgba(113,255,186,.27) 0%, rgba(38,208,124,.18) 42%, rgba(0,168,89,.05) 63%, rgba(0,168,89,0) 77%); filter: blur(15px); transform: scale(.72); } .collect-success-overlay.is-entering .collect-success-core { animation: collectSuccessIconIn 1.05s cubic-bezier(.2,.72,.2,1) forwards; } .collect-success-overlay.is-entering .collect-success-halo { animation: collectSuccessHaloIn 1.05s cubic-bezier(.2,.72,.2,1) forwards; } .collect-success-overlay.is-entering .collect-success-copy { animation: collectSuccessCopyIn .72s .28s cubic-bezier(.2,.72,.2,1) forwards; } .collect-success-overlay.is-leaving .collect-success-core { animation: collectSuccessIconOut .82s cubic-bezier(.35,0,.2,1) forwards; } .collect-success-overlay.is-leaving .collect-success-halo { animation: collectSuccessHaloOut .82s ease-out forwards; } .collect-success-overlay.is-leaving .collect-success-copy { animation: collectSuccessCopyOut .62s cubic-bezier(.35,0,.2,1) forwards; } @keyframes collectSuccessIconIn { 0% {  opacity: 0;  transform: translateY(12px) scale(.62);  filter: drop-shadow(0 0 0 rgba(38,208,124,0)); }  58% {  opacity: .9; }  100% {  opacity: 1;  transform: translateY(0) scale(1);  filter: drop-shadow(0 0 34px rgba(38,208,124,.55)); } } @keyframes collectSuccessHaloIn { 0% {  opacity: 0;  transform: scale(.58); }  100% {  opacity: 1;  transform: scale(1.2); } } @keyframes collectSuccessIconOut { 0% {  opacity: 1;  transform: translateY(0) scale(1); }  55% {  opacity: .75;  transform: translateY(-5px) scale(1.08); }  100% {  opacity: 0;  transform: translateY(-22px) scale(.82); } } @keyframes collectSuccessHaloOut { 0% {  opacity: 1;  transform: scale(1.2); }  100% {  opacity: 0;  transform: scale(1.58); } } @keyframes collectSuccessCopyIn { 0% {  opacity: 0;  transform: translateY(10px);  filter: blur(4px); }  100% {  opacity: 1;  transform: translateY(0);  filter: blur(0); } } @keyframes collectSuccessCopyOut { 0% {  opacity: 1;  transform: translateY(0);  filter: blur(0); }  100% {  opacity: 0;  transform: translateY(-10px);  filter: blur(3px); } } .collect-particle { position: absolute; bottom: 22px; width: var(--collect-particle-size); height: var(--collect-particle-size); border-radius: 9999px; background: var(--collect-particle-color); box-shadow: 0 0 11px var(--collect-particle-color); opacity: 0; left: var(--collect-particle-left); animation: collectParticleRise var(--collect-particle-duration) ease-out forwards; animation-delay: var(--collect-particle-delay); } @keyframes collectParticleRise { 0% {  opacity: 0;  transform: translate3d(0,12px,0) scale(.55); }  15% {  opacity: .96; }  70% {  opacity: .72; }  100% {  opacity: 0;  transform: translate3d(var(--collect-particle-x),-115px,0) scale(0); } } @media (prefers-reduced-motion: reduce) { .collect-success-overlay.is-entering .collect-success-core, .collect-success-overlay.is-entering .collect-success-halo, .collect-success-overlay.is-entering .collect-success-copy, .collect-success-overlay.is-leaving .collect-success-core, .collect-success-overlay.is-leaving .collect-success-halo, .collect-success-overlay.is-leaving .collect-success-copy {  animation-duration: .18s;  animation-delay: 0s; } }</style>
+        <style id="electron-shell-style">html, body { width: 100%; height: 100%; margin: 0; background: transparent!important; overflow: hidden!important; } body { padding-top: 34px!important; box-sizing: border-box; border-radius: 26px; background: #0f0d16!important; overflow: hidden!important; } .electron-titlebar { height: 34px; display: flex; align-items: center; justify-content: space-between; padding: 0 10px; font-size: 14px; background: #201A2B; border-top-left-radius: 26px; border-top-right-radius: 26px; position: fixed; top: 0; left: 0; right: 0; z-index: 99999; -webkit-app-region: drag; user-select: none; } .electron-titlebar-center { display: flex; align-items: center; gap: 8px; position: absolute; left: 50%; transform: translateX(-50%); color: #bd85f1; } .electron-titlebar-icon { width: 16px; height: 16px; object-fit: contain; } .electron-titlebar-actions { margin-left: auto; display: flex; align-items: center; gap: 6px; -webkit-app-region: no-drag; } .electron-titlebar-actions button { width: 22px; height: 22px; border: 0; border-radius: 14px; background: #2E263C; color: white; cursor: pointer; font-size: 12px; } .electron-titlebar-actions button:hover { background: rgba(255,255,255,.08); } #sidebar { top: 34px!important; height: calc(100vh - 34px)!important; border-bottom-left-radius: 26px; } main { height: calc(100vh - 34px); overflow-y: auto!important; }</style>
+        <link rel="stylesheet" href="assets/css/desktop-ui.css"/>
+        <script defer src="assets/js/explorer-modal.js"></script>
+        <script defer src="assets/js/wallet-motion.js"></script>
+    <link id="wallet-layout-refinements" rel="stylesheet" href="assets/css/layout-refinements.css"/>
+<script id="wallet-layout-scroll" defer src="assets/js/layout-refinements.js"></script>
+</head>
+    <body class="text-on-surface">
+        <div class="electron-titlebar">
+            <div class="electron-titlebar-center">
+                <img src="assets/images/vg.png" class="electron-titlebar-icon" alt="">
+                <span style="color:#bdb0cb">Venera GUI</span>
+            </div>
+            <div class="electron-titlebar-actions">
+                <button id="min-btn" type="button">—</button>
+                <button id="close-btn" type="button">✕</button>
+            </div>
+        </div>
+        <aside id="sidebar" class="fixed left-0 top-0 h-screen z-40
+
+              flex flex-col w-[17rem]
+
+              bg-surface-container-low/80
+
+              backdrop-blur-3xl
+
+              border-r border-white/5
+
+              shadow-[20px_0_50px_-20px_rgba(202,146,255,0.12)]
+
+              font-['Space_Grotesk']
+
+              tracking-tight
+
+              text-on-surface
+
+              transform -translate-x-full
+
+              md:translate-x-0
+
+              transition-transform duration-300">
+            
+            <div class="px-6 pt-8 pb-7">
+                <div class="flex items-center gap-3">
+                    <div class="w-11 h-11
+
+                        rounded-lg
+
+                        bg-primary/10
+
+                        border border-primary/15
+
+                        flex items-center justify-center">
+                        <img src="assets/images/vg.png" alt="Venera Logo" class="w-7 h-7 object-contain">
+                    </div>
+                    <div>
+                        <div class="text-xl font-bold tracking-tight">
+                            VENERA
+</div>
+                        <div class="text-[10px]
+
+                            uppercase
+
+                            tracking-[0.18em]
+
+                            text-on-surface-variant">
+                            Wallet
+</div>
+                    </div>
+                </div>
+            </div>
+            
+            <nav class="flex-1 px-4">
+                <div class="px-3 mb-3
+
+                    text-[9px]
+
+                    font-bold
+
+                    uppercase
+
+                    tracking-[0.2em]
+
+                    text-on-surface-variant/60">
+                    NAVIGATION
+</div>
+                <a href="account.html" class="group flex items-center gap-3
+
+                  px-4 py-3.5 mb-1
+
+                  rounded-lg
+
+                  text-on-surface-variant
+
+                  hover:text-primary
+
+                  hover:bg-white/[0.03]
+
+                  transition-all"> <span class="material-symbols-outlined text-[22px]">
+                account_balance_wallet </span> <span class="font-medium text-sm">
+                Assets </span> </a>
+                <a href="staking.html" class="group flex items-center gap-3
+
+                  px-4 py-3.5 mb-1
+
+                  rounded-lg
+
+                  text-on-surface-variant
+
+                  hover:text-primary
+
+                  hover:bg-white/[0.03]
+
+                  transition-all"> <span class="material-symbols-outlined text-[22px]">
+                lock </span> <span class="text-sm">
+                Staking </span> </a>
+                <a href="rewards.html" class="group flex items-center gap-3
+
+                  px-4 py-3.5 mb-1
+
+                  rounded-lg
+
+                  text-on-surface-variant
+
+                  hover:text-primary
+
+                  hover:bg-white/[0.03]
+
+                  transition-all"> <span class="material-symbols-outlined text-[22px]">
+                workspace_premium </span> <span class="text-sm">
+                Rewards </span> </a>
+                <a href="games.html" class="group flex items-center gap-3
+
+                  px-4 py-3.5 mb-1
+
+                  rounded-lg
+
+                  text-on-surface-variant
+
+                  hover:text-primary
+
+                  hover:bg-white/[0.03]
+
+                  transition-all"> <span class="material-symbols-outlined text-[22px]">
+                joystick </span> <span class="text-sm">
+                Games </span> </a>
+                <a href="history.html" class="group flex items-center gap-3
+
+                  px-4 py-3.5 mb-1
+
+                  rounded-lg
+
+                  text-on-surface-variant
+
+                  hover:text-primary
+
+                  hover:bg-white/[0.03]
+
+                  transition-all"> <span class="material-symbols-outlined text-[22px]">
+                history </span> <span class="text-sm">
+                History </span> </a>
+                <div class="h-px bg-white/5 my-6 mx-3"></div>
+                <div class="px-3 mb-3
+
+                    text-[9px]
+
+                    font-bold
+
+                    uppercase
+
+                    tracking-[0.2em]
+
+                    text-on-surface-variant/60">
+                    Earn
+</div>
+                <a href="burn.html" class="group relative
+
+          flex items-center gap-3
+
+          px-4 py-3.5
+
+          mb-1
+
+          rounded-lg
+
+          text-primary
+
+          bg-primary/10
+
+          border border-primary/10
+
+          transition-all duration-200">  <span class="absolute left-1.5 top-1/2
+
+             -translate-y-1/2
+
+             w-[4px] h-1
+
+             rounded-full
+
+             bg-primary"></span> <span class="material-symbols-outlined
+
+                 text-[22px]
+
+                 text-primary">
+        local_fire_department </span> <span class="text-sm font-medium">
+        Burn to Earn </span> <span class="ml-auto
+
+                 text-[8px]
+
+                 uppercase
+
+                 tracking-wider
+
+                 px-1.5 py-0.5
+
+                 rounded-md
+
+                 bg-primary/15
+
+                 text-primary
+
+                 border border-primary/10">
+        New </span></a>
+                <a href="#" class="group flex items-center gap-3
+
+                  px-4 py-3.5
+
+                  rounded-lg
+
+                  text-on-surface-variant/50"> <span class="material-symbols-outlined text-[22px]">
+                layers </span> <span class="text-sm">
+                Bridge </span> <span class="ml-auto
+
+                         text-[8px]
+
+                         uppercase
+
+                         tracking-wider
+
+                         px-1.5 py-0.5
+
+                         rounded-md
+
+                         bg-white/5">
+                Soon </span> </a>
+            </nav>
+            
+            <div class="px-4 pb-6">
+                <a href="settings.html" class="group flex items-center gap-3
+
+                  px-4 py-3.5 mb-3
+
+                  rounded-lg
+
+                  text-on-surface-variant
+
+                  hover:text-primary
+
+                  hover:bg-white/[0.03]
+
+                  transition-all"> <span class="material-symbols-outlined text-[21px]">
+                settings </span> <span class="text-sm">
+                Settings </span> </a>
+                <button id="sign-out-btn" class="group w-full
+
+                       flex items-center justify-center gap-2
+
+                       py-3.5
+
+                       rounded-lg
+
+                       bg-primary/10
+
+                       border border-primary/15
+
+                       text-primary
+
+                       font-bold text-sm
+
+                       hover:bg-primary
+
+                       hover:text-on-primary-fixed
+
+                       transition-all">
+                    <span class="material-symbols-outlined text-lg">
+                logout </span>
+                    Sign out
+                </button>
+            </div>
+        </aside>
+        <main class="pt-24 px-4 sm:px-6 md:px-10 lg:px-12 pb-20 md:ml-72">
+            <div class="max-w-7xl mx-auto">
+                <section class="mb-16">
+                    <div class="burn-layout grid grid-cols-12 gap-6">
+                        
+                        
+                        
+                        <div id="burn-card" class="col-span-12 lg:col-span-7
+
+                relative isolate overflow-hidden
+
+                bg-surface-container-high/30
+
+                backdrop-blur-[40px]
+
+                rounded-lg
+
+                p-7 md:p-9
+
+                shadow-2xl
+
+                border border-outline-variant/10">
+                            
+                            <div class="absolute -right-24 -top-24
+
+                    w-80 h-80
+
+                    bg-primary/10
+
+                    rounded-full
+
+                    blur-[100px]">
+</div>
+                            <div class="absolute -left-20 -bottom-20
+
+                    w-60 h-60
+
+                    bg-primary/5
+
+                    rounded-full
+
+                    blur-[80px]">
+</div>
+                            <div id="burn-particles" class="absolute inset-0 overflow-hidden pointer-events-none z-[50]"></div>
+                            <div id="burn-success-flame" class="burn-success-flame pointer-events-none absolute inset-0 z-[40] hidden items-center justify-center" aria-hidden="true">
+                                <div class="burn-success-flame-core">
+                                    <div class="burn-success-flame-halo"></div>
+                                    <span class="material-symbols-outlined">local_fire_department</span>
+                                    <div id="burn-overlay-amount" class="burn-success-flame-copy">Burned 0 VNR</div>
+                                </div>
+                            </div>
+                            <div class="relative z-10">
+                                
+                                <div class="flex items-start justify-between mb-8">
+                                    <div>
+                                        <div class="flex items-center gap-2 mb-2"><span class="material-symbols-outlined
+
+                                     text-primary text-xl">
+                            local_fire_department </span>
+                                            <p class="text-primary text-xs
+
+                                  font-bold
+
+                                  tracking-[0.2em]
+
+                                  uppercase">
+                            VNR Burn </p>
+                                        </div>
+                                        <h2 class="text-3xl md:text-4xl
+
+                               font-bold
+
+                               tracking-tight">
+                        Burn your VNR </h2>
+                                        <p class="text-slate-400 text-sm mt-2 max-w-md">
+                        Permanently remove VNR from spendable supply.
+                        Every confirmed burn is tracked in your burn history. </p>
+                                    </div>
+                                </div>
+                                
+                                <div class="relative">
+                                    <label class="block text-xs
+
+                              text-slate-500
+
+                              mb-2">
+                                        Amount to burn
+</label>
+                                    <div class="flex items-center
+
+                            bg-surface-container-low/70
+
+                            border border-white/10
+
+                            rounded-lg
+
+                            px-4 py-3
+
+                            focus-within:border-primary/40
+
+                            focus-within:ring-1
+
+                            focus-within:ring-primary/20
+
+                            transition-all">
+                                        <input id="burn-amount" type="number" min="0" step="any" placeholder="0.00" class="w-full min-w-0
+
+                               bg-transparent
+
+                               outline-none
+
+                               border-none
+
+                               text-2xl
+
+                                          focus:outline-none
+
+           focus:border-0
+
+           focus:ring-0
+
+                               font-bold
+
+                               text-on-surface
+
+                               placeholder:text-slate-600">
+                                        <div class="flex items-center gap-2
+
+                                pl-4 mr-4
+
+                                border-l border-white/10">
+                                            <img src="assets/images/vg.png" class="w-7 h-7 object-contain" alt="VNR"><span class="font-bold text-sm">
+                            VNR </span>
+                                        </div>
+                                    </div>
+                                    <div class="flex justify-between mt-3"><span class="text-[11px] text-slate-500">
+                        Available balance <span id="burn-available-balance" data-balance=""></span></span>
+                                        <button id="burn-max" type="button" class="text-[11px]
+
+                                   text-primary
+
+                                   font-bold
+
+                                   hover:underline mx-2">
+                                            MAX
+</button>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-6 p-4 rounded-lg bg-primary/[0.055] border border-primary/10">
+                                    <div class="flex items-center justify-between gap-4">
+                                        <div class="min-w-0">
+                                            <p class="text-[10px] uppercase tracking-[0.16em] font-bold text-primary/60">Estimated Burn Points</p>
+                                            <p id="estimated-burn-points" class="mt-1 text-2xl font-bold tracking-tight text-primary">0 BP</p>
+                                            <p class="mt-1 text-[11px] text-on-surface-variant">
+                                                Live rate: <span id="burn-point-rate" class="font-semibold text-on-surface">—</span> BP / VNR </p>
+                                        </div>
+                                        <div class="w-11 h-11 rounded-lg bg-orange-300/[0.06] border border-orange-300/10 text-orange-200/70 flex items-center justify-center shrink-0">
+                                            <span class="material-symbols-outlined">local_fire_department</span>
+                                        </div>
+                                    </div>
+                                    <div class="mt-3 pt-3 border-t border-white/5 flex items-center gap-2 text-[10px] text-on-surface-variant/70">
+                                        <span class="material-symbols-outlined text-[15px] text-primary/55">schedule</span>
+                                        <span>Points stay full-strength for 7 days, then decay until expiry at day 30.</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="grid grid-cols-2 gap-3 mt-6">
+                                    <button id="burn-btn" type="button" class="group
+
+                               px-6 py-3.5
+
+                               rounded-lg
+
+                               bg-gradient-to-br
+
+                               from-primary
+
+                               to-primary-container
+
+                               text-on-primary-fixed
+
+                               font-bold
+
+                               flex items-center
+
+                               justify-center
+
+                               gap-2
+
+                               hover:-translate-y-0.5
+
+                               hover:shadow-[0_10px_30px_-8px_rgba(204,151,253,0.5)]
+
+                               transition-all"><span class="material-symbols-outlined text-lg">
+                        local_fire_department </span>
+                                        Burn VNR
+                                    </button>
+                                    <button id="burn-cancel-btn" type="button" class="px-6 py-3.5
+
+                               rounded-lg
+
+                               bg-surface-variant/30
+
+                               border border-white/10
+
+                               text-on-surface
+
+                               font-bold
+
+                               hover:bg-surface-variant/50
+
+                               transition-all">
+                                        Cancel
+</button>
+                                </div>
+                                <div id="burn-status" role="status" aria-live="polite" class="hidden mt-5 rounded-lg border px-4 py-4 burn-status-enter">
+                                    <div class="flex items-start gap-3">
+                                        <div id="burn-status-icon" class="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"></div>
+                                        <div class="min-w-0 flex-1">
+                                            <div class="flex justify-between items-start gap-3">
+                                                <p id="burn-status-title" class="font-bold text-sm"></p>
+                                                <button id="dismiss-burn-status" type="button" class="shrink-0 text-on-surface-variant" aria-label="Dismiss burn receipt"><span class="material-symbols-outlined text-lg">close</span>
+                                                </button>
+                                            </div>
+                                            <p id="burn-status-message" class="text-xs mt-1 text-on-surface-variant"></p>
+                                            <div id="burn-tx-wrap" class="hidden mt-4 rounded-lg border border-white/[0.06] bg-black/25 px-4 py-3.5 sm:px-4.5 sm:py-4">
+                                                <div class="flex items-center justify-between gap-3 mb-2.5">
+                                                    <span class="text-[9px] uppercase tracking-[0.16em] text-on-surface-variant/60 font-bold leading-none">Burn transaction</span>
+                                                    <button id="copy-burn-hash" type="button" class="shrink-0 text-[10px] leading-none text-primary hover:text-white transition px-1 py-0.5">Copy</button>
+                                                </div>
+                                                <button id="burn-tx-hash" type="button" title="Open transaction in explorer" class="burn-hash block w-full text-left font-mono text-[11px] leading-5 text-primary break-all"></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        
+                        
+                        <div id="burn-stats-card" class="col-span-12 lg:col-span-5
+
+            relative overflow-hidden
+
+            bg-surface-container-high/30
+
+            backdrop-blur-[40px]
+
+            rounded-lg
+
+            p-7 md:p-9
+
+            text-on-surface
+
+            shadow-2xl
+
+            border border-primary/10">
+                            
+                            <div class="absolute -right-24 -top-24
+
+                w-80 h-80
+
+                bg-primary/12
+
+                rounded-full
+
+                blur-[110px]
+
+                pointer-events-none">
+</div>
+                            <div class="absolute -left-24 -bottom-24
+
+                w-64 h-64
+
+                bg-primary/5
+
+                rounded-full
+
+                blur-[90px]
+
+                pointer-events-none">
+</div>
+                            <div id="collect-particles" class="absolute inset-0 overflow-hidden pointer-events-none z-[50]"></div>
+                            <div id="collect-success-overlay" class="collect-success-overlay pointer-events-none absolute inset-0 z-[40] hidden items-center justify-center" aria-hidden="true">
+                                <div class="collect-success-content">
+                                    <div class="collect-success-core">
+                                        <div class="collect-success-halo"></div>
+                                        <span class="material-symbols-outlined">paid</span>
+                                    </div>
+                                    <div class="collect-success-copy">
+                                        <p class="collect-success-kicker">Yield Collected</p>
+                                        <p class="collect-success-amount">Collected <span id="collect-overlay-amount">0.00 USDT</span></p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="relative z-10 h-full
+
+                flex flex-col justify-between">
+                                
+                                <div>
+                                    <div class="flex items-start justify-between">
+                                        <div class="w-11 h-11
+
+                            rounded-lg
+
+                            bg-primary/10
+
+                            border border-primary/15
+
+                            flex items-center justify-center">
+                                            <span class="material-symbols-outlined
+
+                                 text-primary text-2xl" style="font-variation-settings: 'FILL' 1;">
+                        local_fire_department </span>
+                                        </div>
+                                        <div class="bg-primary/10
+
+                            border border-primary/10
+
+                            backdrop-blur-md
+
+                            px-3 py-1.5
+
+                            rounded-lg
+
+                            text-[10px]
+
+                            text-primary
+
+                            font-bold
+
+                            tracking-[0.15em]">
+                                            BURN STATS
+</div>
+                                    </div>
+                                    
+                                    <div class="mt-8">
+                                        <p class="text-on-surface-variant text-xs uppercase tracking-[0.15em]">Burn Points</p>
+                                        <div class="flex items-baseline gap-2 mt-2 min-w-0">
+                                            <h3 id="burn-points" class="text-4xl md:text-5xl font-bold tracking-tighter text-on-surface break-all">0</h3>
+                                            <span class="text-lg text-primary/70 font-medium shrink-0">BP</span>
+                                        </div>
+                                        <p class="text-[10px] text-on-surface-variant mt-1">Current effective points after age weighting</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="grid grid-cols-2 gap-3 mt-10">
+                                    <div class="bg-surface-container-low/60 backdrop-blur-md rounded-lg p-4 border border-white/5 hover:border-primary/15 transition-colors min-w-0">
+                                        <p class="text-on-surface-variant text-[10px] uppercase tracking-wider">Total Burned</p>
+                                        <div class="flex items-baseline gap-1.5 mt-2 min-w-0">
+                                            <p id="total-burned" class="text-2xl font-bold text-on-surface break-all">0</p>
+                                            <span class="text-[11px] text-primary/65 shrink-0">VNR</span>
+                                        </div>
+                                        <p class="text-[10px] text-on-surface-variant mt-1">Lifetime burned</p>
+                                    </div>
+                                    <div class="bg-surface-container-low/60 backdrop-blur-md rounded-lg p-4 border border-white/5 hover:border-primary/15 transition-colors min-w-0">
+                                        <p class="text-on-surface-variant text-[10px] uppercase tracking-wider">Burn Transactions</p>
+                                        <p id="burn-count" class="text-2xl font-bold text-primary mt-2">0</p>
+                                        <p class="text-[10px] text-on-surface-variant mt-1">Confirmed transactions</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="relative overflow-hidden mt-4 rounded-xl border border-primary/10 bg-surface-container-low/55 backdrop-blur-xl">
+                                    <div class="absolute -right-12 -top-16 w-36 h-36 rounded-full bg-primary/10 blur-[42px] pointer-events-none"></div>
+                                    <div class="yield-layout relative px-5 py-[18px] flex flex-col justify-between gap-4">
+                                        <div class="min-w-0 flex-1">
+                                            <p class="text-on-surface-variant text-[10px] uppercase tracking-[0.14em] leading-none">Available Yield</p>
+                                            <div class="flex items-baseline gap-2 mt-2 min-w-0">
+                                                <span id="accumulated-usdt" class="text-2xl font-bold leading-none text-on-surface break-all">0.00</span>
+                                                <span class="text-xs font-bold text-primary/70 shrink-0">USDT</span>
+                                            </div>
+                                            <p class="text-[10px] leading-relaxed text-on-surface-variant mt-2">Your accumulated share of the daily Burn Points pool</p>
+                                        </div>
+                                        <button id="collect-yield-btn" type="button" disabled class="shrink-0 min-h-[44px] sm:min-w-[138px] inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg
+                                                   bg-primary/12 border border-primary/15 text-primary text-xs font-bold
+                                                   transition-all duration-200 hover:bg-primary/18 hover:border-primary/25
+                                                   active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-primary/12">
+                                            <span class="material-symbols-outlined text-[18px]">payments</span>
+                                            <span>Collect Yield</span>
+                                        </button>
+                                    </div>
+                                    <div id="collect-yield-status" class="hidden collect-yield-success mx-4 mb-4 rounded-lg border border-emerald-300/15 bg-emerald-300/[0.055] px-4 py-3">
+                                        <div class="relative flex items-center gap-3">
+                                            <div class="w-9 h-9 rounded-lg bg-emerald-300/10 border border-emerald-300/15 flex items-center justify-center text-emerald-200 shrink-0">
+                                                <span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">paid</span>
+                                            </div>
+                                            <div class="min-w-0">
+                                                <p class="text-[10px] uppercase tracking-[0.13em] font-bold text-emerald-200/65">Yield Collected</p>
+                                                <p class="text-sm font-bold text-on-surface mt-0.5">Collected <span id="collected-yield-amount">0.00 USDT</span></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-6
+
+                    pt-5
+
+                    border-t border-white/5
+
+                    flex items-center gap-2">
+                                    <span class="material-symbols-outlined
+
+                         text-primary/60
+
+                         text-lg">
+                info </span>
+                                    <span class="text-xs
+
+                         text-on-surface-variant">
+                Burned tokens cannot be recovered </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+        <div id="stakeModal" class="fixed inset-0 z-50 flex items-center justify-center hidden">
+            <div id="stakeBackdrop" class="absolute inset-0 bg-black/50 backdrop-blur-sm opacity-0 transition-opacity duration-300"></div>
+            <div id="stakeContent" class="relative rounded-xl bg-surface-variant/40 backdrop-blur-2xl p-8 md:p-12 border border-white/10 max-w-lg w-full mx-4 transform scale-95 opacity-0 transition-all duration-300">
+                <h2 class="text-3xl font-bold text-center mb-2">Create new stake</h2>
+                <p class="text-center text-slate-400 mb-6">Choose staking period</p>
+                <div class="grid grid-cols-4 gap-3 mb-6">
+                    <button class="lock-btn" data-lock="30">30d</button>
+                    <button class="lock-btn" data-lock="60">60d</button>
+                    <button class="lock-btn" data-lock="120">120d</button>
+                    <button class="lock-btn" data-lock="360">360d</button>
+                </div>
+                <input id="stake-amount" type="number" placeholder="Amount to stake" class="w-full rounded-lg px-4 py-3 bg-black/30 border border-white/10 mb-6 outline-none focus:ring-2 focus:ring-primary"/>
+                <button id="confirm-stake" class="w-full bg-primary text-white py-3 rounded-lg font-bold transition-all hover:opacity-90 active:scale-95">
+                    Confirm Stake
+</button>
+            </div>
+        </div>
+        <button id="mobileMenuBtn" class="md:hidden fixed bottom-5 left-1/2 -translate-x-1/2 bg-[#CA94FD]/25 backdrop-blur-xl
+
+text-[#cc97ff] font-bold py-2.5 px-8 rounded-full flex items-center gap-2 shadow-[0_0_30px_rgba(204,151,255,0.25)] z-50"><span class="material-symbols-outlined">menu</span>
+            Menu
+        </button>
+        <div id="mobileMenu" class="hidden fixed inset-0 z-40 bg-surface-container-low/95 backdrop-blur-3xl transition-all duration-300">
+            <div id="mobileMenuContentWrapper" class="w-full h-full flex flex-col">
+                <div class="flex items-center justify-between px-6 py-5 border-b border-white/5">
+                    <div>
+                        <div class="text-[10px] uppercase tracking-[0.2em] text-primary font-semibold">Menu</div>
+                        <div class="text-lg font-semibold text-on-surface mt-1">Venera Wallet</div>
+                    </div>
+                    <button type="button" onclick="closeMenu()" class="w-10 h-10 rounded-lg bg-white/5 border border-white/5 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-all duration-200"><span class="material-symbols-outlined text-[20px]">close</span>
+                    </button>
+                </div>
+                <div id="mobileMenuContent" class="flex-1 flex flex-col justify-start px-5 space-y-2"><a class="menu-item flex items-center gap-4 px-4 py-4 rounded-lg opacity-0 translate-y-6 transition-all duration-500 text-slate-400 hover:text-white hover:bg-white/5" href="account.html"> <span class="w-11 h-11 rounded-lg bg-white/5 border border-white/5 flex items-center justify-center"> <span class="material-symbols-outlined text-[22px]">account_balance_wallet</span> </span> <span class="flex-1 text-base font-medium">Assets</span> <span class="material-symbols-outlined text-[20px] opacity-40">chevron_right</span> </a><a class="menu-item flex items-center gap-4 px-4 py-4 rounded-lg opacity-0 translate-y-6 transition-all duration-500 text-slate-400 hover:text-white hover:bg-white/5" href="staking.html"> <span class="w-11 h-11 rounded-lg bg-white/5 border border-white/5 flex items-center justify-center"> <span class="material-symbols-outlined text-[22px]">lock</span> </span> <span class="flex-1 text-base font-medium">Staking</span> <span class="material-symbols-outlined text-[20px] opacity-40">chevron_right</span> </a><a class="menu-item flex items-center gap-4 px-4 py-4 rounded-lg opacity-0 translate-y-6 transition-all duration-500 text-slate-400 hover:text-white hover:bg-white/5" href="rewards.html"> <span class="w-11 h-11 rounded-lg bg-primary/10 border border-primary/10 flex items-center justify-center"> <span class="material-symbols-outlined text-[22px]">workspace_premium</span> </span> <span class="flex-1 text-base font-semibold">Rewards</span> <span class="material-symbols-outlined text-[20px] opacity-60">chevron_right</span> </a><a class="menu-item flex items-center gap-4 px-4 py-4 rounded-lg opacity-0 translate-y-6 transition-all duration-500 text-slate-400 hover:text-white hover:bg-white/5" href="games.html"> <span class="w-11 h-11 rounded-lg bg-primary/10 border border-primary/10 flex items-center justify-center"> <span class="material-symbols-outlined text-[22px]">joystick</span> </span> <span class="flex-1 text-base font-semibold">Games</span> <span class="material-symbols-outlined text-[20px] opacity-60">chevron_right</span> </a><a class="menu-item flex items-center gap-4 px-4 py-4 rounded-lg opacity-0 translate-y-6 transition-all duration-500 text-slate-400 hover:text-white hover:bg-white/5" href="history.html"> <span class="w-11 h-11 rounded-lg bg-white/5 border border-white/5 flex items-center justify-center"> <span class="material-symbols-outlined text-[22px]">history</span> </span> <span class="flex-1 text-base font-medium">History</span> <span class="material-symbols-outlined text-[20px] opacity-40">chevron_right</span> </a><a class="menu-item flex items-center gap-4 px-4 py-4 rounded-lg opacity-0 translate-y-6 transition-all duration-500 text-slate-600" href="#"> <span class="w-11 h-11 rounded-lg bg-white/[0.03] border border-white/5 flex items-center justify-center"> <span class="material-symbols-outlined text-[22px]">layers</span> </span> <span class="flex-1 text-base font-medium">Bridge <span class="text-[10px] uppercase tracking-wider ml-1">Soon</span></span> <span class="material-symbols-outlined text-[20px] opacity-20">chevron_right</span> </a>
+                    <a class="menu-item flex items-center gap-4 px-4 py-4 rounded-lg opacity-0 translate-y-6 transition-all duration-500 text-slate-400 hover:text-white hover:bg-white/5" href="settings.html"> <span class="w-11 h-11 rounded-lg bg-white/5 border border-white/5 flex items-center justify-center"> <span class="material-symbols-outlined text-[22px]">settings</span> </span> <span class="flex-1 text-base font-medium">Settings</span> <span class="material-symbols-outlined text-[20px] opacity-40">chevron_right</span> </a>
+                </div>
+                <div class="px-6 py-5 border-t border-white/5 text-center"><span class="text-[10px] uppercase tracking-[0.18em] text-slate-600">Venera Wallet · v0.2.1</span>
+                </div>
+            </div>
+        </div>
+        <style>@keyframes floaty { 0%, 100% {  transform: translate(-50%, 0) translateY(0); }  50% {  transform: translate(-50%, 0) translateY(-6px); } } #mobileMenuBtn { animation: floaty 3s ease-in-out infinite; }</style>
+        <script>
+
+const btn = document.getElementById("mobileMenuBtn");
+
+const menu = document.getElementById("mobileMenu");
+
+const items = document.querySelectorAll(".menu-item");
+
+
+
+function openMenu() {
+
+                    
+
+    btn.style.animation = "none";
+
+    btn.style.opacity = "0";
+
+    btn.style.transform = "translate(-50%, 100px)";
+
+
+
+                   
+
+    menu.classList.remove("hidden");
+
+
+
+                                         
+
+    items.forEach((item, i) => {
+
+        setTimeout(() => {
+
+            item.classList.remove("opacity-0", "translate-y-6");
+
+            item.classList.add("opacity-100", "translate-y-0");
+
+        }, i * 80);
+
+    });
+
+}
+
+
+
+function closeMenu() {
+
+                        
+
+    items.forEach(item => {
+
+        item.classList.add("opacity-0", "translate-y-6");
+
+        item.classList.remove("opacity-100", "translate-y-0");
+
+    });
+
+
+
+                                            
+
+    setTimeout(() => {
+
+        menu.classList.add("hidden");
+
+
+
+        btn.style.transform = "translate(-50%, 0)";
+
+        btn.style.opacity = "1";
+
+        btn.style.animation = "floaty 3s ease-in-out infinite";
+
+    }, 300);
+
+}
+
+
+
+            
+
+btn.addEventListener("click", openMenu);
+
+
+
+                                                
+
+document.getElementById("mobileMenuContentWrapper").addEventListener("click", (e) => {
+
+    if (e.target === e.currentTarget) {
+
+        closeMenu();
+
+    }
+
+});
+
+</script>
+        
+        <style>::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: #0f0d16; } ::-webkit-scrollbar-thumb { background: #272431; border-radius: 10px; } ::-webkit-scrollbar-thumb:hover { background: #cc97ff; }</style>
+        <script id="electron-window-controls">
+(() => {
+  const min = document.getElementById('min-btn');
+  const close = document.getElementById('close-btn');
+  min?.addEventListener('click', () => window.electronAPI?.minimize());
+  close?.addEventListener('click', () => window.electronAPI?.close());
+})();
+</script>
+    </body>
+    <script src="assets/js/burn.js"></script>            &#x20;
+</html>

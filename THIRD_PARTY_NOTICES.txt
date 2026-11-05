@@ -1,0 +1,7 @@
+# Notices
+
+The supplied native source and its bundled dependencies retain their license and copyright files under `native-source/`. Retain these when distributing binaries; the Windows bundling script collects native runtime notices into its `licenses/` directory.
+
+The GUI retains the supplied assets and JavaScript libraries, including their embedded notices. Locally bundled Space Grotesk and Material Symbols licenses are next to the font files in `app/assets/fonts/`.
+
+The npm asset build copies Font Awesome Free's `LICENSE.txt` and Manrope's supplied font license beside the generated assets. Electron/electron-builder also provide runtime/package notices; retain them in the distributed output. Font Awesome Free uses its separate icon/font/code licenses as stated in that notice. This source integration does not change third-party licensing terms.

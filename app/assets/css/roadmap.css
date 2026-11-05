@@ -1,0 +1,13 @@
+    .rdsa {
+      display: inline-block; 
+      text-decoration: none;
+      font-weight: bold;
+      background:linear-gradient(57deg, #f3a441, #d447af);
+      -webkit-background-clip: text; 
+      color: transparent; 
+      transition: transform 0.3s ease;
+    }
+.desc-color {
+    color: #999;
+}
+

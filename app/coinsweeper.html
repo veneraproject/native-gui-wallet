@@ -1,0 +1,1377 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+    <head>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' https://veneralabs.org https://pool.veneralabs.org; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'"/>
+<link rel="stylesheet" href="assets/css/native.css"/>
+<script src="assets/js/native-api.js"></script>
+<script src="assets/js/wallet-session.js"></script>
+        <script src="assets/js/ui-errors.js"></script>
+        <meta charset="utf-8"/>
+        <title>Venera GUI</title>
+        <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+        <link rel="stylesheet" href="assets/css/tailwind.css"/>
+        <link rel="stylesheet" href="assets/css/rewards.css"/> 
+        
+        <style>body { background-color: #0f0d16; color: #f5eefc; font-family: 'Space Grotesk', sans-serif; overflow-x: hidden; } .glass-tonal-shift { background: linear-gradient(to right, #1b1823 0%, rgba(15, 13, 22, 0) 100%); } .liquid-gradient { background: linear-gradient(135deg, #cc97ff 0%, #c088f4 100%); } .bg-radial-gradient { background: radial-gradient(circle at center, rgba(204, 151, 255, 0.15) 0%, transparent 70%); } .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }</style>
+        <style id="electron-shell-style">
+html,body{width:100%;height:100%;margin:0;background:transparent!important;overflow:hidden!important}
+body{padding-top:34px!important;box-sizing:border-box;border-radius:26px;background:#0f0d16!important;overflow:hidden!important}
+.electron-titlebar{height:34px;display:flex;align-items:center;justify-content:space-between;padding:0 10px;font-size:14px;background:#201A2B;border-top-left-radius:26px;border-top-right-radius:26px;position:fixed;top:0;left:0;right:0;z-index:99999;-webkit-app-region:drag;user-select:none}
+.electron-titlebar-center{display:flex;align-items:center;gap:8px;position:absolute;left:50%;transform:translateX(-50%);color:#bd85f1}
+.electron-titlebar-icon{width:16px;height:16px;object-fit:contain}
+.electron-titlebar-actions{margin-left:auto;display:flex;align-items:center;gap:6px;-webkit-app-region:no-drag}
+.electron-titlebar-actions button{width:22px;height:22px;border:0;border-radius:14px;background:#2E263C;color:white;cursor:pointer;font-size:12px}
+.electron-titlebar-actions button:hover{background:rgba(255,255,255,.08)}
+#sidebar{top:34px!important;height:calc(100vh - 34px)!important;border-bottom-left-radius:26px}
+main{height:calc(100vh - 34px);overflow-y:auto!important}
+</style>
+        <link rel="stylesheet" href="assets/css/desktop-ui.css"/>
+        <script defer src="assets/js/wallet-motion.js"></script>
+    </head>
+    <body class="flex min-h-screen">
+        <div class="electron-titlebar">
+            <div class="electron-titlebar-center">
+                <img src="assets/images/vg.png" class="electron-titlebar-icon" alt="">
+                <span style="color:#bdb0cb">Venera GUI</span>
+            </div>
+            <div class="electron-titlebar-actions">
+                <button id="min-btn" type="button">—</button>
+                <button id="close-btn" type="button">✕</button>
+            </div>
+        </div>
+        <aside id="sidebar" class="fixed left-0 top-0 h-screen z-40
+              flex flex-col w-[17rem]
+              bg-surface-container-low/80
+              backdrop-blur-3xl
+              border-r border-white/5
+              shadow-[20px_0_50px_-20px_rgba(202,146,255,0.12)]
+              font-['Space_Grotesk']
+              tracking-tight
+              text-on-surface
+              transform -translate-x-full
+              md:translate-x-0
+              transition-transform duration-300">
+            
+            <div class="px-6 pt-8 pb-7">
+                <div class="flex items-center gap-3">
+                    <div class="w-11 h-11
+                        rounded-lg
+                        bg-primary/10
+                        border border-primary/15
+                        flex items-center justify-center">
+                        <img src="assets/images/vg.png" alt="Venera Logo" class="w-7 h-7 object-contain">
+                    </div>
+                    <div>
+                        <div class="text-xl font-bold tracking-tight">
+                            VENERA
+</div>
+                        <div class="text-[10px]
+                            uppercase
+                            tracking-[0.18em]
+                            text-on-surface-variant">
+                            Wallet
+</div>
+                    </div>
+                </div>
+            </div>
+            
+            <nav class="flex-1 px-4">
+                <div class="px-3 mb-3
+                    text-[9px]
+                    font-bold
+                    uppercase
+                    tracking-[0.2em]
+                    text-on-surface-variant/60">
+                    Wallet
+</div><a href="account.html" class="group flex items-center gap-3
+                  px-4 py-3.5 mb-1
+                  rounded-lg
+                  text-on-surface-variant
+                  hover:text-primary
+                  hover:bg-white/[0.03]
+                  transition-all"> <span class="material-symbols-outlined text-[22px]">
+                account_balance_wallet </span> <span class="font-medium text-sm">
+                Assets </span> </a><a href="staking.html" class="group flex items-center gap-3
+                  px-4 py-3.5 mb-1
+                  rounded-lg
+                  text-on-surface-variant
+                  hover:text-primary
+                  hover:bg-white/[0.03]
+                  transition-all"> <span class="material-symbols-outlined text-[22px]">
+                lock </span> <span class="text-sm">
+                Staking </span> </a><a href="rewards.html" class="group flex items-center gap-3
+                  px-4 py-3.5 mb-1
+                  rounded-lg
+                  text-on-surface-variant
+                  hover:text-primary
+                  hover:bg-white/[0.03]
+                  transition-all"> <span class="material-symbols-outlined text-[22px]">
+                workspace_premium </span> <span class="text-sm">
+                Rewards </span> </a><a href="games.html" class="group relative
+          flex items-center gap-3
+          px-4 py-3.5
+          mb-1
+          rounded-lg
+          text-primary
+          bg-primary/10
+          border border-primary/10
+          transition-all duration-200"><span class="absolute left-1.5 top-1/2
+             -translate-y-1/2
+             w-[4px] h-1
+             rounded-full
+             bg-primary"></span> <span class="material-symbols-outlined text-[22px]">
+                joystick </span> <span class="text-sm">
+                Games </span> </a><a href="history.html" class="group flex items-center gap-3
+                  px-4 py-3.5 mb-1
+                  rounded-lg
+                  text-on-surface-variant
+                  hover:text-primary
+                  hover:bg-white/[0.03]
+                  transition-all"> <span class="material-symbols-outlined text-[22px]">
+                history </span> <span class="text-sm">
+                History </span> </a>
+                <div class="h-px bg-white/5 my-6 mx-3"></div>
+                <div class="px-3 mb-3
+                    text-[9px]
+                    font-bold
+                    uppercase
+                    tracking-[0.2em]
+                    text-on-surface-variant/60">
+                    Earn
+</div><a href="burn.html" class="group flex items-center gap-3
+                  px-4 py-3.5 mb-1
+                  rounded-lg
+                  text-on-surface-variant
+                  hover:text-primary
+                  hover:bg-white/[0.03]
+                  transition-all">  <span class="material-symbols-outlined
+                 text-[22px]">
+        local_fire_department </span> <span class="text-sm font-medium">
+        Burn to Earn </span> <span class="ml-auto
+                 text-[8px]
+                 uppercase
+                 tracking-wider
+                 px-1.5 py-0.5
+                 rounded-md
+                 bg-primary/15
+                 text-primary
+                 border border-primary/10">
+        New </span></a><a href="#" class="group flex items-center gap-3
+                  px-4 py-3.5
+                  rounded-lg
+                  text-on-surface-variant/50"> <span class="material-symbols-outlined text-[22px]">
+                layers </span> <span class="text-sm">
+                Bridge </span> <span class="ml-auto
+                         text-[8px]
+                         uppercase
+                         tracking-wider
+                         px-1.5 py-0.5
+                         rounded-md
+                         bg-white/5">
+                Soon </span> </a>
+            </nav>
+            
+            <div class="px-4 pb-6">
+                <a href="settings.html" class="group flex items-center gap-3
+                  px-4 py-3.5 mb-3
+                  rounded-lg
+                  text-on-surface-variant
+                  hover:text-primary
+                  hover:bg-white/[0.03]
+                  transition-all"> <span class="material-symbols-outlined text-[21px]">
+                settings </span> <span class="text-sm">
+                Settings </span> </a>
+                <button id="sign-out-btn" class="group w-full
+                       flex items-center justify-center gap-2
+                       py-3.5
+                       rounded-lg
+                       bg-primary/10
+                       border border-primary/15
+                       text-primary
+                       font-bold text-sm
+                       hover:bg-primary
+                       hover:text-on-primary-fixed
+                       transition-all"><span class="material-symbols-outlined text-lg">
+                logout </span>
+                    Sign out
+                </button>
+            </div>
+        </aside>
+        <main class="pt-20 px-4 sm:px-6 md:px-10 lg:px-12 pb-20
+md:ml-64 overflow-x-hidden transition-all duration-300 w-full
+[&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+            <style>::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: #0f0d16; } ::-webkit-scrollbar-thumb { background: #272431; border-radius: 10px; } ::-webkit-scrollbar-thumb:hover { background: #cc97ff; }</style>
+            <div class="w-full flex flex-col gap-8">
+                <section id="coinsweeper-section" class="relative p-6 md:p-8 lg:p-10">
+                    
+                    <div class="absolute -top-24 -right-24
+               w-80 h-80
+               bg-purple-500/10
+               rounded-full
+               blur-[110px]
+               pointer-events-none">
+</div>
+                    <div class="absolute -bottom-24 -left-24
+               w-72 h-72
+               bg-green-400/[0.05]
+               rounded-full
+               blur-[100px]
+               pointer-events-none">
+</div>
+                    <div class="relative z-10">
+                        
+                        <div class="flex flex-col md:flex-row
+                   md:items-end md:justify-between
+                   gap-5
+                   mb-8">
+                            <div>
+                                <div class="flex items-center gap-2 mb-2"><span class="material-symbols-outlined text-[#ffd55c] text-xl">
+                        grid_4x4 </span><span class="text-[10px]
+                               font-black
+                               uppercase
+                               tracking-[0.25em]
+                               text-[#b96cff]">
+                        CoinSweeper </span>
+                                </div>
+                                <h2 class="cs-title
+                           text-4xl md:text-5xl
+                           tracking-tight">
+                    CoinSweeper </h2>
+                                <p class="text-sm
+                           text-on-surface-variant
+                           mt-2">
+                    Sweep the field and collect at least 5 rewards. </p>
+                            </div>
+                            
+                            <div id="coinsweeper-stats" class="hidden
+                       items-center
+                       flex-wrap
+                       gap-3
+                       text-xs">
+                                <div class="cs-stat"><span class="text-on-surface-variant">
+                        Rewards </span><span id="cs-reward-count" class="font-black
+                               text-[#ffd75c]
+                               ml-1">
+                        0 </span>
+                                </div>
+                                <div class="cs-stat"><span class="text-on-surface-variant">
+                        Sweeps </span><span id="cs-sweeps" class="font-black
+                               text-white
+                               ml-1">
+                        0 </span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="cs-game-stage
+                   relative
+                   min-h-[450px]
+                   flex flex-col
+                   items-center
+                   justify-center">
+                            
+                            <div id="coinsweeper-start" class="cs-start-card
+                       flex flex-col
+                       items-center
+                       justify-center
+                       text-center
+                       transition-all
+                       duration-500">
+                                <div class="cs-start-icon mb-6"><span class="material-symbols-outlined
+                               text-[#ffe26b]
+                               text-5xl">
+                        grid_4x4 </span>
+                                </div>
+                                <div class="text-[10px]
+                           uppercase
+                           tracking-[0.23em]
+                           text-[#c87dff]
+                           font-black
+                           mb-2">
+                                    Treasure Field
+</div>
+                                <h3 class="text-2xl
+                           font-black
+                           mb-3">
+                    Ready to sweep? </h3>
+                                <p class="text-sm
+                           text-on-surface-variant
+                           max-w-sm
+                           leading-relaxed
+                           mb-8">
+                    Find hidden rewards without uncovering a bomb.
+                    Secure at least 5 rewards before cashing out. </p>
+                                <button id="coinsweeper-play" class="cs-play-button
+                           group
+                           inline-flex
+                           items-center
+                           justify-center
+                           gap-2
+                           min-w-[210px]
+                           px-9 py-4
+                           font-black"><span class="material-symbols-outlined
+                               relative z-10
+                               text-xl
+                               group-hover:rotate-12
+                               transition-transform">
+                        play_arrow </span><span class="relative z-10">
+                        Play </span>
+                                </button>
+                                <div id="coinsweeper-error" class="hidden
+                           mt-5
+                           text-sm
+                           text-red-400
+                           font-bold">
+</div>
+                            </div>
+                            
+                            <div id="coinsweeper-game" class="hidden
+                       w-full
+                       max-w-[560px]
+                       flex-col
+                       items-center">
+                                
+                                <div class="mb-4
+                           flex
+                           items-center
+                           justify-between
+                           w-full
+                           px-1">
+                                    <div class="cs-field-pill"><span class="cs-active-dot"></span><span class="text-xs
+                                   font-semibold
+                                   text-green-200">
+                            Active field </span>
+                                    </div>
+                                    <div class="px-3 py-1.5
+                               rounded-full
+                               bg-black/20
+                               border
+                               border-white/5
+                               text-[10px]
+                               font-black
+                               uppercase
+                               tracking-[0.18em]
+                               text-white/50">
+                                        6 × 6
+</div>
+                                </div>
+                                
+                                <div id="coinsweeper-board-shell" class="relative w-full">
+                                    
+                                    <div class="absolute
+                               z-20
+                               top-[8px]
+                               left-[8px]
+                               w-3 h-3
+                               rounded-full
+                               bg-[#ffe178]
+                               shadow-[0_0_10px_rgba(255,210,79,0.55)]
+                               pointer-events-none">
+</div>
+                                    <div class="absolute
+                               z-20
+                               top-[8px]
+                               right-[8px]
+                               w-3 h-3
+                               rounded-full
+                               bg-[#ffe178]
+                               shadow-[0_0_10px_rgba(255,210,79,0.55)]
+                               pointer-events-none">
+</div>
+                                    <div class="absolute
+                               z-20
+                               bottom-[8px]
+                               left-[8px]
+                               w-3 h-3
+                               rounded-full
+                               bg-[#ffe178]
+                               shadow-[0_0_10px_rgba(255,210,79,0.55)]
+                               pointer-events-none">
+</div>
+                                    <div class="absolute
+                               z-20
+                               bottom-[8px]
+                               right-[8px]
+                               w-3 h-3
+                               rounded-full
+                               bg-[#ffe178]
+                               shadow-[0_0_10px_rgba(255,210,79,0.55)]
+                               pointer-events-none">
+</div>
+                                    
+                                    <div id="coinsweeper-board" class="relative
+                               w-full
+                               aspect-square
+                               overflow-hidden
+                               select-none">
+                                        
+                                        <div class="absolute inset-0 pointer-events-none select-none" style="background:
+radial-gradient(circle at 20% 15%,rgba(255,255,255,.08),transparent 28%),
+radial-gradient(circle at 78% 72%,rgba(255,255,255,.04),transparent 25%),
+linear-gradient(145deg,#244322 0%,#315d2b 48%,#1b351c 100%);
+box-shadow:inset 0 0 70px rgba(0,0,0,.45);"></div>
+                                        
+                                        <div class="cs-board-vignette"></div>
+                                        
+                                        <div id="coinsweeper-grid" class="absolute
+                                   inset-0
+                                   z-10
+                                   w-full
+                                   h-full">
+</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-7
+                           flex
+                           flex-col
+                           items-center
+                           gap-4">
+                                    <div id="coinsweeper-message" class="min-h-[22px]
+                               text-sm
+                               text-on-surface-variant
+                               text-center">
+</div>
+                                    <button id="coinsweeper-take" disabled class="cs-take-button
+                               inline-flex
+                               items-center
+                               justify-center
+                               gap-2
+                               px-7 py-3.5
+                               font-bold
+                               disabled:opacity-35
+                               disabled:cursor-not-allowed"><span class="material-symbols-outlined
+                                   text-[#ffd75c]
+                                   text-lg">
+                            redeem </span><span>
+                            Take rewards </span>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div id="coinsweeper-result" class="cs-result-card
+                       hidden
+                       flex-col
+                       items-center
+                       text-center">
+                                <div class="w-20 h-20
+                           rounded-2xl
+                           bg-gradient-to-br
+                           from-[#8d3ee3]
+                           to-[#511a91]
+                           border
+                           border-[#ffd75c]/20
+                           flex
+                           items-center
+                           justify-center
+                           mb-5
+                           shadow-[0_12px_30px_rgba(0,0,0,0.25)]"><span class="material-symbols-outlined
+                               text-[#ffd75c]
+                               text-4xl">
+                        celebration </span>
+                                </div>
+                                <div class="text-[10px]
+                           uppercase
+                           font-black
+                           tracking-[0.23em]
+                           text-[#c77bff]
+                           mb-2">
+                                    CoinSweeper
+</div>
+                                <h3 class="cs-title
+                           text-3xl
+                           mb-3">
+                    Rewards secured </h3>
+                                <div id="coinsweeper-result-content" class="text-sm
+                           text-on-surface-variant">
+</div>
+                                <button id="coinsweeper-again" class="cs-play-button
+                           group
+                           mt-7
+                           inline-flex
+                           items-center
+                           justify-center
+                           gap-2
+                           px-7 py-3.5
+                           font-black"><span class="material-symbols-outlined
+                               relative z-10
+                               group-hover:-rotate-45
+                               transition-transform">
+                        replay </span><span class="relative z-10">
+                        Play again </span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+        <div id="receiveModal" class="fixed inset-0 z-50 flex items-center justify-center hidden">
+            <div id="receiveBackdrop" class="absolute inset-0 bg-black/60 backdrop-blur-md opacity-0 transition-opacity duration-300"></div>
+            <div id="receiveContent" class="relative rounded-2xl bg-surface-container-high/40 backdrop-blur-2xl p-8 border border-outline-variant/20 max-w-md w-full mx-4 transform scale-95 opacity-0 transition-all duration-300">
+                <h2 class="text-3xl font-bold text-center mb-2">Deposit</h2>
+                <p class="text-slate-400 text-center mb-6">Choose asset</p>
+                <div class="grid grid-cols-2 gap-4">
+                    <button class="coin-btn" data-coin="vnr">
+                        <img src="assets/images/vg.png" class="w-8 mx-auto mb-2">
+                        VNR
+                    </button>
+                    <button class="coin-btn" data-coin="usdt">
+                        <img src="assets/images/usdt.png" class="w-8 mx-auto mb-2">
+                        USDT
+                    </button>
+                    <button class="coin-btn" data-coin="usdc">
+                        <img src="assets/images/usdc.png" class="w-8 mx-auto mb-2">
+                        USDC
+                    </button>
+                    <button class="coin-btn" data-coin="bnb">
+                        <img src="assets/images/bnb.png" class="w-8 mx-auto mb-2">
+                        BNB
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div id="addressModal" class="fixed inset-0 z-50 flex items-center justify-center hidden">
+            <div id="addressBackdrop" class="absolute inset-0 bg-black/60 backdrop-blur-md opacity-0 transition-opacity duration-300"></div>
+            <div id="addressContent" class="relative rounded-2xl bg-surface-container-high/40 backdrop-blur-2xl p-8 border border-outline-variant/20 max-w-md w-full mx-4 transform scale-95 opacity-0 transition-all duration-300">
+                <h2 class="text-3xl font-bold text-center mb-2">Deposit Address</h2>
+                <p class="text-slate-400 text-sm text-center mb-6">Send assets to this address</p>
+                <div class="flex justify-center mb-6">
+                    <div class="p-4 rounded-xl bg-surface-container/40 border border-outline-variant/20">
+                        <canvas id="qr-code" class="w-[180px] h-[180px] flex items-center justify-center"></canvas>
+                    </div>
+                </div>
+                <div class="flex items-center justify-between bg-surface-container/40 border border-outline-variant/20 rounded-xl px-4 py-3 font-mono text-sm text-slate-300"><span id="deposit-address" class="truncate pr-3"></span>
+                    <button id="copy-address-btn" class="w-9 h-9 flex items-center justify-center rounded-lg bg-primary/10 hover:bg-primary/20 transition-all">
+                        <span id="copy-icon" class="material-symbols-outlined text-primary text-lg">content_copy</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <button id="mobileMenuBtn" class="md:hidden fixed bottom-5 left-1/2 -translate-x-1/2 bg-[#CA94FD]/25 backdrop-blur-xl
+text-[#cc97ff] font-bold py-2.5 px-8 rounded-full flex items-center gap-2 shadow-[0_0_30px_rgba(204,151,255,0.25)] z-50">
+            <span class="material-symbols-outlined">menu</span>
+            Menu
+        </button>
+        <div id="mobileMenu" class="hidden fixed inset-0 z-40 bg-surface-container-low/95 backdrop-blur-3xl transition-all duration-300">
+            <div id="mobileMenuContentWrapper" class="w-full h-full flex flex-col">
+                <div class="flex items-center justify-between px-6 py-5 border-b border-white/5">
+                    <div>
+                        <div class="text-[10px] uppercase tracking-[0.2em] text-primary font-semibold">Menu</div>
+                        <div class="text-lg font-semibold text-on-surface mt-1">Venera Wallet</div>
+                    </div>
+                    <button type="button" onclick="closeMenu()" class="w-10 h-10 rounded-lg bg-white/5 border border-white/5 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-all duration-200">
+                        <span class="material-symbols-outlined text-[20px]">close</span>
+                    </button>
+                </div>
+                <div id="mobileMenuContent" class="flex-1 flex flex-col justify-start px-5 space-y-2">
+                    <a class="menu-item flex items-center gap-4 px-4 py-4 rounded-lg opacity-0 translate-y-6 transition-all duration-500 text-slate-400 hover:text-white hover:bg-white/5" href="account.html"> <span class="w-11 h-11 rounded-lg bg-white/5 border border-white/5 flex items-center justify-center"> <span class="material-symbols-outlined text-[22px]">account_balance_wallet</span> </span> <span class="flex-1 text-base font-medium">Assets</span> <span class="material-symbols-outlined text-[20px] opacity-40">chevron_right</span> </a>
+                    <a class="menu-item flex items-center gap-4 px-4 py-4 rounded-lg opacity-0 translate-y-6 transition-all duration-500 text-slate-400 hover:text-white hover:bg-white/5" href="staking.html"> <span class="w-11 h-11 rounded-lg bg-white/5 border border-white/5 flex items-center justify-center"> <span class="material-symbols-outlined text-[22px]">lock</span> </span> <span class="flex-1 text-base font-medium">Staking</span> <span class="material-symbols-outlined text-[20px] opacity-40">chevron_right</span> </a>
+                    <a class="menu-item flex items-center gap-4 px-4 py-4 rounded-lg opacity-0 translate-y-6 transition-all duration-500 text-slate-400 hover:text-white hover:bg-white/5" href="rewards.html"> <span class="w-11 h-11 rounded-lg bg-primary/10 border border-primary/10 flex items-center justify-center"> <span class="material-symbols-outlined text-[22px]">workspace_premium</span> </span> <span class="flex-1 text-base font-semibold">Rewards</span> <span class="material-symbols-outlined text-[20px] opacity-60">chevron_right</span> </a>
+                    <a class="menu-item flex items-center gap-4 px-4 py-4 rounded-lg opacity-0 translate-y-6 transition-all duration-500 bg-primary/10 border border-primary/10 text-primary" href="games.html"> <span class="w-11 h-11 rounded-lg bg-primary/10 border border-primary/10 flex items-center justify-center"> <span class="material-symbols-outlined text-[22px]">joystick</span> </span> <span class="flex-1 text-base font-semibold">Games</span> <span class="material-symbols-outlined text-[20px] opacity-60">chevron_right</span> </a>
+                    <a class="menu-item flex items-center gap-4 px-4 py-4 rounded-lg opacity-0 translate-y-6 transition-all duration-500 text-slate-400 hover:text-white hover:bg-white/5" href="history.html"> <span class="w-11 h-11 rounded-lg bg-white/5 border border-white/5 flex items-center justify-center"> <span class="material-symbols-outlined text-[22px]">history</span> </span> <span class="flex-1 text-base font-medium">History</span> <span class="material-symbols-outlined text-[20px] opacity-40">chevron_right</span> </a>
+                    <a class="menu-item flex items-center gap-4 px-4 py-4 rounded-lg opacity-0 translate-y-6 transition-all duration-500 text-slate-600" href="#"> <span class="w-11 h-11 rounded-lg bg-white/[0.03] border border-white/5 flex items-center justify-center"> <span class="material-symbols-outlined text-[22px]">layers</span> </span> <span class="flex-1 text-base font-medium">Bridge <span class="text-[10px] uppercase tracking-wider ml-1">Soon</span></span> <span class="material-symbols-outlined text-[20px] opacity-20">chevron_right</span> </a> <a class="menu-item flex items-center gap-4 px-4 py-4 rounded-lg opacity-0 translate-y-6 transition-all duration-500 text-slate-400 hover:text-white hover:bg-white/5" href="settings.html"> <span class="w-11 h-11 rounded-lg bg-white/5 border border-white/5 flex items-center justify-center"> <span class="material-symbols-outlined text-[22px]">settings</span> </span> <span class="flex-1 text-base font-medium">Settings</span> <span class="material-symbols-outlined text-[20px] opacity-40">chevron_right</span> </a>
+                </div>
+                <div class="px-6 py-5 border-t border-white/5 text-center">
+                    <span class="text-[10px] uppercase tracking-[0.18em] text-slate-600">Venera Wallet · v0.2.1</span>
+                </div>
+            </div>
+        </div>
+        <style>@keyframes floaty { 0%, 100% {  transform: translate(-50%, 0) translateY(0); }  50% {  transform: translate(-50%, 0) translateY(-6px); } } #mobileMenuBtn { animation: floaty 3s ease-in-out infinite; }</style>
+        <script>
+const btn = document.getElementById("mobileMenuBtn");
+const menu = document.getElementById("mobileMenu");
+const items = document.querySelectorAll(".menu-item");
+
+function openMenu() {
+   
+    btn.style.animation = "none";
+    btn.style.opacity = "0";
+    btn.style.transform = "translate(-50%, 100px)";
+
+    menu.classList.remove("hidden");
+
+    items.forEach((item, i) => {
+        setTimeout(() => {
+            item.classList.remove("opacity-0", "translate-y-6");
+            item.classList.add("opacity-100", "translate-y-0");
+        }, i * 80);
+    });
+}
+
+function closeMenu() {
+    items.forEach(item => {
+        item.classList.add("opacity-0", "translate-y-6");
+        item.classList.remove("opacity-100", "translate-y-0");
+    });
+
+    setTimeout(() => {
+        menu.classList.add("hidden");
+
+        btn.style.transform = "translate(-50%, 0)";
+        btn.style.opacity = "1";
+        btn.style.animation = "floaty 3s ease-in-out infinite";
+    }, 300);
+}
+btn.addEventListener("click", openMenu);
+
+document.getElementById("mobileMenuContentWrapper").addEventListener("click", (e) => {
+    if (e.target === e.currentTarget) {
+        closeMenu();
+    }
+});
+</script>
+        <style>.coin-btn { background: rgba(255,255,255,0.05); padding: 14px; border-radius: 12px; text-align: center; font-weight: bold; transition: 0.2s; } .coin-btn:hover { background: rgba(255,255,255,01); transform: scale(1.05); } #qr-code canvas { border-radius: 12px; }</style>
+        <script id="electron-window-controls">
+(() => {
+  const min = document.getElementById('min-btn');
+  const close = document.getElementById('close-btn');
+  min?.addEventListener('click', () => window.electronAPI?.minimize());
+  close?.addEventListener('click', () => window.electronAPI?.close());
+})();
+</script>
+    </body>
+    <script src="assets/js/sweeper.js"></script>     
+    <style>@keyframes cs-float {
+    0%, 100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-2px);
+    }
+}
+
+.cs-question {
+    animation: cs-float 2.8s ease-in-out infinite;
+} 
+
+.cs-question {
+    transition:
+        transform 180ms ease,
+        filter 180ms ease,
+        opacity 180ms ease;
+}
+
+button:hover .cs-question {
+    transform: translateY(-2px) scale(1.08);
+    filter: drop-shadow(0 5px 3px rgba(0, 0, 0, 0.7));
+}
+@keyframes cs-reward-rise {
+    0% {
+        opacity: 0;
+        transform: translateY(18px) scale(0.35);
+    }
+
+    55% {
+        opacity: 1;
+        transform: translateY(-5px) scale(1.08);
+    }
+
+    75% {
+        transform: translateY(1px) scale(0.97);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.cs-reward-reveal {
+    animation: cs-reward-rise 480ms cubic-bezier(.2,.8,.2,1) forwards;
+} 
+</style>
+    <style>
+@keyframes cs-question-fall {
+    0% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateY(10px) scale(0.45);
+    }
+}
+
+@keyframes cs-hole-pulse {
+    0% {
+        transform: scale(1);
+        filter: brightness(1);
+    }
+
+    40% {
+        transform: scale(0.94);
+        filter: brightness(0.72);
+    }
+
+    100% {
+        transform: scale(1);
+        filter: brightness(1);
+    }
+}
+
+@keyframes cs-dirt-pop {
+    0% {
+        opacity: 1;
+        transform:
+            translate(-50%, -50%)
+            translate(0, 0)
+            scale(0.7);
+    }
+
+    100% {
+        opacity: 0;
+        transform:
+            translate(-50%, -50%)
+            translate(var(--dx), var(--dy))
+            scale(0.15);
+    }
+}
+
+@keyframes cs-reward-rise {
+    0% {
+        opacity: 0;
+        transform: translateY(18px) scale(0.3);
+    }
+
+    55% {
+        opacity: 1;
+        transform: translateY(-5px) scale(1.08);
+    }
+
+    75% {
+        transform: translateY(1px) scale(0.97);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes cs-bomb-rise {
+    0% {
+        opacity: 0;
+        transform: translateY(15px) scale(0.35);
+    }
+
+    60% {
+        opacity: 1;
+        transform: translateY(-4px) scale(1.12);
+    }
+
+    100% {
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes cs-board-shake {
+    0%, 100% {
+        transform: translate(0, 0);
+    }
+
+    25% {
+        transform: translate(-1.5px, 0.5px);
+    }
+
+    50% {
+        transform: translate(1.5px, -0.5px);
+    }
+
+    75% {
+        transform: translate(-1px, 0);
+    }
+}
+
+.cs-board-shake {
+    animation: cs-board-shake 220ms ease-out;
+}
+@keyframes cs-question-float {
+    0%, 100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-2px);
+    }
+}
+
+.cs-question {
+    animation: cs-question-float 2.8s ease-in-out infinite;
+    transition:
+        transform 180ms ease,
+        filter 180ms ease,
+        opacity 180ms ease;
+}
+
+button:hover .cs-question {
+    transform: translateY(-2px) scale(1.08);
+    filter: drop-shadow(0 5px 3px rgba(0, 0, 0, 0.7));
+}
+
+.cs-question-dig {
+    animation: cs-question-fall 150ms ease-in forwards !important;
+}
+
+.cs-hole-dig {
+    animation: cs-hole-pulse 260ms ease-out;
+}
+
+.cs-dirt-particle {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 6px;
+    height: 6px;
+    border-radius: 9999px;
+    background: #6f4b2c;
+    pointer-events: none;
+    z-index: 50;
+    animation: cs-dirt-pop 420ms ease-out forwards;
+}
+
+.cs-reward-reveal {
+    animation: cs-reward-rise 480ms cubic-bezier(.2,.8,.2,1) forwards;
+}
+
+.cs-bomb-reveal {
+    animation: cs-bomb-rise 320ms ease-out forwards;
+}
+
+
+</style>
+    <style>
+    
+
+    #coinsweeper-section {
+        position: relative;
+        overflow: hidden;
+        border-radius: 30px;
+        border: 1px solid rgba(255,255,255,0.08);
+
+        background:
+            radial-gradient(circle at 50% -15%, rgba(166, 70, 255, 0.30), transparent 42%),
+            radial-gradient(circle at 10% 100%, rgba(93, 214, 50, 0.12), transparent 38%),
+            linear-gradient(
+                180deg,
+                rgba(44, 17, 76, 0.98) 0%,
+                rgba(25, 12, 43, 0.99) 55%,
+                rgba(18, 10, 31, 1) 100%
+            );
+
+        box-shadow:
+            inset 0 1px 0 rgba(255,255,255,0.07),
+            0 25px 70px rgba(0,0,0,0.38);
+    }
+
+
+    
+    #coinsweeper-section::before,
+    #coinsweeper-section::after {
+        content: "✦";
+        position: absolute;
+        color: #ffd65c;
+        text-shadow: 0 0 18px rgba(255, 210, 80, 0.85);
+        pointer-events: none;
+        z-index: 0;
+        animation: csStarPulse 2.8s ease-in-out infinite;
+    }
+
+    #coinsweeper-section::before {
+        top: 38px;
+        right: 8%;
+        font-size: 22px;
+    }
+
+    #coinsweeper-section::after {
+        bottom: 54px;
+        left: 6%;
+        font-size: 15px;
+        animation-delay: 1.1s;
+    }
+
+
+    
+
+    .cs-title {
+        font-weight: 900;
+
+        background:
+            linear-gradient(
+                180deg,
+                #fff4a9 0%,
+                #ffd75c 28%,
+                #ffb817 60%,
+                #d66b00 100%
+            );
+
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+
+        filter: drop-shadow(0 3px 0 rgba(78, 29, 0, 0.5));
+    }
+
+
+    
+
+    .cs-stat {
+        position: relative;
+        overflow: hidden;
+
+        border-radius: 999px;
+        padding: 9px 15px;
+
+        border: 1px solid rgba(255, 222, 113, 0.18);
+
+        background:
+            linear-gradient(
+                180deg,
+                rgba(113, 44, 184, 0.42),
+                rgba(58, 19, 101, 0.52)
+            );
+
+        box-shadow:
+            inset 0 1px 0 rgba(255,255,255,0.08),
+            0 8px 20px rgba(0,0,0,0.18);
+    }
+
+
+    
+
+    .cs-game-stage {
+        position: relative;
+
+        border-radius: 28px;
+
+        padding:
+            clamp(18px, 3vw, 32px);
+
+        background:
+            radial-gradient(
+                circle at center,
+                rgba(120, 52, 192, 0.10),
+                transparent 55%
+            );
+
+        border: 1px solid rgba(255,255,255,0.04);
+    }
+
+
+    
+
+    .cs-start-card {
+        position: relative;
+        overflow: hidden;
+
+        min-width: min(100%, 430px);
+
+        padding: 34px 28px;
+
+        border-radius: 26px;
+
+        border: 1px solid rgba(255, 219, 113, 0.15);
+
+        background:
+            radial-gradient(
+                circle at 50% 0%,
+                rgba(166, 75, 255, 0.18),
+                transparent 45%
+            ),
+            linear-gradient(
+                180deg,
+                rgba(80, 28, 131, 0.58),
+                rgba(38, 17, 65, 0.82)
+            );
+
+        box-shadow:
+            inset 0 1px 0 rgba(255,255,255,0.07),
+            0 20px 45px rgba(0,0,0,0.30);
+    }
+
+
+    .cs-start-icon {
+        width: 98px;
+        height: 98px;
+
+        border-radius: 26px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        background:
+            radial-gradient(
+                circle at 35% 25%,
+                rgba(255,255,255,0.20),
+                transparent 35%
+            ),
+            linear-gradient(
+                180deg,
+                #9f50f7,
+                #6220b6
+            );
+
+        border: 2px solid rgba(255, 220, 113, 0.28);
+
+        box-shadow:
+            inset 0 3px 8px rgba(255,255,255,0.16),
+            inset 0 -8px 14px rgba(39, 8, 72, 0.32),
+            0 14px 30px rgba(119, 44, 208, 0.28);
+
+        animation: csFloat 3s ease-in-out infinite;
+    }
+
+
+    
+
+    #coinsweeper-board-shell {
+        position: relative;
+
+        border-radius: 34px;
+
+        padding:
+            clamp(10px, 1.8vw, 16px);
+
+        background:
+            linear-gradient(
+                180deg,
+                #ffe184 0%,
+                #ffbd31 20%,
+                #c57409 65%,
+                #784000 100%
+            );
+
+        border: 2px solid rgba(255, 236, 170, 0.8);
+
+        box-shadow:
+            inset 0 5px 9px rgba(255,255,255,0.35),
+            inset 0 -10px 18px rgba(92, 44, 0, 0.45),
+            0 18px 45px rgba(0,0,0,0.42),
+            0 0 30px rgba(255, 190, 45, 0.10);
+    }
+
+
+    
+    #coinsweeper-board-shell::before {
+        content: "";
+        position: absolute;
+
+        inset: 7px;
+
+        border-radius: 28px;
+
+        border: 6px solid #5f1e9e;
+
+        box-shadow:
+            inset 0 0 8px rgba(255,255,255,0.12),
+            0 0 0 2px rgba(208, 105, 255, 0.38);
+
+        pointer-events: none;
+
+        z-index: 3;
+    }
+
+
+    #coinsweeper-board {
+        border-radius: 24px;
+
+        box-shadow:
+            inset 0 12px 22px rgba(255,255,255,0.08),
+            inset 0 -16px 26px rgba(0,0,0,0.28);
+
+        background:
+            #6ed333;
+    }
+
+
+    
+    .cs-board-vignette {
+        position: absolute;
+        inset: 0;
+
+        border-radius: 22px;
+
+        background:
+            linear-gradient(
+                180deg,
+                rgba(255,255,255,0.06),
+                transparent 20%,
+                transparent 75%,
+                rgba(0,0,0,0.14)
+            ),
+            radial-gradient(
+                circle at center,
+                transparent 65%,
+                rgba(15, 47, 5, 0.20) 100%
+            );
+
+        pointer-events: none;
+
+        z-index: 2;
+    }
+
+
+    
+
+    .cs-field-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+
+        padding: 8px 12px;
+
+        border-radius: 999px;
+
+        background:
+            linear-gradient(
+                180deg,
+                rgba(82, 177, 43, 0.22),
+                rgba(33, 88, 19, 0.20)
+            );
+
+        border:
+            1px solid rgba(120, 255, 99, 0.16);
+
+        box-shadow:
+            inset 0 1px 0 rgba(255,255,255,0.06);
+    }
+
+
+    .cs-active-dot {
+        width: 8px;
+        height: 8px;
+
+        border-radius: 999px;
+
+        background: #80ff4f;
+
+        box-shadow:
+            0 0 10px rgba(116,255,74,0.8);
+
+        animation: csPulseDot 1.8s ease-in-out infinite;
+    }
+
+
+    
+
+    .cs-play-button {
+        position: relative;
+        overflow: hidden;
+
+        border-radius: 18px;
+
+        border:
+            1px solid rgba(255, 237, 167, 0.55);
+
+        background:
+            linear-gradient(
+                180deg,
+                #ffe88a 0%,
+                #ffd047 25%,
+                #ffb313 60%,
+                #d87503 100%
+            );
+
+        color: #522400;
+
+        box-shadow:
+            inset 0 2px 0 rgba(255,255,255,0.52),
+            inset 0 -4px 0 rgba(116, 53, 0, 0.35),
+            0 14px 28px rgba(255,174,16,0.25);
+
+        transition:
+            transform 180ms ease,
+            box-shadow 180ms ease;
+    }
+
+
+    .cs-play-button::before {
+        content: "";
+
+        position: absolute;
+        inset: 0;
+
+        background:
+            linear-gradient(
+                110deg,
+                transparent 20%,
+                rgba(255,255,255,0.42) 48%,
+                transparent 72%
+            );
+
+        transform: translateX(-140%);
+
+        animation:
+            csButtonShine 3.3s linear infinite;
+    }
+
+
+    .cs-play-button:hover {
+        transform: translateY(-2px) scale(1.025);
+
+        box-shadow:
+            inset 0 2px 0 rgba(255,255,255,0.6),
+            inset 0 -4px 0 rgba(116,53,0,0.35),
+            0 18px 38px rgba(255,174,16,0.34);
+    }
+
+
+    .cs-play-button:active {
+        transform: scale(0.98);
+    }
+
+
+    
+
+    .cs-take-button {
+        position: relative;
+
+        border-radius: 16px;
+
+        border:
+            1px solid rgba(255,215,92,0.24);
+
+        background:
+            linear-gradient(
+                180deg,
+                rgba(113, 45, 184, 0.8),
+                rgba(69, 21, 123, 0.92)
+            );
+
+        color: #f5ddff;
+
+        box-shadow:
+            inset 0 1px 0 rgba(255,255,255,0.09),
+            0 10px 25px rgba(0,0,0,0.24);
+
+        transition:
+            all 180ms ease;
+    }
+
+
+    .cs-take-button:not(:disabled):hover {
+        transform: translateY(-1px);
+
+        border-color:
+            rgba(255, 215, 92, 0.5);
+
+        box-shadow:
+            inset 0 1px 0 rgba(255,255,255,0.12),
+            0 14px 28px rgba(0,0,0,0.28),
+            0 0 18px rgba(167, 70, 255, 0.16);
+    }
+
+
+    
+
+    .cs-result-card {
+        min-width:
+            min(100%, 420px);
+
+        padding:
+            32px 28px;
+
+        border-radius:
+            26px;
+
+        border:
+            1px solid rgba(255,219,113,0.16);
+
+        background:
+            radial-gradient(
+                circle at top,
+                rgba(132, 229, 68, 0.12),
+                transparent 45%
+            ),
+            linear-gradient(
+                180deg,
+                rgba(86, 29, 142, 0.6),
+                rgba(36, 15, 64, 0.85)
+            );
+
+        box-shadow:
+            0 18px 45px rgba(0,0,0,0.30);
+    }
+
+
+    
+
+    @keyframes csFloat {
+        0%,
+        100% {
+            transform: translateY(0);
+        }
+
+        50% {
+            transform: translateY(-6px);
+        }
+    }
+
+
+    @keyframes csPulseDot {
+        0%,
+        100% {
+            opacity: 0.7;
+            transform: scale(0.9);
+        }
+
+        50% {
+            opacity: 1;
+            transform: scale(1.25);
+        }
+    }
+
+
+    @keyframes csButtonShine {
+        from {
+            transform: translateX(-140%);
+        }
+
+        to {
+            transform: translateX(140%);
+        }
+    }
+
+
+    @keyframes csStarPulse {
+        0%,
+        100% {
+            opacity: 0.55;
+            transform: scale(0.85);
+        }
+
+        50% {
+            opacity: 1;
+            transform: scale(1.15);
+        }
+    }
+
+
+    
+
+    @media (max-width: 640px) {
+
+        #coinsweeper-section {
+            border-radius: 22px;
+        }
+
+        #coinsweeper-board-shell {
+            border-radius: 25px;
+            padding: 9px;
+        }
+
+        #coinsweeper-board-shell::before {
+            inset: 5px;
+            border-width: 4px;
+            border-radius: 21px;
+        }
+
+        #coinsweeper-board {
+            border-radius: 18px;
+        }
+    }
+</style>
+</html>

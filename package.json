@@ -1,0 +1,64 @@
+{
+  "name": "venera-native-gui",
+  "version": "0.3.0",
+  "author": "VeneraLabs",
+  "description": "Venera native desktop wallet",
+  "main": "main.js",
+  "scripts": {
+    "build:css": "tailwindcss -c tailwind.config.cjs -i app/assets/css/tailwind.input.css -o app/assets/css/tailwind.css --minify && tailwindcss -c tailwind.explorer.config.cjs -i app/assets/css/tailwind.input.css -o app/assets/css/tailwind-explorer.css --minify && node scripts/copy-assets.cjs",
+    "prestart": "npm run build:css",
+    "start": "electron .",
+    "predist": "npm run build:css && node scripts/check-native.cjs",
+    "dist": "electron-builder --win portable"
+  },
+  "devDependencies": {
+    "electron": "42.4.0",
+    "electron-builder": "26.15.2",
+    "tailwindcss": "3.4.17",
+    "@tailwindcss/forms": "0.5.10",
+    "@tailwindcss/container-queries": "0.1.1",
+    "@fortawesome/fontawesome-free": "6.7.2",
+    "@fontsource/manrope": "5.3.0"
+  },
+  "build": {
+    "appId": "com.venera.gui",
+    "productName": "Venera GUI",
+    "asar": true,
+    "icon": "build/icon.ico",
+    "electronLanguages": [
+      "en-US"
+    ],
+    "electronFuses": {
+      "runAsNode": false,
+      "enableNodeOptionsEnvironmentVariable": false,
+      "enableNodeCliInspectArguments": false
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "desktop/**",
+      "app/**",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "native/bin",
+        "to": "native",
+        "filter": [
+          "**/*",
+          "!README.md"
+        ]
+      }
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    }
+  }
+}

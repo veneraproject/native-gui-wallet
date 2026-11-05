@@ -1,0 +1,82 @@
+                                       
+                                              
+   
+                       
+   
+                                                                                       
+                                                            
+   
+                                                                                         
+                                              
+   
+                                                                                         
+                                                                                  
+                                               
+   
+                                                                                       
+                                                                                     
+                               
+   
+                                                                                      
+                                                                                          
+                                                                                         
+                                                                                       
+                                                                               
+                                                                                          
+                                                                                    
+                                                                                          
+                                                                               
+   
+                                                                                      
+
+#pragma once
+
+#ifdef __cplusplus
+#include <array>
+#include <cstddef>
+
+extern "C" {
+#endif
+
+void *memwipe(void *src, size_t n);
+
+#ifdef __cplusplus
+}
+#endif
+
+#ifdef __cplusplus
+namespace tools {
+
+   
+   
+   
+   
+  template <class T>
+  struct scrubbed : public T {
+    using type = T;
+
+    ~scrubbed() {
+      scrub();
+    }
+
+     
+    void scrub() {
+      static_assert(std::is_pod<T>::value,
+                    "T cannot be auto-scrubbed. T must be POD.");
+      static_assert(std::is_trivially_destructible<T>::value,
+                    "T cannot be auto-scrubbed. T must be trivially destructable.");
+      memwipe(this, sizeof(T));
+    }
+  };
+
+  template<typename T>
+  T& unwrap(scrubbed<T>& src) { return src; }
+
+  template<typename T>
+  const T& unwrap(scrubbed<T> const& src) { return src; }
+
+  template <class T, size_t N>
+  using scrubbed_arr = scrubbed<std::array<T, N>>;
+}  
+
+#endif  

@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+    <head>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' https://veneralabs.org https://pool.veneralabs.org; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'"/>
+<link rel="stylesheet" href="assets/css/native.css"/>
+<script src="assets/js/native-api.js"></script>
+<script src="assets/js/wallet-session.js"></script>
+        <script src="assets/js/ui-errors.js"></script>
+        <meta charset="utf-8"/>
+        <title>Venera GUI</title>
+        <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+        <link rel="stylesheet" href="assets/css/tailwind.css"/>
+        
+        <style>body { font-family: 'Space Grotesk', sans-serif; overflow-x: hidden; } .glass-tonal-shift { background: linear-gradient(to right, #1b1823 0%, rgba(15, 13, 22, 0) 100%); } .liquid-gradient { background: linear-gradient(135deg, #cc97ff 0%, #c088f4 100%); } .bg-radial-gradient { background: radial-gradient(circle at center, rgba(204, 151, 255, 0.15) 0%, transparent 70%); } .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }</style>
+        <style>.material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; } .liquid-bg { background: radial-gradient(circle at 20% 30%, rgba(204, 151, 255, 0.15) 0%, transparent 40%),
+                        radial-gradient(circle at 80% 70%, rgba(189, 133, 241, 0.1) 0%, transparent 40%); } .glass-panel { background: rgba(39, 36, 49, 0.4); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); } html, body, * { scrollbar-width: none;   -ms-overflow-style: none;   } html::-webkit-scrollbar, body::-webkit-scrollbar, *::-webkit-scrollbar { display: none;   } .glass-pill { background: rgba(39, 36, 49, 0.3); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); } .login-gradient { background: linear-gradient(135deg, #cc97ff 0%, #360061 100%); }</style>
+        <style>body { min-height: max(884px, 100dvh); } .titlebar { height: 34px; display: flex; align-items: center; justify-content: space-between; padding: 0 10px; font-size: 14px; background: #201A2B; border-top-left-radius: 26px; border-top-right-radius: 26px; position: fixed; top: 0; left: 0; right: 0; z-index: 99999; -webkit-app-region: drag; user-select: none; } .titlebar-center { display: flex; align-items: center; gap: 8px; position: absolute; left: 50%; transform: translateX(-50%); } .titlebar-icon { width: 14px; height: 14px; } .titlebar-actions { margin-left: auto; display: flex; align-items: center; gap: 6px; -webkit-app-region: no-drag; } .titlebar-actions button { width: 22px; height: 22px; border: none; border-radius: 16px; background: #2E263C; color: white; cursor: pointer; font-size: 12px; } .titlebar-actions button:hover { background: rgba(255,255,255,0.08); } .titlebar-icon { width: 16px; height: 16px; object-fit: contain; }</style>
+        <link rel="stylesheet" href="assets/css/desktop-ui.css"/>
+        <script defer src="assets/js/wallet-motion.js"></script>
+    </head>
+    <body class="rounded-[26px]" style="overflow:hidden;background: transparent; height: 100%">
+        <div class="h-screen rounded-[26px] overflow-hidden bg-surface relative" id="app">
+            <div class="titlebar rounded-tl-[26px] rounded-tr-[26px] fixed top-0 left-0 w-full" style="z-index: 999">
+                <div class="titlebar-left"></div>
+                <div class="titlebar-center">
+                    <img class="titlebar-icon" src="assets/images/vg.png"/><span style="color:#bdb0cb">Venera GUI</span>
+                </div>
+                <div class="titlebar-actions mr-1">
+                    <button id="min-btn">—</button>
+                    <button id="close-btn">✕</button>
+                </div>
+            </div>
+            <div class="overflow-hidden bg-surface">
+                
+                <div class="fixed inset-0 z-[9999] hidden bg-black/50 backdrop-blur-md opacity-0 transition-opacity duration-300" id="trust-modal">
+                    
+                    <div class="absolute inset-0 flex items-center justify-center p-6 sm:p-8">
+                        
+                        <div class="glass-modal w-full max-w-[420px] rounded-[32px] bg-surface-container-high/40 backdrop-blur-[24px] border border-white/5 px-7 py-8 sm:px-9 sm:py-10 transform scale-95 opacity-0 transition-all duration-300 relative" id="trust-modal-content">
+                            
+                            <button class="absolute top-4 right-4 text-slate-500 hover:text-white transition-colors" id="trust-close"><span class="material-symbols-outlined">
+                    close </span>
+                            </button>
+                            
+                            <div class="flex items-start gap-4 mb-5">
+                                <div class="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-primary text-3xl">
+                        qr_code_2 </span>
+                                </div>
+                                <div>
+                                    <h2 class="text-2xl font-bold leading-tight text-white">
+                        Import To Trust Wallet </h2>
+                                    <p class="text-sm text-slate-400 mt-2 leading-relaxed" id="trust-description">
+                        This action can only be performed once.
+                        Proceed to generate your import QR code. </p>
+                                </div>
+                            </div>
+                            
+                            <div class="hidden flex justify-center mb-6" id="trust-qr-wrapper">
+                                <canvas class="p-4 rounded-2xl bg-white/5 border border-white/5" id="trust-qr">
+</canvas>
+                            </div>
+                            
+                            <div class="hidden text-sm text-center mb-5" id="trust-status">
+</div>
+                            
+                            <div class="flex gap-3" id="trust-actions">
+                                <button class="text-white flex-1 py-4 rounded-2xl bg-primary hover:bg-primary/90 transition-all font-medium" id="trust-cancel">
+                                    Cancel
+</button>
+                                <button class="text-white flex-1 glass-btn py-4 rounded-2xl font-bold" id="trust-proceed">
+                                    Proceed
+</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <aside class="rounded-bl-[26px] fixed left-0 top-0 h-full z-40 flex flex-col w-72 bg-surface-container-low/80 backdrop-blur-3xl border-r border-white/5 shadow-[20px_0_50px_-20px_rgba(202,146,255,0.12)] font-['Space_Grotesk'] tracking-tight text-on-surface transform -translate-x-full md:translate-x-0 transition-transform duration-300" id="sidebar">
+                    <div class="px-6 pt-10 pb-5">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg bg-primary/10 border border-primary/15 flex items-center justify-center">
+                                <img class="w-6 h-6" src="assets/images/vg.png"/>
+                            </div>
+                            <div>
+                                <div class="text-lg font-bold">VENERA</div>
+                                <div class="text-[9px] uppercase tracking-[.18em] text-on-surface-variant">Wallet</div>
+                            </div>
+                        </div>
+                    </div>
+                    <nav class="flex-1 px-4 overflow-y-auto">
+                        <div class="px-3 mb-3 text-[9px] font-bold uppercase tracking-[.2em] text-on-surface-variant/60">Wallet</div>
+                        <a class="group relative flex items-center gap-3 px-4 py-3.5 mb-1 rounded-lg text-on-surface-variant hover:text-primary hover:bg-white/[0.03] transition-all duration-200" href="account.html"><span class="material-symbols-outlined text-[22px]">account_balance_wallet</span><span class="text-sm font-medium">Assets</span></a><a class="group relative flex items-center gap-3 px-4 py-3.5 mb-1 rounded-lg text-on-surface-variant hover:text-primary hover:bg-white/[0.03] transition-all duration-200" href="staking.html"><span class="material-symbols-outlined text-[22px]">lock</span><span class="text-sm font-medium">Staking</span></a><a class="group relative flex items-center gap-3 px-4 py-3.5 mb-1 rounded-lg text-on-surface-variant hover:text-primary hover:bg-white/[0.03] transition-all duration-200" href="rewards.html"><span class="material-symbols-outlined text-[22px]">workspace_premium</span><span class="text-sm font-medium">Rewards</span></a><a class="group relative flex items-center gap-3 px-4 py-3.5 mb-1 rounded-lg text-on-surface-variant hover:text-primary hover:bg-white/[0.03] transition-all duration-200" href="games.html"><span class="material-symbols-outlined text-[22px]">joystick</span><span class="text-sm font-medium">Games</span></a><a class="group relative flex items-center gap-3 px-4 py-3.5 mb-1 rounded-lg text-on-surface-variant hover:text-primary hover:bg-white/[0.03] transition-all duration-200" href="history.html"><span class="material-symbols-outlined text-[22px]">history</span><span class="text-sm font-medium">History</span></a>
+                        <div class="h-px bg-white/5 my-5 mx-3"></div>
+                        <div class="px-3 mb-3 text-[9px] font-bold uppercase tracking-[.2em] text-on-surface-variant/60">Earn</div>
+                        <a class="group relative flex items-center gap-3 px-4 py-3.5 mb-1 rounded-lg text-on-surface-variant hover:text-primary hover:bg-white/[0.03] transition-all duration-200" href="burn.html"><span class="material-symbols-outlined text-[22px]">local_fire_department</span><span class="text-sm font-medium">Burn to Earn</span><span class="ml-auto text-[8px] uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-primary/15 text-primary border border-primary/10">New</span></a>
+                        <a class="group flex items-center gap-3 px-4 py-3.5 rounded-lg text-on-surface-variant/50" href="#"><span class="material-symbols-outlined text-[22px]">layers</span><span class="text-sm">Bridge</span><span class="ml-auto text-[8px] uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-white/5">Soon</span></a>
+                    </nav>
+                    <div class="px-4 pb-5"><a class="group flex items-center gap-3 px-4 py-3 mb-2 rounded-lg text-primary bg-primary/10" href="settings.html"><span class="material-symbols-outlined text-[21px]">settings</span><span class="text-sm">Settings</span></a>
+                        <button class="group w-full flex items-center justify-center gap-2 py-3 rounded-lg bg-primary/10 border border-primary/15 text-primary font-bold text-sm hover:bg-primary hover:text-on-primary-fixed transition-all" id="sign-out-btn"><span class="material-symbols-outlined text-lg">logout</span>Sign out
+                        </button>
+                    </div>
+                </aside>
+                <main class="pt-20 px-4 sm:px-6 md:px-10 lg:px-12 pb-20 md:ml-72 overflow-x-hidden transition-all duration-300">
+                    <div class="w-full max-w-7xl mx-auto flex flex-col gap-10">
+                        
+                        <section class="flex flex-col md:flex-row md:items-end justify-between gap-4 md:gap-6">
+                            <div>
+                                <span class="text-primary-dim font-['Space_Grotesk'] tracking-widest text-xs font-bold uppercase mb-2 block">
+                SETTINGS </span>
+                                <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tighter text-on-surface">
+                Wallet Settings </h1>
+                            </div>
+                        </section>
+                        
+                        <section id="wallet-settings-cards" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            
+                            
+                            
+                            <button class="group flex items-center justify-between bg-surface-container-high/40 backdrop-blur-[24px] rounded-2xl p-6 border border-white/5 hover:border-primary/30 hover:bg-surface-container-high/60 transition-all duration-300" id="importtrust">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center">
+                                        <span class="material-symbols-outlined text-primary text-3xl">
+                        account_balance_wallet </span>
+                                    </div>
+                                    <div class="text-left">
+                                        <h3 class="text-lg font-bold text-on-surface text-white">
+                        Import to Trust Wallet </h3>
+                                        <p class="text-sm text-slate-400">
+                        Export and connect your wallet securely </p>
+                                    </div>
+                                </div><span class="material-symbols-outlined text-slate-500 group-hover:text-primary transition-colors">
+                chevron_right </span>
+                            </button>
+                            
+                            
+                            
+                            <div class="flex items-center justify-between bg-surface-container-high/40 backdrop-blur-[24px] rounded-2xl p-6 border border-white/5">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center">
+                                        <span class="material-symbols-outlined text-primary text-3xl">
+                        verified_user </span>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-lg font-bold text-on-surface">
+                        Enhanced Transfers </h3>
+                                        <p class="text-sm text-slate-400">
+                        Wallet password required for local outgoing transfers </p>
+                                    </div>
+                                </div>
+                                
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input class="sr-only peer" type="checkbox"/>
+                                    <div class="w-14 h-8 bg-white/10 rounded-full peer peer-checked:bg-primary/80 transition-all duration-300"></div>
+                                    <div class="absolute left-1 top-1 w-6 h-6 bg-white rounded-full transition-all duration-300 peer-checked:translate-x-6"></div>
+                                </label>
+                            </div>
+                        </section>
+                        <script>
+document.addEventListener("DOMContentLoaded", () => {
+    const toggle = document.querySelector('input[type="checkbox"].peer');
+
+    toggle.addEventListener("change", async () => {
+        const endpoint = toggle.checked ? "/ehc" : "/eho";
+
+        try {
+            const res = await fetch(endpoint, { method: "POST" });
+            const data = await res.json();
+            if (res.ok) {
+                console.log("Enhanced Transfers Security updated");
+            } else {
+                console.error("Error updating setting");
+            }
+        } catch (err) {
+            console.error("Network Error");
+        }
+    });
+});
+</script>
+                    </div>
+                    <div class="fixed -top-40 -right-40 w-[600px] h-[600px] bg-[#cc97ff]/5 rounded-full blur-[120px] pointer-events-none -z-10"></div>
+                    <div class="fixed top-1/2 -left-20 w-[400px] h-[400px] bg-tertiary/5 rounded-full blur-[100px] pointer-events-none -z-10"></div>
+                </main>
+                <button class="md:hidden fixed bottom-5 left-1/2 -translate-x-1/2 bg-[#CA94FD]/25 backdrop-blur-xl text-[#cc97ff] font-bold text-white py-2.5 px-8 rounded-full flex items-center gap-2 shadow-[0_0_30px_rgba(204,151,255,0.25)] z-50" id="mobileMenuBtn">
+                    <span class="material-symbols-outlined">menu</span>
+                    Menu
+                </button>
+                <style>.otp-cell { width: 54px; height: 64px; border-radius: 20px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08); text-align: center; font-size: 1.55rem; font-weight: 700; color: white; outline: none; transition: all .2s ease; backdrop-filter: blur(10px); } .otp-cell:focus { border-color: #C994FD; background: rgba(255,255,255,0.09); box-shadow: 0 0 0 4px rgba(201,148,253,0.14),
+        0 10px 30px rgba(201,148,253,0.08); } @media (max-width: 480px){ .otp-cell {  width: 46px;  height: 58px;  font-size: 1.3rem;  border-radius: 18px; } }</style>
+                <script>
+document.querySelectorAll(".otp-cell").forEach((input, index, arr) => {
+
+    input.addEventListener("input", () => {
+        input.value = input.value.replace(/[^0-9]/g, "");
+
+        if (input.value && index < arr.length - 1) {
+            arr[index + 1].focus();
+        }
+    });
+
+    input.addEventListener("keydown", (e) => {
+        if (e.key === "Backspace" && !input.value && index > 0) {
+            arr[index - 1].focus();
+        }
+    });
+
+});
+</script>
+                <script>
+function closeOtpxModal() {
+
+    const modal =
+        document.getElementById("otp-modal");
+
+    const content =
+        document.getElementById("otp-modal-content");
+
+    if (!modal || !content) return;
+
+    content.classList.remove("opacity-100", "scale-100");
+    content.classList.add("opacity-0", "scale-95");
+
+    modal.classList.add("opacity-0");
+
+    setTimeout(() => {
+        modal.classList.add("hidden");
+    }, 250);
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    const modal = document.getElementById("otp-modal");
+    const content = document.getElementById("otp-modal-content");
+
+    if (!modal || !content) return;
+
+    modal.addEventListener("click", (e) => {
+        if (!content.contains(e.target)) {
+            closeOtpxModal();
+        }
+
+    });
+
+});
+</script>
+                <div class="hidden fixed inset-0 z-40 bg-black/70 backdrop-blur-xl flex items-center justify-center transition-all duration-500" id="mobileMenu">
+                    <div class="w-full h-full flex items-center justify-center" id="mobileMenuContentWrapper">
+                        <div class="flex flex-col items-center justify-center space-y-6" id="mobileMenuContent">
+                            <a class="menu-item flex items-center gap-3 opacity-0 translate-y-6 transition-all duration-500 text-[#cc97ff] font-medium" href="account.html"> <span class="material-symbols-outlined">account_balance_wallet</span>
+                Assets </a>
+                            <a class="menu-item flex items-center gap-3 opacity-0 translate-y-6 transition-all duration-500 text-slate-400" href="staking.html"> <span class="material-symbols-outlined">lock</span>
+                Staking </a>
+                            <a class="menu-item flex items-center gap-3 opacity-0 translate-y-6 transition-all duration-500 text-slate-400" href="rewards.html"> <span class="material-symbols-outlined">workspace_premium</span>
+                Rewards </a>
+                            <a class="menu-item flex items-center gap-3 opacity-0 translate-y-6 transition-all duration-500 text-slate-400" href="history.html"> <span class="material-symbols-outlined">history</span>
+                History </a>
+                            <a class="menu-item flex items-center gap-3 opacity-0 translate-y-6 transition-all duration-500 text-slate-400"> <span class="material-symbols-outlined">layers</span>
+                Bridge (soon) </a>
+                        </div>
+                    </div>
+                </div>
+                <style>@keyframes floaty { 0%, 100% {  transform: translate(-50%, 0) translateY(0); }  50% {  transform: translate(-50%, 0) translateY(-6px); } } #mobileMenuBtn { animation: floaty 3s ease-in-out infinite; }</style>
+                <script>
+const btn = document.getElementById("mobileMenuBtn");
+const menu = document.getElementById("mobileMenu");
+const items = document.querySelectorAll(".menu-item");
+
+function openMenu() {
+    btn.style.animation = "none";
+    btn.style.opacity = "0";
+    btn.style.transform = "translate(-50%, 100px)";
+
+    menu.classList.remove("hidden");
+    items.forEach((item, i) => {
+        setTimeout(() => {
+            item.classList.remove("opacity-0", "translate-y-6");
+            item.classList.add("opacity-100", "translate-y-0");
+        }, i * 80);
+    });
+}
+
+function closeMenu() {
+    items.forEach(item => {
+        item.classList.add("opacity-0", "translate-y-6");
+        item.classList.remove("opacity-100", "translate-y-0");
+    });
+    setTimeout(() => {
+        menu.classList.add("hidden");
+
+        btn.style.transform = "translate(-50%, 0)";
+        btn.style.opacity = "1";
+        btn.style.animation = "floaty 3s ease-in-out infinite";
+    }, 300);
+}
+btn.addEventListener("click", openMenu);
+document.getElementById("mobileMenuContentWrapper").addEventListener("click", (e) => {
+    if (e.target === e.currentTarget) {
+        closeMenu();
+    }
+});
+</script>
+                <div class="fixed inset-0 z-50 flex items-center justify-center hidden" id="receiveModal">
+                    <div class="absolute inset-0 bg-black/10 backdrop-blur-md opacity-0 transition-opacity duration-300" id="receiveBackdrop"></div>
+                    <div class="glass-modal relative rounded-2xl bg-surface-container-high/40 backdrop-blur-2xl p-8 border border-outline-variant/20 max-w-md w-full mx-4 transform scale-95 opacity-0 transition-all duration-300" id="receiveContent">
+                        <h2 class="text-3xl font-bold text-white text-white text-center mb-2">Deposit</h2>
+                        <p class="text-slate-400 text-center mb-6">Choose asset to deposit</p>
+                        <div class="grid grid-cols-2 gap-4">
+                            <button class="coin-btn text-white" data-coin="vnr">
+                                <img class="w-8 mx-auto mb-2" src="assets/images/vg.png"/>
+                                VNR
+                            </button>
+                            <button class="coin-btn text-white" data-coin="usdt">
+                                <img class="w-8 mx-auto mb-2" src="assets/images/usdt.png"/>
+                                USDT
+                            </button>
+                            <button class="coin-btn text-white" data-coin="usdc">
+                                <img class="w-8 mx-auto mb-2" src="assets/images/usdc.png"/>
+                                USDC
+                            </button>
+                            <button class="coin-btn text-white" data-coin="bnb">
+                                <img class="w-8 mx-auto mb-2" src="assets/images/bnb.png"/>
+                                BNB
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="fixed inset-0 z-50 flex items-center justify-center hidden" id="addressModal">
+                    <div class="absolute inset-0 bg-black/10 backdrop-blur-md opacity-0 transition-opacity duration-300" id="addressBackdrop"></div>
+                    <div class="glass-modal relative rounded-2xl bg-surface-container-high/40 backdrop-blur-2xl p-8 border border-outline-variant/20 max-w-md w-full mx-4 transform scale-95 opacity-0 transition-all duration-300" id="addressContent">
+                        <h2 class="text-3xl font-bold text-white text-center mb-2">Deposit Address</h2>
+                        <p class="text-slate-400 text-sm text-center mb-6">Send assets to this address</p>
+                        <div class="flex justify-center mb-6">
+                            <div class="p-4 rounded-xl bg-surface-container/40 border border-outline-variant/20">
+                                <canvas class="w-[180px] h-[180px] flex items-center justify-center" id="qr-code"></canvas>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between gap-3 min-w-0 bg-surface-container/40 border border-outline-variant/20 rounded-xl px-4 py-3 font-mono text-sm text-slate-300">
+                            <span class="truncate pr-3" id="deposit-address"></span>
+                            <button class="w-9 h-9 flex items-center justify-center rounded-lg bg-primary/10 hover:bg-primary/20 transition-all" id="copy-address-btn">
+                                <span class="material-symbols-outlined text-primary text-lg" id="copy-icon">content_copy</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <style>.coin-btn { background: rgba(255,255,255,0.05); padding: 14px; border-radius: 32px; text-align: center; font-weight: bold; transition: 0.2s; } .coin-btn:hover { background: rgba(255,255,255,0.1); transform: scale(1.05); } #qr-code canvas { border-radius: 12px; }</style>
+            </div>
+        </div>
+    <script src="assets/js/native-settings.js"></script>
+</body>
+    <script src="assets/js/settings.js"></script>
+    <script src="assets/js/qr.min.js"></script>
+</html>

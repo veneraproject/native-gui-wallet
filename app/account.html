@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+    <head>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' https://veneralabs.org https://pool.veneralabs.org; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'"/>
+<link rel="stylesheet" href="assets/css/native.css"/>
+<link rel="stylesheet" href="assets/fontawesome/css/all.min.css"/>
+<script src="assets/js/native-api.js"></script>
+<script src="assets/js/wallet-session.js"></script>
+        <script src="assets/js/ui-errors.js"></script>
+        <meta charset="utf-8"/>
+        <title>Venera GUI</title>
+        <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+        <link rel="stylesheet" href="assets/css/tailwind.css"/>
+        
+        
+        <style>body { font-family: 'Space Grotesk', sans-serif; overflow-x: hidden; } .glass-tonal-shift { background: linear-gradient(to right, #1b1823 0%, rgba(15, 13, 22, 0) 100%); } .liquid-gradient { background: linear-gradient(135deg, #cc97ff 0%, #c088f4 100%); } .bg-radial-gradient { background: radial-gradient(circle at center, rgba(204, 151, 255, 0.15) 0%, transparent 70%); } .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }</style>
+        <style>.material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; } .liquid-bg { background: radial-gradient(circle at 20% 30%, rgba(204, 151, 255, 0.15) 0%, transparent 40%),
+                        radial-gradient(circle at 80% 70%, rgba(189, 133, 241, 0.1) 0%, transparent 40%); } .glass-panel { background: rgba(39, 36, 49, 0.4); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); } html, body, * { scrollbar-width: none;   -ms-overflow-style: none;   } html::-webkit-scrollbar, body::-webkit-scrollbar, *::-webkit-scrollbar { display: none;   } .glass-pill { background: rgba(39, 36, 49, 0.3); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); } .login-gradient { background: linear-gradient(135deg, #cc97ff 0%, #360061 100%); }</style>
+        <style>body { min-height: max(884px, 100dvh); } .titlebar { height: 34px; display: flex; align-items: center; justify-content: space-between; padding: 0 10px; font-size: 14px; background: #201A2B; border-top-left-radius: 26px; border-top-right-radius: 26px; position: fixed; top: 0; left: 0; right: 0; z-index: 99999; -webkit-app-region: drag; user-select: none; } .titlebar-center { display: flex; align-items: center; gap: 8px; position: absolute; left: 50%; transform: translateX(-50%); } .titlebar-icon { width: 14px; height: 14px; } .titlebar-actions { margin-left: auto; display: flex; align-items: center; gap: 6px; -webkit-app-region: no-drag; } .titlebar-actions button { width: 22px; height: 22px; border: none; border-radius: 16px; background: #2E263C; color: white; cursor: pointer; font-size: 12px; } .titlebar-actions button:hover { background: rgba(255,255,255,0.08); } .titlebar-icon { width: 16px; height: 16px; object-fit: contain; }</style>
+        <link href="assets/css/desktop-ui.css" rel="stylesheet"/>
+        <script defer="" src="assets/js/explorer-modal.js"></script>
+        <script defer="" src="assets/js/wallet-motion.js"></script>
+    <link id="wallet-layout-refinements" rel="stylesheet" href="assets/css/layout-refinements.css"/>
+<script id="wallet-layout-scroll" defer src="assets/js/layout-refinements.js"></script>
+</head>
+    <body style="overflow:hidden;background: transparent; height: 100%">
+        <div class="h-screen rounded-[26px] overflow-hidden bg-surface relative" id="app">
+            <div class="titlebar rounded-tl-[26px] rounded-tr-[26px] fixed top-0 left-0 w-full" style="z-index: 999">
+                <div class="titlebar-left"></div>
+                <div class="titlebar-center">
+                    <img class="titlebar-icon" src="assets/images/vg.png"/>
+                    <span style="color:#bdb0cb">Venera GUI</span>
+                </div>
+                <div class="titlebar-actions mr-1">
+                    <button id="min-btn">—</button>
+                    <button id="close-btn">✕</button>
+                </div>
+            </div>
+            <script>
+document.getElementById("min-btn")
+  .addEventListener("click", () => {
+    window.electronAPI.minimize();
+  });
+
+document.getElementById("close-btn")
+  .addEventListener("click", () => {
+    window.electronAPI.close();
+  });
+</script>
+            <div class="overflow-hidden bg-surface">
+                <aside class="rounded-bl-[26px] fixed left-0 top-0 h-full z-40 flex flex-col w-72 bg-surface-container-low/80 backdrop-blur-3xl border-r border-white/5 shadow-[20px_0_50px_-20px_rgba(202,146,255,0.12)] font-['Space_Grotesk'] tracking-tight text-on-surface transform -translate-x-full md:translate-x-0 transition-transform duration-300" id="sidebar">
+                    <div class="px-6 pt-10 pb-5">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg bg-primary/10 border border-primary/15 flex items-center justify-center">
+                                <img class="w-6 h-6" src="assets/images/vg.png"/>
+                            </div>
+                            <div>
+                                <div class="text-lg font-bold">VENERA</div>
+                                <div class="text-[9px] uppercase tracking-[.18em] text-on-surface-variant">Wallet</div>
+                            </div>
+                        </div>
+                    </div>
+                    <style>.input-box { position: relative; min-height: 72px; padding: 25px 20px 10px 20px; background: rgba(255, 255, 255, 0.055); border: 1px solid rgba(255, 255, 255, 0.10);   border-radius: 999px; transition: border-color 0.2s ease,
+        background 0.2s ease,
+        box-shadow 0.2s ease; } .input-box:hover { background: rgba(255, 255, 255, 0.075); } .input-box:focus-within { background: rgba(255, 255, 255, 0.07); border-color: rgba(202, 148, 253, 0.40); box-shadow: 0 0 0 1px rgba(202, 148, 253, 0.10); } .input-label { position: absolute; top: 8px; left: 20px; font-size: 10px; line-height: 14px; color: #9ca3af; pointer-events: none; letter-spacing: 0.02em; } .input-box input { width: 100%; height: 25px; margin: 0; padding: 0; background: transparent; outline: none !important; border: none !important; box-shadow: none !important; color: #fff; font-size: 14px; line-height: 25px; appearance: none; -webkit-appearance: none; } #send-amount { font-size: 17px; font-weight: 700; } .input-box input::placeholder { color: rgba(156, 163, 175, 0.45); } .input-box input:focus, .input-box input:focus-visible { outline: none !important; border: none !important; box-shadow: none !important; }</style>
+                    <nav class="flex-1 px-4 overflow-y-auto">
+                        <div class="px-3 mb-3 text-[9px] font-bold uppercase tracking-[.2em] text-on-surface-variant/60">Wallet</div>
+                        <a class="group relative flex items-center gap-3 px-4 py-3.5 mb-1 rounded-lg text-primary bg-primary/10 border border-primary/10 transition-all duration-200" href="account.html"><span class="absolute left-1.5 top-1/2 -translate-y-1/2 w-[4px] h-1 rounded-full bg-primary"></span><span class="material-symbols-outlined text-[22px]">account_balance_wallet</span><span class="text-sm font-medium">Assets</span></a><a class="group relative flex items-center gap-3 px-4 py-3.5 mb-1 rounded-lg text-on-surface-variant hover:text-primary hover:bg-white/[0.03] transition-all duration-200" href="staking.html"><span class="material-symbols-outlined text-[22px]">lock</span><span class="text-sm font-medium">Staking</span></a><a class="group relative flex items-center gap-3 px-4 py-3.5 mb-1 rounded-lg text-on-surface-variant hover:text-primary hover:bg-white/[0.03] transition-all duration-200" href="rewards.html"><span class="material-symbols-outlined text-[22px]">workspace_premium</span><span class="text-sm font-medium">Rewards</span></a><a class="group relative flex items-center gap-3 px-4 py-3.5 mb-1 rounded-lg text-on-surface-variant hover:text-primary hover:bg-white/[0.03] transition-all duration-200" href="games.html"><span class="material-symbols-outlined text-[22px]">joystick</span><span class="text-sm font-medium">Games</span></a><a class="group relative flex items-center gap-3 px-4 py-3.5 mb-1 rounded-lg text-on-surface-variant hover:text-primary hover:bg-white/[0.03] transition-all duration-200" href="history.html"><span class="material-symbols-outlined text-[22px]">history</span><span class="text-sm font-medium">History</span></a>
+                        <div class="h-px bg-white/5 my-5 mx-3"></div>
+                        <div class="px-3 mb-3 text-[9px] font-bold uppercase tracking-[.2em] text-on-surface-variant/60">Earn</div>
+                        <a class="group relative flex items-center gap-3 px-4 py-3.5 mb-1 rounded-lg text-on-surface-variant hover:text-primary hover:bg-white/[0.03] transition-all duration-200" href="burn.html"><span class="material-symbols-outlined text-[22px]">local_fire_department</span><span class="text-sm font-medium">Burn to Earn</span><span class="ml-auto text-[8px] uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-primary/15 text-primary border border-primary/10">New</span></a>
+                        <a class="group flex items-center gap-3 px-4 py-3.5 rounded-lg text-on-surface-variant/50" href="#"><span class="material-symbols-outlined text-[22px]">layers</span><span class="text-sm">Bridge</span><span class="ml-auto text-[8px] uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-white/5">Soon</span></a>
+                    </nav>
+                    <div class="px-4 pb-5"><a class="group flex items-center gap-3 px-4 py-3 mb-2 rounded-lg text-on-surface-variant hover:text-primary hover:bg-white/[0.03]" href="settings.html"><span class="material-symbols-outlined text-[21px]">settings</span><span class="text-sm">Settings</span></a>
+                        <button class="group w-full flex items-center justify-center gap-2 py-3 rounded-lg bg-primary/10 border border-primary/15 text-primary font-bold text-sm hover:bg-primary hover:text-on-primary-fixed transition-all" id="sign-out-btn"><span class="material-symbols-outlined text-lg">logout</span>Sign out
+                        </button>
+                    </div>
+                </aside>
+                <style>#app { opacity: 0; transform: scale(.9) translateY(8px); transition: opacity .35s ease,
+        transform .35s cubic-bezier(.16,1,.3,1); } #app.loaded { opacity: 1; transform: scale(1) translateY(0); }</style>
+                <script>window.addEventListener("DOMContentLoaded", () => {
+    requestAnimationFrame(() => {
+        document.getElementById("app")
+            .classList.add("loaded");
+    });
+});</script>
+                <main class="absolute top-14 bottom-0 pt-1 px-4 sm:px-6 md:px-10 lg:px-12 pb-20 md:ml-72 overflow-x-hidden overflow-y-auto account-page">
+                    <div class="w-full md:max-w-7xl md:mx-auto">
+                        <style>::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: #0f0d16; } ::-webkit-scrollbar-thumb { background: #272431; border-radius: 10px; } ::-webkit-scrollbar-thumb:hover { background: #cc97ff; }</style>
+                        <div class="pt-28 md:pt-3 w-full md:max-w-7xl md:mx-auto">
+                            <div class="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8 account-grid">
+                                <div class="mining-widget">
+                                    <div class="mining-panel">
+                                        <span class="status-text" id="statusText">Loading...</span>
+                                        <span class="hashrate-text ml-1" id="hashrateEl">0 kH/s</span>
+                                    </div>
+                                    <div class="pickaxe-circle">
+                                        <span class="outline-ring"></span>
+                                        <img alt="Mining" class="pickaxe-icon" src="assets/images/mining.svg"/>
+                                    </div>
+                                </div>
+                                <style>.pickaxe-icon { position: relative; z-index: 2; color: #C48EF8; font-size: 30px; transition: transform .3s ease; } .pickaxe-circle:hover .pickaxe-icon { transform: scale(1.15); } .pickaxe-icon { color: #C48EF8; font-size: 25px;   font-weight: normal; line-height: 1; transition: transform 0.3s ease; } .pickaxe-circle:hover .pickaxe-icon { transform: scale(1.15); } .pickaxe-circle { position: fixed; right: 24px; bottom: 24px; z-index: 1000; width: 72px; height: 72px; border-radius: 50%; background: #16141E; border: 1px solid rgba(195, 140, 247, 0.15); display: flex; align-items: center; justify-content: center; cursor: pointer; overflow: visible; transition: all 0.35s ease; box-shadow: 0 0 12px rgba(195, 140, 247, 0.15),
+        0 0 24px rgba(195, 140, 247, 0.08),
+        inset 0 0 12px rgba(195, 140, 247, 0.05); } .pickaxe-circle:hover { transform: scale(1.08); box-shadow: 0 0 20px rgba(195, 140, 247, 0.45),
+        0 0 40px rgba(195, 140, 247, 0.2),
+        inset 0 0 20px rgba(195, 140, 247, 0.08); } .icon-wrapper { position: relative; z-index: 2; } .pickaxe-icon { width: 26px; height: 26px; color: #C38CF7; transition: transform 0.35s ease; } .pickaxe-circle:hover .pickaxe-icon { transform: scale(1.12); } .outline-ring { position: absolute; inset: -2px; border-radius: 50%; } .outline-ring::before, .outline-ring::after { content: ""; position: absolute; inset: 0; border-radius: 50%; border: 2px solid transparent; opacity: 0; transition: transform 0.55s ease,
+        opacity 0.25s ease; } .outline-ring::before { border-top-color: #C38CF7; border-right-color: #C38CF7; transform: rotate(-180deg); } .outline-ring::after { border-bottom-color: #C38CF7; border-left-color: #C38CF7; transform: rotate(180deg); } .pickaxe-circle:hover .outline-ring::before, .pickaxe-circle:hover .outline-ring::after { transform: rotate(0deg); opacity: 1; } .mining-widget { position: fixed; right: 24px; bottom: 24px; display: flex; align-items: center; height: 72px; z-index: 1000; } .pickaxe-circle { width: 72px; height: 72px; border-radius: 50%; background: #16141E; border: 1px solid rgba(195, 140, 247, 0.15); display: flex; align-items: center; justify-content: center; z-index: 2; box-shadow: 0 0 12px rgba(195, 140, 247, 0.15),
+        0 0 24px rgba(195, 140, 247, 0.08),
+        inset 0 0 12px rgba(195, 140, 247, 0.05); transition: transform 0.3s ease; } .pickaxe-circle:hover { transform: scale(1.06); } .pickaxe-icon { width: 28px; height: 28px; filter: drop-shadow(0 0 6px rgba(195, 140, 247, 0.6)); transition: transform 0.3s ease; } .pickaxe-circle:hover .pickaxe-icon { transform: scale(1.15); } .mining-panel { height: 72px;   width: 0; background: #16141E; border: 1px solid rgba(195, 140, 247, 0.15); border-right: none;   display: flex; align-items: center; color: #C48EF8; white-space: nowrap; overflow: hidden; padding: 0; border-radius: 99px; transform: translateX(10px); opacity: 0; transition: width 0.35s ease,
+        opacity 0.25s ease,
+        padding 0.35s ease,
+        transform 0.35s ease; } .mining-widget:hover .mining-panel { width: 220px; padding: 0 18px; opacity: 1; transform: translateX(-20px); }</style>
+                                <div class="md:col-span-12 bg-surface-container-high/40 backdrop-blur-2xl rounded-lg p-9 relative overflow-hidden border border-outline-variant/10 account-overview">
+                                    <div class="relative z-10">
+                                        <div class="text-primary-dim text-xs font-bold tracking-[0.2em] uppercase mb-4 select-none">Total Portfolio Value</div>
+                                        <div class="flex items-end gap-2 sm:gap-4 min-w-0">
+                                            <h1 class="select-none text-3xl sm:text-4xl md:text-6xl font-bold tracking-tighter text-on-surface" id="totalvalue">Loading..</h1>
+                                        </div>
+                                        <style>.glass-modal { background: rgba(204, 151, 255, 0.07);   backdrop-filter: blur(20px) saturate(60%); -webkit-backdrop-filter: blur(20px) saturate(60%); border-radius: 50px; position: relative; overflow: hidden;   border: 1px solid rgba(255,255,255,0.06);   box-shadow: 0 12px 40px rgba(0,0,0,0.35),inset 0 1px 4px rgba(255, 255, 255, 0.15); } .glass-modal::before { content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px; background: linear-gradient(
+        135deg,
+        rgba(255,255,255,0.3),
+        rgba(255,255,255,0.02) 25%,
+        transparent 60%
+    ); -webkit-mask: linear-gradient(#000 0 0) content-box, 
+        linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none; } .glass-modal::after { content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px; background: linear-gradient(
+        315deg,
+        rgba(255,255,255,0.3),
+        rgba(255,255,255,0.02) 25%,
+        transparent 60%
+    ); -webkit-mask: linear-gradient(#000 0 0) content-box, 
+        linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none; } .glass-btn { border-radius: 999px; background: linear-gradient(135deg, #CA94FD, #8A5CF6); transition: all 0.2s ease; box-shadow: 0 10px 30px rgba(202,148,253,0.35); } .glass-btn:hover { transform: translateY(-2px) scale(1.03); box-shadow: 0 5px 32px rgba(202,148,253,0.45); } .glass-btn:active { transform: scale(0.96); box-shadow: 0 6px 15px rgba(202,148,253,0.3); }</style>
+                                        <div class="flex flex-col sm:flex-row gap-2 sm:gap-5 mt-8 sm:mt-12">
+                                            <button class="select-none px-10 py-3.5 rounded-full liquid-gradient text-on-primary-fixed font-bold flex items-center justify-center sm:justify-start shadow-[0_10px_30px_-5px_rgba(204,151,255,0.4)] hover:scale-105 transition-transform" id="send-btn"><span class="material-symbols-outlined mr-2">north_east</span>
+                                                Send
+                                            </button>
+                                            <button class="px-9 py-3.5 rounded-full bg-surface-variant/40 backdrop-blur-md text-on-surface font-bold text-white flex items-center justify-center sm:justify-start border border-primary/20 hover:bg-primary/10 transition-all select-none" id="receive-btn"><span class="material-symbols-outlined mr-2">south_west</span>
+                                                Receive
+                                            </button>
+                                        </div>
+                                        
+                                    </div>
+                                    <div class="flex items-center gap-3 mt-6 opacity-0 transition-opacity duration-300" id="sync-indicator">
+                                        
+                                        <div class="w-5 h-5 border-2 border-primary/30 border-t-primary rounded-full animate-spin"></div>
+                                        
+                                        <span class="text-sm text-on-surface/70 animate-pulse">
+        Sync in progress </span>
+                                    </div>
+                                    <div class="absolute -top-24 -right-24 w-64 h-64 bg-primary/10 blur-[100px] rounded-full"></div>
+                                    <div class="absolute -bottom-12 left-1/4 w-48 h-48 bg-primary/5 blur-[80px] rounded-full"></div>
+                                </div>
+                                <div class="select-none md:col-span-4 bg-surface-container/60 backdrop-blur-xl rounded-lg p-8 flex flex-col justify-between border border-outline-variant/10 group account-staking-card">
+                                    <div>
+                                        <div class="flex justify-between items-center mb-6">
+                                            <div class="text-primary-dim text-xs font-bold tracking-[0.2em] uppercase">Active Staking</div>
+                                            <span class="material-symbols-outlined text-primary" data-icon="bolt">bolt</span>
+                                        </div>
+                                        <div class="text-4xl font-bold text-white text-on-surface">0.0% <span class="text-xl font-normal text-slate-500">Term return</span>
+                                        </div>
+                                        <p class="text-slate-400 text-sm mt-2 leading-relaxed">Compounding rewards active on VNR.</p>
+                                    </div>
+                                    <div class="mt-8">
+                                        <div class="h-1.5 w-full bg-surface-variant rounded-full overflow-hidden">
+                                            <div class="h-full liquid-gradient w-[72%] rounded-full"></div>
+                                        </div>
+                                        <div class="flex justify-between mt-3 text-xs font-medium text-slate-500">
+                                            <span>Next Unlock:</span>
+                                            <span class="text-primary">+0.00 VNR</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="md:col-span-12 space-y-3 mt-1 select-none account-assets">
+                                    <div class="flex items-center justify-between px-1 pb-2">
+                                        <div>
+                                            <h3 class="text-xl font-bold tracking-tight">Your Assets</h3>
+                                            <p class="text-xs text-on-surface-variant mt-1">Your connected wallet balances</p>
+                                        </div>
+                                        <button class="inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:text-primary-fixed transition-colors" type="button">
+                                            View All<span class="material-symbols-outlined text-sm">arrow_forward</span>
+                                        </button>
+                                    </div>
+                                    
+                                    <div class="account-asset-card group relative bg-surface-container-high/30 backdrop-blur-xl rounded-lg px-4 sm:px-5 py-4 border border-white/5 hover:bg-surface-container-high/50 hover:border-primary/15 transition-all duration-200 cursor-pointer overflow-hidden">
+                                        <div class="absolute inset-y-0 left-0 w-0.5 bg-primary/50 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                        <div class="flex items-center justify-between gap-4">
+                                            <div class="flex items-center gap-3 min-w-0">
+                                                <div class="w-11 h-11 shrink-0 rounded-lg bg-[#211A2B] border border-white/5 flex items-center justify-center group-hover:border-primary/20 transition-colors">
+                                                    <img src="assets/images/vg.png" class="w-7 h-7 object-contain" alt="VNR">
+                                                </div>
+                                                <div class="min-w-0">
+                                                    <div class="flex items-center gap-2">
+                                                        <span class="font-bold">VNR</span>
+                                                        <span class="text-[9px] px-1.5 py-0.5 rounded-md bg-primary/10 text-primary uppercase tracking-wider">Mainnet</span>
+                                                    </div>
+                                                    <div class="text-xs text-on-surface-variant mt-0.5">Venera</div>
+                                                </div>
+                                            </div>
+                                            <div class="text-right shrink-0">
+                                                <div id="vnr-loader" class="loader"></div>
+                                                <div id="vnr-content" class="hidden">
+                                                    <div id="vnr-balance" class="font-bold text-sm sm:text-base">0</div>
+                                                    <div id="vnr-value" class="text-xs text-on-surface-variant mt-0.5">$0.00</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="account-asset-card group relative bg-surface-container-high/30 backdrop-blur-xl rounded-lg px-4 sm:px-5 py-4 border border-white/5 hover:bg-surface-container-high/50 hover:border-primary/15 transition-all duration-200 cursor-pointer overflow-hidden">
+                                        <div class="absolute inset-y-0 left-0 w-0.5 bg-primary/50 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                        <div class="flex items-center justify-between gap-4">
+                                            <div class="flex items-center gap-3 min-w-0">
+                                                <div class="w-11 h-11 shrink-0 rounded-lg bg-[#211A2B] border border-white/5 flex items-center justify-center">
+                                                    <img src="assets/images/usdt.png" class="w-7 h-7 object-contain" alt="USDT">
+                                                </div>
+                                                <div class="min-w-0">
+                                                    <div class="flex items-center gap-2">
+                                                        <span class="font-bold">USDT</span>
+                                                        <span class="text-[9px] px-1.5 py-0.5 rounded-md bg-white/5 text-on-surface-variant uppercase tracking-wider">BSC</span>
+                                                    </div>
+                                                    <div class="text-xs text-on-surface-variant mt-0.5">Tether USD</div>
+                                                </div>
+                                            </div>
+                                            <div class="text-right shrink-0">
+                                                <div id="usdt-loader" class="loader"></div>
+                                                <div id="usdt-content" class="hidden">
+                                                    <div id="usdt-balance" class="font-bold text-sm sm:text-base">0</div>
+                                                    <div id="usdt-value" class="text-xs text-on-surface-variant mt-0.5">$0.00</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="account-asset-card group relative bg-surface-container-high/30 backdrop-blur-xl rounded-lg px-4 sm:px-5 py-4 border border-white/5 hover:bg-surface-container-high/50 hover:border-primary/15 transition-all duration-200 cursor-pointer overflow-hidden">
+                                        <div class="absolute inset-y-0 left-0 w-0.5 bg-primary/50 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                        <div class="flex items-center justify-between gap-4">
+                                            <div class="flex items-center gap-3 min-w-0">
+                                                <div class="w-11 h-11 shrink-0 rounded-lg bg-[#211A2B] border border-white/5 flex items-center justify-center">
+                                                    <img src="assets/images/usdc.png" class="w-7 h-7 object-contain" alt="USDC">
+                                                </div>
+                                                <div class="min-w-0">
+                                                    <div class="flex items-center gap-2">
+                                                        <span class="font-bold">USDC</span>
+                                                        <span class="text-[9px] px-1.5 py-0.5 rounded-md bg-white/5 text-on-surface-variant uppercase tracking-wider">BSC</span>
+                                                    </div>
+                                                    <div class="text-xs text-on-surface-variant mt-0.5">USD Coin</div>
+                                                </div>
+                                            </div>
+                                            <div class="text-right shrink-0">
+                                                <div id="usdc-loader" class="loader"></div>
+                                                <div id="usdc-content" class="hidden">
+                                                    <div id="usdc-balance" class="font-bold text-sm sm:text-base">0</div>
+                                                    <div id="usdc-value" class="text-xs text-on-surface-variant mt-0.5">$0.00</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="account-asset-card group relative bg-surface-container-high/30 backdrop-blur-xl rounded-lg px-4 sm:px-5 py-4 border border-white/5 hover:bg-surface-container-high/50 hover:border-primary/15 transition-all duration-200 cursor-pointer overflow-hidden">
+                                        <div class="absolute inset-y-0 left-0 w-0.5 bg-primary/50 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                        <div class="flex items-center justify-between gap-4">
+                                            <div class="flex items-center gap-3 min-w-0">
+                                                <div class="w-11 h-11 shrink-0 rounded-lg bg-[#211A2B] border border-white/5 flex items-center justify-center">
+                                                    <img src="assets/images/bnb.png" class="w-7 h-7 object-contain" alt="BNB">
+                                                </div>
+                                                <div class="min-w-0">
+                                                    <div class="flex items-center gap-2">
+                                                        <span class="font-bold">BNB</span>
+                                                        <span class="text-[9px] px-1.5 py-0.5 rounded-md bg-white/5 text-on-surface-variant uppercase tracking-wider">BSC</span>
+                                                    </div>
+                                                    <div class="text-xs text-on-surface-variant mt-0.5">Binance Coin</div>
+                                                </div>
+                                            </div>
+                                            <div class="text-right shrink-0">
+                                                <div id="bnb-loader" class="loader"></div>
+                                                <div id="bnb-content" class="hidden">
+                                                    <div id="bnb-balance" class="font-bold text-sm sm:text-base">0</div>
+                                                    <div id="bnb-value" class="text-xs text-on-surface-variant mt-0.5">$0.00</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <style>.loader { width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.2); border-top: 2px solid #fff; border-radius: 50%; animation: spin 0.8s linear infinite; margin-left: auto; } @keyframes spin { to {  transform: rotate(360deg); } } .hidden { display: none; }</style>
+                                </div>
+                                
+                            </div>
+                        </div>
+                    </div>
+                </main>
+                <button class="md:hidden fixed bottom-5 left-1/2 -translate-x-1/2 bg-[#CA94FD]/25 backdrop-blur-xl text-[#cc97ff] font-bold text-white py-2.5 px-8 rounded-full flex items-center gap-2 shadow-[0_0_30px_rgba(204,151,255,0.25)] z-50" id="mobileMenuBtn"><span class="material-symbols-outlined">menu</span>
+                    Menu
+                </button>
+                
+                
+                <div class="fixed inset-0 z-[9999] hidden bg-black/60 backdrop-blur-md opacity-0 transition-opacity duration-300" id="otp-modal">
+                    
+                    <div class="absolute inset-0 flex items-center justify-center p-6 sm:p-8">
+                        
+                        <div class="glass-modal w-full max-w-[420px] rounded-[32px] px-7 py-8 sm:px-9 sm:py-10 transform scale-95 opacity-0 transition-all duration-300" id="otp-modal-content">
+                            <h2 class="text-2xl sm:text-3xl font-bold text-white text-center mb-3">
+                Confirm Transfer </h2>
+                            <p class="text-sm text-slate-400 text-center mb-8 leading-relaxed">
+                Enter your 6-digit security code </p>
+                            
+                            <div class="flex justify-center gap-2 sm:gap-3 mb-7">
+                                <input autocomplete="off" class="otp-cell" inputmode="numeric" maxlength="1"/>
+                                <input autocomplete="off" class="otp-cell" inputmode="numeric" maxlength="1"/>
+                                <input autocomplete="off" class="otp-cell" inputmode="numeric" maxlength="1"/>
+                                <input autocomplete="off" class="otp-cell" inputmode="numeric" maxlength="1"/>
+                                <input autocomplete="off" class="otp-cell" inputmode="numeric" maxlength="1"/>
+                                <input autocomplete="off" class="otp-cell" inputmode="numeric" maxlength="1"/>
+                            </div>
+                            
+                            <button class="glass-btn w-full py-4 rounded-2xl font-bold text-white" id="verify-otp-btn">
+                                Verify Code
+</button>
+                            
+                            <div class="hidden text-red-400 text-sm text-center mt-5" id="otp-error">
+                                Invalid code
+</div>
+                        </div>
+                    </div>
+                </div>
+                <style>.otp-cell { width: 54px; height: 64px; border-radius: 20px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08); text-align: center; font-size: 1.55rem; font-weight: 700; color: white; outline: none; transition: all .2s ease; backdrop-filter: blur(10px); } .otp-cell:focus { border-color: #C994FD; background: rgba(255,255,255,0.09); box-shadow: 0 0 0 4px rgba(201,148,253,0.14),
+        0 10px 30px rgba(201,148,253,0.08); } @media (max-width: 480px){ .otp-cell {  width: 46px;  height: 58px;  font-size: 1.3rem;  border-radius: 18px; } }</style>
+                <div class="hidden fixed inset-0 z-40 bg-black/70 backdrop-blur-xl flex items-center justify-center transition-all duration-500" id="mobileMenu">
+                    <div class="w-full h-full flex items-center justify-center" id="mobileMenuContentWrapper">
+                        <div class="flex flex-col items-center justify-center space-y-6" id="mobileMenuContent"><a class="menu-item flex items-center gap-3 opacity-0 translate-y-6 transition-all duration-500 text-[#cc97ff] font-medium" href="account.html"> <span class="material-symbols-outlined">account_balance_wallet</span>
+                Assets </a><a class="menu-item flex items-center gap-3 opacity-0 translate-y-6 transition-all duration-500 text-slate-400" href="staking.html"> <span class="material-symbols-outlined">lock</span>
+                Staking </a><a class="menu-item flex items-center gap-3 opacity-0 translate-y-6 transition-all duration-500 text-slate-400" href="rewards.html"> <span class="material-symbols-outlined">workspace_premium</span>
+                Rewards </a><a class="menu-item flex items-center gap-3 opacity-0 translate-y-6 transition-all duration-500 text-slate-400" href="history.html"> <span class="material-symbols-outlined">history</span>
+                History </a><a class="menu-item flex items-center gap-3 opacity-0 translate-y-6 transition-all duration-500 text-slate-400"> <span class="material-symbols-outlined">layers</span>
+                Bridge (soon) </a>
+                        </div>
+                    </div>
+                </div>
+                <style>@keyframes floaty { 0%, 100% {  transform: translate(-50%, 0) translateY(0); }  50% {  transform: translate(-50%, 0) translateY(-6px); } } #mobileMenuBtn { animation: floaty 3s ease-in-out infinite; }</style>
+                <script>
+const btn = document.getElementById("mobileMenuBtn");
+const menu = document.getElementById("mobileMenu");
+const items = document.querySelectorAll(".menu-item");
+
+function openMenu() {
+    btn.style.animation = "none";
+    btn.style.opacity = "0";
+    btn.style.transform = "translate(-50%, 100px)";
+
+    menu.classList.remove("hidden");
+    items.forEach((item, i) => {
+        setTimeout(() => {
+            item.classList.remove("opacity-0", "translate-y-6");
+            item.classList.add("opacity-100", "translate-y-0");
+        }, i * 80);
+    });
+}
+
+function closeMenu() {
+    items.forEach(item => {
+        item.classList.add("opacity-0", "translate-y-6");
+        item.classList.remove("opacity-100", "translate-y-0");
+    });
+    setTimeout(() => {
+        menu.classList.add("hidden");
+
+        btn.style.transform = "translate(-50%, 0)";
+        btn.style.opacity = "1";
+        btn.style.animation = "floaty 3s ease-in-out infinite";
+    }, 300);
+}
+btn.addEventListener("click", openMenu);
+document.getElementById("mobileMenuContentWrapper").addEventListener("click", (e) => {
+    if (e.target === e.currentTarget) {
+        closeMenu();
+    }
+});
+</script>
+                <div class="fixed inset-0 z-50 flex items-center justify-center hidden" id="receiveModal">
+                    <div class="absolute inset-0 bg-black/10 backdrop-blur-md opacity-0 transition-opacity duration-300" id="receiveBackdrop"></div>
+                    <div class="glass-modal wallet-dialog opacity-0 scale-95" id="receiveContent">
+                        <button aria-label="Close dialog" class="modal-dismiss" type="button"><span class="material-symbols-outlined">close</span>
+                        </button>
+                        <div class="modal-emblem"><span class="material-symbols-outlined">south_west</span>
+                        </div>
+                        <h2>Receive assets</h2>
+                        <p class="modal-description">Choose the asset you want to receive.</p>
+                        <div class="asset-choices">
+                            <button class="asset-choice coin-btn" data-coin="vnr" type="button">
+                                <img alt="" src="assets/images/vg.png"/><span><strong>VNR</strong><small>Venera</small></span><span class="material-symbols-outlined">arrow_forward</span>
+                            </button>
+                            <button class="asset-choice coin-btn" data-coin="usdt" type="button">
+                                <img alt="" src="assets/images/usdt.png"/><span><strong>USDT</strong><small>BNB Smart Chain</small></span><span class="material-symbols-outlined">arrow_forward</span>
+                            </button>
+                            <button class="asset-choice coin-btn" data-coin="usdc" type="button">
+                                <img alt="" src="assets/images/usdc.png"/><span><strong>USDC</strong><small>BNB Smart Chain</small></span><span class="material-symbols-outlined">arrow_forward</span>
+                            </button>
+                            <button class="asset-choice coin-btn" data-coin="bnb" type="button">
+                                <img alt="" src="assets/images/bnb.png"/><span><strong>BNB</strong><small>BNB Smart Chain</small></span><span class="material-symbols-outlined">arrow_forward</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="fixed inset-0 z-50 flex items-center justify-center hidden" id="addressModal">
+                    <div class="absolute inset-0 bg-black/10 backdrop-blur-md opacity-0 transition-opacity duration-300" id="addressBackdrop"></div>
+                    <div class="glass-modal wallet-dialog opacity-0 scale-95" id="addressContent">
+                        <button aria-label="Close dialog" class="modal-dismiss" type="button"><span class="material-symbols-outlined">close</span>
+                        </button>
+                        <h2 class="dialog-title" id="deposit-title">Deposit Address</h2>
+                        <p class="receive-network" id="deposit-network">Send assets to this address</p>
+                        <div class="receive-qr-area">
+                            <div class="receive-qr-frame">
+                                <canvas class="w-[180px] h-[180px] flex items-center justify-center rounded-[26px]" id="qr-code"></canvas>
+                            </div>
+                        </div>
+                        <p class="address-hint">Your deposit address</p>
+                        <div class="address-copy-row">
+                            <span class="break-all pr-3" id="deposit-address"></span>
+                            <button aria-label="Copy deposit address" class="w-9 h-9 flex items-center justify-center rounded-lg bg-primary/10 hover:bg-primary/20 transition-all" id="copy-address-btn"><span class="material-symbols-outlined text-primary text-lg" id="copy-icon">content_copy</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <style>.coin-btn { background: rgba(255,255,255,0.05); padding: 14px; border-radius: 32px; text-align: center; font-weight: bold; transition: 0.2s; } .coin-btn:hover { background: rgba(255,255,255,0.1); transform: scale(1.05); } #qr-code canvas { border-radius: 12px; }</style>
+            </div>
+        </div>
+    
+<style id="send-modal-rounding-fix">
+
+#sendFormModal #sendFormContent {
+    padding: 0 !important;
+    border-radius: 3rem !important;
+}
+#sendFormModal #sendFormContent .input-box {
+    box-sizing: border-box !important;
+    min-height: 72px !important;
+    padding: 25px 20px 10px !important;
+    border-radius: 9999px !important;
+}
+#sendFormModal #sendFormContent .input-box .input-label {
+    position: absolute !important;
+    top: 8px !important;
+    left: 20px !important;
+    padding: 0 !important;
+    line-height: 14px !important;
+}
+#sendFormModal #sendFormContent .input-box input {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    height: 25px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 25px !important;
+}
+</style>
+<style id="wallet-asset-card-rounding">
+
+.account-assets .account-asset-card {
+    box-sizing: border-box !important;
+    padding: 16px 20px !important;
+    border-radius: 2rem !important;
+    border-color: rgba(255,255,255,.05) !important;
+}
+.account-assets .account-asset-card:hover {
+    background-color: rgba(33,30,42,.5) !important;
+    border-color: rgba(204,151,255,.15) !important;
+}
+#sidebar nav > a {
+    min-height: 44px !important;
+    padding-top: 11px !important;
+    padding-bottom: 11px !important;
+}
+@media (max-height: 720px) {
+    #sidebar nav > a {
+        min-height: 40px !important;
+        padding-top: 9px !important;
+        padding-bottom: 9px !important;
+    }
+}
+</style>
+<div id="sendSelectModal" class="fixed inset-0 z-50
+            flex items-center justify-center
+            hidden px-4">
+                    
+                    <div id="sendSelectBackdrop" class="absolute inset-0
+                bg-black/40
+                backdrop-blur-md
+                opacity-0
+                transition-opacity duration-300">
+</div>
+                    
+                    <div id="sendSelectContent" class="relative z-10
+                w-full max-w-[540px]
+                bg-surface-container-high/90
+                backdrop-blur-3xl
+                rounded-xl
+                border border-white/10
+                shadow-[0_25px_80px_-20px_rgba(0,0,0,0.6)]
+                overflow-hidden
+                transform scale-95
+                opacity-0
+                transition-all duration-300">
+                        
+                        <div class="absolute -right-24 -top-24
+                    w-64 h-64
+                    bg-primary/10
+                    rounded-full
+                    blur-[100px]
+                    pointer-events-none">
+</div>
+                        
+                        
+                        
+                        <div class="relative z-10
+                    flex items-center justify-between
+                    px-6 py-5
+                    border-b border-white/5">
+                            <div>
+                                <h3 class="text-lg
+                           font-bold
+                           text-on-surface">
+                    Send Asset </h3>
+                                <p class="text-xs
+                          text-on-surface-variant
+                          mt-1">
+                    Select the asset you want to send </p>
+                            </div>
+                            <button id="closeSendSelectModal" class="w-9 h-9
+                           rounded-lg
+                           flex items-center justify-center
+                           bg-white/[0.03]
+                           border border-white/5
+                           text-on-surface-variant
+                           hover:text-on-surface
+                           hover:bg-white/[0.06]
+                           transition-all"><span class="material-symbols-outlined text-lg">
+                    close </span>
+                            </button>
+                        </div>
+                        
+                        
+                        
+                        <div class="relative z-10 p-6">
+                            <div class="grid grid-cols-2 gap-3">
+                                
+                                <button class="send-asset-btn group
+                           relative
+                           flex items-center gap-3
+                           p-4
+                           rounded-lg
+                           bg-surface-container-low/60
+                           border border-white/5
+                           text-left
+                           hover:bg-primary/[0.07]
+                           hover:border-primary/20
+                           transition-all duration-200" data-asset="usdt">
+                                    <div class="w-10 h-10
+                                shrink-0
+                                rounded-lg
+                                bg-[#211A2B]
+                                border border-white/5
+                                flex items-center justify-center">
+                                        <img src="assets/images/usdt.png" class="w-7 h-7" alt="USDT">
+                                    </div>
+                                    <div class="min-w-0">
+                                        <div class="font-bold text-sm">
+                                            USDT
+</div>
+                                        <div class="text-[10px]
+                                    text-on-surface-variant
+                                    mt-0.5">
+                                            Tether
+</div>
+                                    </div><span class="material-symbols-outlined
+                                 ml-auto
+                                 text-lg
+                                 text-on-surface-variant/40
+                                 group-hover:text-primary
+                                 transition-colors">
+                        chevron_right </span>
+                                </button>
+                                
+                                <button class="send-asset-btn group
+                           relative
+                           flex items-center gap-3
+                           p-4
+                           rounded-lg
+                           bg-surface-container-low/60
+                           border border-white/5
+                           text-left
+                           hover:bg-primary/[0.07]
+                           hover:border-primary/20
+                           transition-all duration-200" data-asset="usdc">
+                                    <div class="w-10 h-10
+                                shrink-0
+                                rounded-lg
+                                bg-[#211A2B]
+                                border border-white/5
+                                flex items-center justify-center">
+                                        <img src="assets/images/usdc.png" class="w-7 h-7" alt="USDC">
+                                    </div>
+                                    <div class="min-w-0">
+                                        <div class="font-bold text-sm">
+                                            USDC
+</div>
+                                        <div class="text-[10px]
+                                    text-on-surface-variant
+                                    mt-0.5">
+                                            USD Coin
+</div>
+                                    </div><span class="material-symbols-outlined
+                                 ml-auto
+                                 text-lg
+                                 text-on-surface-variant/40
+                                 group-hover:text-primary
+                                 transition-colors">
+                        chevron_right </span>
+                                </button>
+                                
+                                <button class="send-asset-btn group
+                           relative
+                           flex items-center gap-3
+                           p-4
+                           rounded-lg
+                           bg-surface-container-low/60
+                           border border-white/5
+                           text-left
+                           hover:bg-primary/[0.07]
+                           hover:border-primary/20
+                           transition-all duration-200" data-asset="bnb">
+                                    <div class="w-10 h-10
+                                shrink-0
+                                rounded-lg
+                                bg-[#211A2B]
+                                border border-white/5
+                                flex items-center justify-center">
+                                        <img src="assets/images/bnb.png" class="w-7 h-7" alt="BNB">
+                                    </div>
+                                    <div class="min-w-0">
+                                        <div class="font-bold text-sm">
+                                            BNB
+</div>
+                                        <div class="text-[10px]
+                                    text-on-surface-variant
+                                    mt-0.5">
+                                            Binance Coin
+</div>
+                                    </div><span class="material-symbols-outlined
+                                 ml-auto
+                                 text-lg
+                                 text-on-surface-variant/40
+                                 group-hover:text-primary
+                                 transition-colors">
+                        chevron_right </span>
+                                </button>
+                                
+                                <button class="send-asset-btn group
+                           relative
+                           flex items-center gap-3
+                           p-4
+                           rounded-lg
+                           bg-primary/[0.06]
+                           border border-primary/15
+                           text-left
+                           hover:bg-primary/[0.10]
+                           hover:border-primary/25
+                           transition-all duration-200" data-asset="vnr">
+                                    <div class="w-10 h-10
+                                shrink-0
+                                rounded-lg
+                                bg-primary/10
+                                border border-primary/15
+                                flex items-center justify-center">
+                                        <img src="assets/images/vg.png" class="w-7 h-7" alt="VNR">
+                                    </div>
+                                    <div class="min-w-0">
+                                        <div class="font-bold text-sm text-primary">
+                                            VNR
+</div>
+                                        <div class="text-[10px]
+                                    text-on-surface-variant
+                                    mt-0.5">
+                                            Venera Mainnet
+</div>
+                                    </div><span class="material-symbols-outlined
+                                 ml-auto
+                                 text-lg
+                                 text-primary/50
+                                 group-hover:text-primary
+                                 transition-colors">
+                        chevron_right </span>
+                                </button>
+                            </div>
+                            
+                            
+                            
+                            <div class="mt-5
+                        flex items-center gap-3
+                        px-4 py-3
+                        rounded-lg
+                        bg-surface-container-low/50
+                        border border-white/5">
+                                <div class="w-8 h-8
+                            rounded-lg
+                            bg-primary/10
+                            flex items-center justify-center"><span class="material-symbols-outlined
+                                 text-primary text-lg">
+                        hub </span>
+                                </div>
+                                <div>
+                                    <div class="text-xs font-medium">
+                                        Supported Networks
+</div>
+                                    <div class="text-[10px]
+                                text-on-surface-variant
+                                mt-0.5">
+                                        Select an asset to continue
+</div>
+                                </div><span class="ml-auto
+                             text-[9px]
+                             uppercase
+                             tracking-wider
+                             text-primary">
+                    All Networks </span>
+                            </div>
+                        </div>
+                        
+                        <div class="h-px
+                    bg-gradient-to-r
+                    from-transparent
+                    via-primary/20
+                    to-transparent">
+</div>
+                    </div>
+                </div>
+<div id="sendFormModal" class="fixed inset-0 z-50 flex items-center justify-center hidden px-4">
+            
+            <div id="sendFormBackdrop" class="absolute inset-0
+                bg-black/45
+                backdrop-blur-md
+                opacity-0
+                transition-opacity duration-300">
+</div>
+            
+            <div id="sendFormContent" class="relative z-10
+                w-full max-w-[480px]
+                rounded-xl
+                overflow-hidden
+                bg-surface-container-high
+                border border-white/10
+                shadow-[0_25px_80px_-20px_rgba(0,0,0,0.65)]
+                transform scale-95
+                opacity-0
+                transition-all duration-300">
+                
+                <div class="absolute -right-24 -top-24
+                    w-72 h-72
+                    bg-primary/15
+                    rounded-full
+                    blur-[100px]
+                    pointer-events-none">
+</div>
+                <div class="relative z-10">
+                    
+                    <div class="flex items-center justify-between
+                        px-7 py-5
+                        border-none">
+                        <div class="flex items-center gap-3">
+                            <div id="send-asset-icon" class="w-10 h-10
+                                rounded-lg
+                                bg-primary/10
+                                border border-primary/20
+                                flex items-center justify-center"><span class="material-symbols-outlined text-primary">
+                            north_east </span>
+                            </div>
+                            <div>
+                                <h2 id="send-title" class="text-lg font-bold text-on-surface">
+                            Send </h2>
+                                <p class="text-[10px]
+                                  uppercase
+                                  tracking-[0.16em]
+                                  text-on-surface-variant
+                                  mt-0.5">
+                            Transfer asset </p>
+                            </div>
+                        </div>
+                        <button id="closeSendFormModal" class="w-9 h-9
+                               rounded-lg
+                               flex items-center justify-center
+                               bg-white/[0.04]
+                               border border-white/8
+                               text-on-surface-variant
+                               hover:text-on-surface
+                               hover:bg-white/[0.08]
+                               transition-all"><span class="material-symbols-outlined text-lg">
+                        close </span>
+                        </button>
+                    </div>
+                    
+                    <div class="px-7 py-6">
+                        
+                        <div id="recipient-box" class="input-box mb-4"><span class="input-label mt-0.5">
+                        Recipient Address </span>
+                            <input id="send-recipient" type="text" placeholder="0x..." autocomplete="off">
+                        </div>
+                        
+                        <div id="amount-box" class="input-box"><span class="input-label mt-0.5">
+                        Amount </span>
+                            <input id="send-amount" type="text" inputmode="decimal" placeholder="0.00" autocomplete="off">
+                        </div>
+                        
+                        <div class="flex items-start gap-3
+                            mt-5
+                            px-4 py-3
+                            rounded-lg
+                            bg-yellow-400/[0.06]
+                            border border-yellow-400/10"><span class="material-symbols-outlined
+                                 text-yellow-300
+                                 text-lg
+                                 mt-0.5">
+                        warning </span>
+                            <div>
+                                <p class="text-xs
+                                  font-medium
+                                  text-yellow-200">
+                            Network fee required </p>
+                                <p class="text-[10px]
+                                  text-yellow-200/60
+                                  mt-1
+                                  leading-relaxed">
+                            USDT and USDC transfers require BNB
+                            to cover gas fees. </p>
+                            </div>
+                        </div>
+                        
+                        <button id="confirm-send" class="w-full
+                               mt-7
+                               py-4
+                               rounded-lg
+                               bg-gradient-to-br
+                               from-primary
+                               to-primary-container
+                               text-on-primary-fixed
+                               font-bold
+                               flex items-center
+                               justify-center
+                               gap-2
+                               shadow-[0_10px_30px_-5px_rgba(202,148,253,0.35)]
+                               hover:scale-[1.01]
+                               hover:shadow-[0_12px_35px_-5px_rgba(202,148,253,0.45)]
+                               active:scale-[0.98]
+                               transition-all"><span class="material-symbols-outlined text-lg">
+                        north_east </span>
+                            Confirm Transfer
+                        </button>
+                        
+                        <div id="send-status" class="mt-4
+                            text-center
+                            text-sm
+                            hidden">
+</div>
+                        
+                        <div class="flex items-center
+                            justify-center
+                            gap-2
+                            mt-5
+                            text-[10px]
+                            text-on-surface-variant/45"><span class="material-symbols-outlined text-sm">
+                        shield </span>
+                            Verify the recipient address before sending
+                        </div>
+                    </div>
+                </div>
+            </div>
+        
+        
+        
+        </div>
+</body>
+    <script src="assets/js/account.js"></script>
+    <script src="assets/js/account-transfers.js"></script>
+    <script src="assets/js/qr.min.js"></script>
+    
+</html>

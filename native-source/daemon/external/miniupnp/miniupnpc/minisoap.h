@@ -1,0 +1,17 @@
+                                                            
+                     
+                          
+                                         
+                                                             
+                                                 
+#ifndef MINISOAP_H_INCLUDED
+#define MINISOAP_H_INCLUDED
+
+#include "miniupnpc_socketdef.h"
+
+ 
+int soapPostSubmit(SOCKET, const char *, const char *, unsigned short,
+		   const char *, const char *, const char *);
+
+#endif
+

@@ -1,0 +1,248 @@
+<html lang="en">
+    <head>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' https://veneralabs.org https://pool.veneralabs.org; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'"/>
+<link rel="stylesheet" href="assets/css/native.css"/>
+<script src="assets/js/native-api.js"></script>
+<script src="assets/js/wallet-session.js"></script>
+        <meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width,initial-scale=1"/>
+        <title>Venera GUI</title>
+        <style id="electron-wallet-entry-layout">
+@font-face {font-family:'Space Grotesk';font-style:normal;font-weight:400;font-display:swap;src:url('assets/fonts/space-grotesk-latin-400-normal.woff2') format('woff2');}
+@font-face {font-family:'Space Grotesk';font-style:normal;font-weight:700;font-display:swap;src:url('assets/fonts/space-grotesk-latin-700-normal.woff2') format('woff2');}
+html,body {width:100%;height:100%;margin:0;padding:0;overflow:hidden;background:transparent;}
+*,*::before,*::after {box-sizing:border-box;}
+.wallet-entry-page {font-family:'Space Grotesk',Arial,sans-serif;font-size:14px;line-height:1.4;isolation:isolate;border-radius:26px;clip-path:inset(0 round 26px);}
+.wallet-entry-page button,.wallet-entry-page input,.wallet-entry-page textarea {font-family:inherit;line-height:1.4;margin:0;}
+.wallet-entry-page button {cursor:pointer;appearance:none;}
+.wallet-entry-page button:disabled {cursor:wait;}
+.wallet-entry-page button:focus-visible {outline:2px solid #cc97ff;outline-offset:3px;}
+.wallet-entry-page textarea {appearance:none;}
+.entry-titlebar {height:34px;min-height:34px;-webkit-user-select:none;user-select:none;}
+.entry-titlebar .titlebar-actions,.entry-titlebar button {-webkit-app-region:no-drag;}
+.entry-svg-icon {display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;width:20px;height:20px;line-height:1;}
+.entry-svg-icon svg {display:block;width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;}
+.entry-panel-content.opacity-0 {opacity:0;}
+.entry-panel-content.opacity-100 {opacity:1;}
+.entry-update.opacity-0 {opacity:0;}
+.entry-status.text-red-300 {color:#f5b3bd;}
+.entry-status.text-green-300 {color:#a8e7c1;}
+.entry-otp {display:flex;flex-direction:column;gap:18px;}
+.entry-otp p {margin:0;color:#b8a6c9;font-size:13px;}
+.entry-otp-row {display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;}
+.entry-otp-row .otp-box {width:100%;min-width:0;height:48px;border:1px solid #cc97ff30;border-radius:12px;background:#19131f;color:#f4edf9;font-size:20px;font-weight:700;text-align:center;outline:none;}
+.entry-otp-row .otp-box:focus {border-color:#cc97ff;}
+#otpConfirm.bg-red-200 {background:#f5b3bd;color:#622435;}
+
+
+html:has(.wallet-entry-page), body.wallet-entry-page { height:100dvh!important; min-height:0!important; overflow:hidden!important; margin:0!important; padding:0!important; }
+.wallet-entry-page { color:#f4edf9; background:#15111e!important; }
+.wallet-entry-page .entry-window { position:absolute; inset:34px 0 0; height:calc(100dvh - 34px)!important; width:100%; overflow:hidden!important; background:radial-gradient(ellipse at 50% 0,#34224270,transparent 70%),#15111e; }
+.entry-titlebar { position:fixed; inset:0 0 auto; z-index:100; display:flex; align-items:center; justify-content:flex-end; padding:0 12px; background:#201a2b; -webkit-app-region:drag; }
+.entry-titlebar .titlebar-center { position:absolute; left:50%; transform:translateX(-50%); display:flex; align-items:center; gap:8px; font-size:11px; color:#bdb0cb; }
+.entry-titlebar .titlebar-icon { width:15px; height:15px; object-fit:contain; }
+.entry-titlebar .titlebar-actions { display:flex; gap:6px; -webkit-app-region:no-drag; }
+.entry-titlebar button { width:23px; height:23px; border:0; border-radius:8px; background:#30263d; color:#dfcceb; }
+.entry-stage { height:100%; display:grid; place-items:center; padding:22px; overflow:hidden; }
+.entry-main { width:min(500px,100%); height:auto!important; min-height:0; margin:0!important; padding:0!important; display:flex; flex-direction:column; gap:20px; overflow:visible!important; }
+.entry-brand { display:flex; align-items:center; justify-content:center; gap:14px; flex-shrink:0; }
+.entry-brand-logo { width:54px; height:54px; flex:0 0 54px; border-radius:18px; display:grid; place-items:center; background:#2c213a; border:1px solid #cc97ff22; }
+.entry-brand-logo img { width:34px; height:34px; object-fit:contain; }
+.entry-brand h1 { margin:0; font-size:25px; line-height:1.2; font-weight:700; letter-spacing:-.04em; }
+.entry-brand p { margin:5px 0 0; font-size:12px; color:#9f93ae; }
+.entry-panel { padding:24px; border:1px solid #cc97ff1c; border-radius:24px; background:#221b2b; box-shadow:0 16px 50px #0003; }
+.entry-tabs { display:grid; grid-template-columns:1fr 1fr; gap:6px; padding:4px; border-radius:14px; background:#16111e; margin-bottom:20px; }
+.entry-tab { border:0; border-radius:10px; padding:10px; color:#a99bb6; font-size:12px; font-weight:600; background:transparent; }
+.entry-tab-active { color:#e1c2ff; background:#362641; box-shadow:inset 0 0 0 1px #cc97ff22; }
+.entry-panel-content { transition:opacity .15s; }
+.entry-restore-form { display:flex; flex-direction:column; gap:16px; }
+.entry-form-heading h2 { font-size:21px; line-height:1.25; font-weight:700; margin:0 0 5px; letter-spacing:-.025em; }
+.entry-form-heading p { margin:0; font-size:12px; color:#a89ab6; line-height:1.5; }
+.entry-label { display:block; font-size:11px; line-height:1.4; color:#beadcf; margin-bottom:7px; }
+.entry-input { width:100%; min-width:0; border:1px solid #cda5f528; background:#19131f; border-radius:14px; padding:13px 15px; color:#f4edf9; font-size:13px; outline:none; }
+.entry-input::placeholder { color:#81728e; }
+.entry-input:focus { border-color:#c69bf1; }
+.entry-seed { height:86px; resize:none; font-family:monospace; line-height:1.5; display:block; }
+.entry-import { width:100%; display:flex; align-items:center; justify-content:center; gap:9px; min-height:44px; padding:10px 14px; color:#d9b7f7; background:#2b2035; border:1px dashed #cda5f544; border-radius:14px; font-size:12px; font-weight:600; }
+.entry-import:hover { background:#35273e; border-color:#cc97ff88; }
+.entry-import .material-symbols-outlined { font-size:20px; }
+.entry-file-extension { font-size:10px; font-weight:400; color:#a391b3; }
+.entry-primary { width:100%; min-height:46px; display:flex; align-items:center; justify-content:center; gap:10px; border:0; border-radius:14px; padding:12px 14px; background:linear-gradient(110deg,#cc97ff,#9c65d5); color:#22132e; font-weight:700; font-size:13px; }
+.entry-primary:hover { filter:brightness(1.06); }
+.entry-primary:disabled { opacity:.6; cursor:wait; }
+.entry-file-card { display:flex; align-items:center; gap:12px; padding:15px; border-radius:14px; background:#18121f; border:1px solid #cda5f526; min-height:92px; }
+.entry-file-card > div { min-width:0; flex:1; }
+.entry-file-card .entry-label { margin:0 0 4px; }
+.entry-file-card p { margin:0; font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.entry-icon-button { border:0; background:#35283e; color:#cdbada; border-radius:10px; width:32px; height:32px; display:grid; place-items:center; flex-shrink:0; }
+.entry-icon-button .material-symbols-outlined { font-size:18px; }
+.entry-footer { display:flex; align-items:center; justify-content:center; gap:6px; color:#867690; font-size:10px; }
+.entry-footer .material-symbols-outlined { font-size:14px; }
+.entry-status { font-size:11px; line-height:1.4; margin:0; }
+.entry-loader { position:absolute; inset:0; z-index:50; display:flex; align-items:center; justify-content:center; background:#100b17bb; }
+.entry-spinner { width:36px; height:36px; border:3px solid #cc97ff; border-top-color:transparent; border-radius:50%; animation:spin 1s linear infinite; }
+@keyframes spin {to {transform:rotate(360deg)}}
+.entry-update { position:absolute; z-index:60; top:10px; left:50%; transform:translateX(-50%); max-width:90%; display:flex; gap:6px; align-items:center; padding:8px 12px; font-size:11px; border-radius:12px; pointer-events:none; transition:opacity .3s; }
+.entry-unlock-dialog { width:min(410px,calc(100vw - 40px)); margin:auto; padding:24px; border:1px solid #665077; border-radius:22px; background:#241b2e; color:#f4edf9; overflow:hidden; box-shadow:0 25px 90px #0009; }
+.entry-unlock-dialog::backdrop { background:#0b0716cc; }
+.entry-unlock-form { display:flex; flex-direction:column; gap:12px; }
+.entry-modal-heading { display:flex; align-items:center; justify-content:space-between; }
+.entry-lock-icon { width:38px; height:38px; display:grid!important; place-items:center; border-radius:12px; color:#d6adff; background:#392747; }
+.entry-unlock-form h2 { font-size:23px; font-weight:700; margin:0; }
+.entry-modal-description { margin:0; font-size:12px; color:#b8a6c9; line-height:1.5; }
+.entry-modal-filename { margin:0; color:#dcbcf9; font-size:11px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.entry-unlock-form .entry-label { margin-bottom:-5px; }
+.entry-modal-actions { display:flex; gap:10px; padding-top:4px; }
+.entry-secondary { border:1px solid #765c8944; border-radius:14px; padding:12px 18px; background:#30243b; color:#dccbe7; font-size:12px; }
+.entry-modal-error { font-size:11px; line-height:1.4; color:#f5b3bd; margin:0; }
+.wallet-entry-page [hidden], .wallet-entry-page .hidden { display:none!important; }
+@media (max-height:560px) {
+ .entry-stage {padding:14px 20px;}
+ .entry-main {gap:12px;}
+ .entry-brand-logo {width:44px;height:44px;flex-basis:44px;border-radius:14px;}
+ .entry-brand-logo img {width:28px;height:28px;}
+ .entry-brand h1 {font-size:22px;}
+ .entry-brand p {font-size:11px;}
+ .entry-panel {padding:18px;}
+ .entry-tabs {margin-bottom:14px;}
+ .entry-restore-form {gap:12px;}
+ .entry-seed {height:74px;}
+ .entry-footer {display:none;}
+}
+@media (max-height:460px) {
+ .entry-stage {padding:10px 18px;}
+ .entry-main {gap:10px;}
+ .entry-brand p {display:none;}
+ .entry-brand-logo {width:36px;height:36px;flex-basis:36px;}
+ .entry-brand-logo img {width:24px;height:24px;}
+ .entry-panel {padding:14px;}
+ .entry-tabs {margin-bottom:10px;}
+ .entry-restore-form {gap:10px;}
+ .entry-form-heading p {display:none;}
+ .entry-seed {height:54px;}
+ .entry-unlock-dialog {padding:18px;}
+ .entry-unlock-form {gap:9px;}
+}
+
+.entry-seed-wrap { position:relative; }
+.entry-seed-wrap .entry-seed {padding-right:50px;}
+.entry-copy-slot {position:absolute;right:12px;top:50%;transform:translateY(-50%);color:#d6adff;}
+.entry-copy-slot button {border:0;background:transparent;color:inherit;font-size:20px;cursor:pointer;padding:3px;}
+.entry-mini-spinner {width:18px;height:18px;border:2px solid #cc97ff;border-top-color:transparent;border-radius:50%;animation:spin 1s linear infinite;}
+
+
+
+html, body { width:100%; height:100%; min-height:0; margin:0; padding:0; overflow:hidden; background:transparent!important; }
+body.wallet-entry-page { background:transparent!important; }
+#app.entry-shell { position:relative; width:100vw; height:100dvh; min-height:0; overflow:hidden; border-radius:26px; background:#0f0d16; clip-path:inset(0 round 26px); }
+#app.entry-shell > .entry-titlebar { position:absolute; inset:0 0 auto; width:100%; height:34px; min-height:34px; border-top-left-radius:26px; border-top-right-radius:26px; }
+#app.entry-shell > .entry-window { position:absolute; inset:34px 0 0; width:100%; height:auto!important; min-height:0; overflow:hidden; border-bottom-left-radius:26px; border-bottom-right-radius:26px; }
+</style>
+    
+<link rel="stylesheet" href="assets/css/startup-version.css"/>
+<script src="assets/js/startup-version.js" defer></script>
+</head>
+    <body class="wallet-entry-page">
+        <div id="app" class="entry-shell h-screen rounded-[26px] overflow-hidden bg-surface relative">
+        <div class="titlebar entry-titlebar rounded-tl-[26px] rounded-tr-[26px]">
+            <div class="titlebar-center">
+                <img src="assets/images/vg.png" class="titlebar-icon" alt=""/><span style="color:#bdb0cb">Venera GUI</span>
+            </div>
+            <div class="titlebar-actions">
+                <button id="min-btn" aria-label="Minimize">—</button>
+                <button id="close-btn" aria-label="Close">✕</button>
+            </div>
+        </div>
+        <div class="app-window entry-window rounded-bl-[26px] rounded-br-[26px]">
+            <div class="entry-stage">
+                <main class="entry-main">
+                    <header class="entry-brand">
+                        <div class="entry-brand-logo">
+                            <img src="assets/images/vg.png" alt="Venera"/>
+                        </div>
+                        <div>
+                            <h1>Venera Wallet</h1>
+                            <p>Your gateway to private finance</p>
+                        </div>
+                    </header>
+                    <section id="wallet-panel" class="entry-panel">
+                        <nav class="entry-tabs" aria-label="Wallet setup">
+                            <button id="restoreBtn" class="entry-tab entry-tab-active" aria-pressed="true">Restore wallet</button>
+                            <button id="createBtn" class="entry-tab" aria-pressed="false">Create wallet</button>
+                        </nav>
+                        <div id="panel-content" class="entry-panel-content">
+                            <div class="entry-restore-form">
+                                <div class="entry-form-heading">
+                                    <h2>Restore your wallet</h2>
+                                    <p>Enter your seed phrase or import an encrypted wallet.</p>
+                                </div>
+                                <div id="seedRestorePanel">
+                                    <label class="entry-label" for="restoreInput">25-word seed phrase</label>
+                                    <textarea id="restoreInput" class="entry-input entry-seed" placeholder="Enter your seed phrase…" autocomplete="off" spellcheck="false"></textarea>
+                                </div>
+                                <input id="walletFileInput" type="file" accept=".keys,application/octet-stream" hidden/>
+                                <div id="fileRestorePanel" hidden class="entry-file-card"><span class="entry-svg-icon"><svg viewBox="0 0 24 24" aria-hidden="true">
+                                            <rect x="5" y="10" width="14" height="11" rx="3"/>
+                                            <path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v3"/>
+                                        </svg></span>
+                                    <div><span class="entry-label">Encrypted wallet selected</span>
+                                        <p id="walletFileName"></p>
+                                    </div>
+                                    <button id="clearWalletFileBtn" type="button" aria-label="Remove wallet file" class="entry-icon-button"><span class="entry-svg-icon"><svg viewBox="0 0 24 24" aria-hidden="true">
+                                                <path d="m6 6 12 12M6 18 18 6"/>
+                                            </svg></span>
+                                    </button>
+                                </div>
+                                <button id="chooseWalletFileBtn" type="button" class="entry-import"><span class="entry-svg-icon"><svg viewBox="0 0 24 24" aria-hidden="true">
+                                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M12 18v-7M9 14l3-3 3 3"/>
+                                        </svg></span><span id="importWalletLabel">Import wallet file</span><span class="entry-file-extension">.keys</span>
+                                </button>
+                                <p id="restoreFileStatus" class="hidden entry-status" role="status"></p>
+                                <button id="restoreSubmit" type="button" class="entry-primary">Restore Wallet <span class="entry-svg-icon"><svg viewBox="0 0 24 24" aria-hidden="true">
+                                            <path d="M4 12h16M13 5l7 7-7 7"/>
+                                        </svg></span>
+                                </button>
+                            </div>
+                        </div>
+                    </section>
+                    <footer class="entry-footer"><span class="entry-svg-icon"><svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6zM8 12l3 3 5-6"/>
+                            </svg></span>Keep your seed phrase and wallet password safe.
+                    </footer>
+                </main>
+            </div>
+            <div id="update-banner" class="entry-update opacity-0 -translate-y-32"></div>
+            <div id="globalLoader" class="hidden entry-loader">
+                <div class="entry-spinner"></div>
+            </div>
+        </div>
+        </div>
+        <script>
+document.getElementById("min-btn")
+  .addEventListener("click", () => {
+    window.electronAPI.minimize();
+  });
+
+document.getElementById("close-btn")
+  .addEventListener("click", () => {
+    window.electronAPI.close();
+  });
+</script>
+        <style>
+    #wallet-panel.entry-panel {
+    border-radius: 32px !important;
+}
+
+#wallet-panel .entry-tabs,
+#wallet-panel .entry-tab,
+#wallet-panel .entry-input,
+#wallet-panel .entry-file-card,
+#wallet-panel .entry-import,
+#wallet-panel .entry-primary,
+#wallet-panel .entry-icon-button {
+    border-radius: 24px !important;
+}
+    </style>
+        <script src="assets/js/gui.js"></script>         
+    </body>
+</html>

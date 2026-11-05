@@ -1,0 +1,50 @@
+#update-banner.venera-version-notice {
+  position: fixed;
+  top: 48px;
+  left: 50%;
+  z-index: 200;
+  display: block;
+  width: max-content;
+  max-width: calc(100vw - 40px);
+  margin: 0;
+  padding: 12px 18px;
+  border: 1px solid rgba(204, 151, 255, .25);
+  border-radius: 16px;
+  background: rgba(28, 22, 38, .94);
+  color: #ded2eb;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, .24);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  font-family: 'Space Grotesk', Arial, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.45;
+  text-align: center;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-50%, -8px) scale(.98);
+  transition: opacity .22s ease, transform .22s ease;
+}
+
+#update-banner.venera-version-notice[data-visible="true"] {
+  opacity: 1;
+  transform: translate(-50%, 0) scale(1);
+}
+
+#update-banner.venera-version-notice[data-kind="current"] {
+  color: #b8efcc;
+  border-color: rgba(103, 211, 145, .35);
+  background: rgba(22, 43, 35, .96);
+}
+
+#update-banner.venera-version-notice[data-kind="outdated"] {
+  color: #ffe0a8;
+  border-color: rgba(240, 187, 92, .4);
+  background: rgba(51, 37, 22, .96);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #update-banner.venera-version-notice {
+    transition: none;
+  }
+}

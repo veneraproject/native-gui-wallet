@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+    <head>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' https://veneralabs.org https://pool.veneralabs.org; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'"/>
+<link rel="stylesheet" href="assets/css/native.css"/>
+<script src="assets/js/native-api.js"></script>
+<script src="assets/js/wallet-session.js"></script>
+        <script src="assets/js/ui-errors.js"></script>
+        <meta charset="utf-8"/>
+        <title>Venera GUI</title>
+        <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+        <link rel="stylesheet" href="assets/css/tailwind.css"/>
+        <link rel="stylesheet" href="assets/css/rewards.css"/> 
+        
+        <style>body { background-color: #0f0d16; color: #f5eefc; font-family: 'Space Grotesk', sans-serif; overflow-x: hidden; } .glass-tonal-shift { background: linear-gradient(to right, #1b1823 0%, rgba(15, 13, 22, 0) 100%); } .liquid-gradient { background: linear-gradient(135deg, #cc97ff 0%, #c088f4 100%); } .bg-radial-gradient { background: radial-gradient(circle at center, rgba(204, 151, 255, 0.15) 0%, transparent 70%); } .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }</style>
+        <style id="electron-shell-style">
+html,body{width:100%;height:100%;margin:0;background:transparent!important;overflow:hidden!important}
+body{padding-top:34px!important;box-sizing:border-box;border-radius:26px;background:#0f0d16!important;overflow:hidden!important}
+.electron-titlebar{height:34px;display:flex;align-items:center;justify-content:space-between;padding:0 10px;font-size:14px;background:#201A2B;border-top-left-radius:26px;border-top-right-radius:26px;position:fixed;top:0;left:0;right:0;z-index:99999;-webkit-app-region:drag;user-select:none}
+.electron-titlebar-center{display:flex;align-items:center;gap:8px;position:absolute;left:50%;transform:translateX(-50%);color:#bd85f1}
+.electron-titlebar-icon{width:16px;height:16px;object-fit:contain}
+.electron-titlebar-actions{margin-left:auto;display:flex;align-items:center;gap:6px;-webkit-app-region:no-drag}
+.electron-titlebar-actions button{width:22px;height:22px;border:0;border-radius:14px;background:#2E263C;color:white;cursor:pointer;font-size:12px}
+.electron-titlebar-actions button:hover{background:rgba(255,255,255,.08)}
+#sidebar{top:34px!important;height:calc(100vh - 34px)!important;border-bottom-left-radius:26px}
+main{height:calc(100vh - 34px);overflow-y:auto!important}
+</style>
+        <link rel="stylesheet" href="assets/css/desktop-ui.css"/>
+        <script defer src="assets/js/wallet-motion.js"></script>
+    </head>
+    <body class="flex min-h-screen">
+        <div class="electron-titlebar">
+            <div class="electron-titlebar-center">
+                <img src="assets/images/vg.png" class="electron-titlebar-icon" alt="">
+                <span style="color:#bdb0cb">Venera GUI</span>
+            </div>
+            <div class="electron-titlebar-actions">
+                <button id="min-btn" type="button">—</button>
+                <button id="close-btn" type="button">✕</button>
+            </div>
+        </div>
+        <aside id="sidebar" class="fixed left-0 top-0 h-screen z-40
+              flex flex-col w-[17rem]
+              bg-surface-container-low/80
+              backdrop-blur-3xl
+              border-r border-white/5
+              shadow-[20px_0_50px_-20px_rgba(202,146,255,0.12)]
+              font-['Space_Grotesk']
+              tracking-tight
+              text-on-surface
+              transform -translate-x-full
+              md:translate-x-0
+              transition-transform duration-300">
+            
+            <div class="px-6 pt-8 pb-7">
+                <div class="flex items-center gap-3">
+                    <div class="w-11 h-11
+                        rounded-lg
+                        bg-primary/10
+                        border border-primary/15
+                        flex items-center justify-center">
+                        <img src="assets/images/vg.png" alt="Venera Logo" class="w-7 h-7 object-contain">
+                    </div>
+                    <div>
+                        <div class="text-xl font-bold tracking-tight">
+                            VENERA
+</div>
+                        <div class="text-[10px]
+                            uppercase
+                            tracking-[0.18em]
+                            text-on-surface-variant">
+                            Wallet
+</div>
+                    </div>
+                </div>
+            </div>
+            
+            <nav class="flex-1 px-4">
+                <div class="px-3 mb-3
+                    text-[9px]
+                    font-bold
+                    uppercase
+                    tracking-[0.2em]
+                    text-on-surface-variant/60">
+                    Wallet
+</div>
+                <a href="account.html" class="group flex items-center gap-3
+                  px-4 py-3.5 mb-1
+                  rounded-lg
+                  text-on-surface-variant
+                  hover:text-primary
+                  hover:bg-white/[0.03]
+                  transition-all"> <span class="material-symbols-outlined text-[22px]">
+                account_balance_wallet </span> <span class="font-medium text-sm">
+                Assets </span> </a>
+                <a href="staking.html" class="group flex items-center gap-3
+                  px-4 py-3.5 mb-1
+                  rounded-lg
+                  text-on-surface-variant
+                  hover:text-primary
+                  hover:bg-white/[0.03]
+                  transition-all"> <span class="material-symbols-outlined text-[22px]">
+                lock </span> <span class="text-sm">
+                Staking </span> </a>
+                <a href="rewards.html" class="group flex items-center gap-3
+                  px-4 py-3.5 mb-1
+                  rounded-lg
+                  text-on-surface-variant
+                  hover:text-primary
+                  hover:bg-white/[0.03]
+                  transition-all"> <span class="material-symbols-outlined text-[22px]">
+                workspace_premium </span> <span class="text-sm">
+                Rewards </span> </a><a href="games.html" class="group relative
+          flex items-center gap-3
+          px-4 py-3.5
+          mb-1
+          rounded-lg
+          text-primary
+          bg-primary/10
+          border border-primary/10
+          transition-all duration-200"> <span class="absolute left-1.5 top-1/2
+             -translate-y-1/2
+             w-[4px] h-1
+             rounded-full
+             bg-primary"></span><span class="material-symbols-outlined text-[22px]">
+                joystick </span> <span class="text-sm">
+                Games </span> </a>
+                <a href="history.html" class="group flex items-center gap-3
+                  px-4 py-3.5 mb-1
+                  rounded-lg
+                  text-on-surface-variant
+                  hover:text-primary
+                  hover:bg-white/[0.03]
+                  transition-all"> <span class="material-symbols-outlined text-[22px]">
+                history </span> <span class="text-sm">
+                History </span> </a>
+                <div class="h-px bg-white/5 my-6 mx-3"></div>
+                <div class="px-3 mb-3
+                    text-[9px]
+                    font-bold
+                    uppercase
+                    tracking-[0.2em]
+                    text-on-surface-variant/60">
+                    Earn
+</div>
+                <a href="burn.html" class="group flex items-center gap-3
+                  px-4 py-3.5 mb-1
+                  rounded-lg
+                  text-on-surface-variant
+                  hover:text-primary
+                  hover:bg-white/[0.03]
+                  transition-all">  <span class="material-symbols-outlined
+                 text-[22px]">
+        local_fire_department </span> <span class="text-sm font-medium">
+        Burn to Earn </span> <span class="ml-auto
+                 text-[8px]
+                 uppercase
+                 tracking-wider
+                 px-1.5 py-0.5
+                 rounded-md
+                 bg-primary/15
+                 text-primary
+                 border border-primary/10">
+        New </span></a>
+                <a href="#" class="group flex items-center gap-3
+                  px-4 py-3.5
+                  rounded-lg
+                  text-on-surface-variant/50"> <span class="material-symbols-outlined text-[22px]">
+                layers </span> <span class="text-sm">
+                Bridge </span> <span class="ml-auto
+                         text-[8px]
+                         uppercase
+                         tracking-wider
+                         px-1.5 py-0.5
+                         rounded-md
+                         bg-white/5">
+                Soon </span> </a>
+            </nav>
+            
+            <div class="px-4 pb-6"><a href="settings.html" class="group flex items-center gap-3
+                  px-4 py-3.5 mb-3
+                  rounded-lg
+                  text-on-surface-variant
+                  hover:text-primary
+                  hover:bg-white/[0.03]
+                  transition-all"> <span class="material-symbols-outlined text-[21px]">
+                settings </span> <span class="text-sm">
+                Settings </span> </a>
+                <button id="sign-out-btn" class="group w-full
+                       flex items-center justify-center gap-2
+                       py-3.5
+                       rounded-lg
+                       bg-primary/10
+                       border border-primary/15
+                       text-primary
+                       font-bold text-sm
+                       hover:bg-primary
+                       hover:text-on-primary-fixed
+                       transition-all">
+                    <span class="material-symbols-outlined text-lg">
+                logout </span>
+                    Sign out
+                </button>
+            </div>
+        </aside>
+        <style>.venus-panel { position: relative; overflow: visible; border-radius: 28px; border: 1px solid rgba(255,255,255,0.08); background: radial-gradient(circle at top center, rgba(183, 95, 255, 0.18), transparent 35%),
+      radial-gradient(circle at bottom left, rgba(255, 196, 84, 0.08), transparent 35%),
+      linear-gradient(180deg, rgba(44, 18, 74, 0.96) 0%, rgba(20, 10, 37, 0.98) 100%); box-shadow: inset 0 1px 0 rgba(255,255,255,0.06),
+      0 22px 70px rgba(0,0,0,0.45); } .venus-title { background: linear-gradient(180deg, #fff4b0 0%, #ffd85f 28%, #ffbc28 60%, #d97a00 100%); -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: 0 2px 0 rgba(98, 37, 0, 0.55),
+      0 6px 18px rgba(255, 181, 49, 0.2); } .venus-reel-stage { position: relative; padding: 18px 54px; border-radius: 34px; background: linear-gradient(180deg, #a85cff 0%, #7e2fe3 25%, #5a18aa 55%, #34105e 100%); border: 2px solid rgba(255, 207, 103, 0.45); box-shadow: inset 0 8px 20px rgba(255,255,255,0.13),
+      inset 0 -16px 26px rgba(0,0,0,0.28),
+      0 14px 36px rgba(72, 20, 131, 0.4); } .venus-reel-rim { position: absolute; top: 50%; transform: translateY(-50%); width: 56px; height: calc(100% - 14px); border-radius: 999px; background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.45), transparent 24%),
+      linear-gradient(180deg, #ffe699 0%, #ffcd55 32%, #d98811 68%, #9c5600 100%); border: 2px solid rgba(255, 241, 180, 0.45); box-shadow: inset 0 5px 10px rgba(255,255,255,0.28),
+      inset 0 -8px 16px rgba(104, 57, 0, 0.32),
+      0 0 18px rgba(255, 207, 103, 0.2); z-index: 3; } .venus-reel-rim-left { left: 10px; } .venus-reel-rim-right { right: 10px; } .venus-reel-window { position: relative; border-radius: 26px; border: 2px solid rgba(255, 219, 126, 0.45); background: linear-gradient(180deg, rgba(109, 52, 171, 0.95) 0%, rgba(67, 24, 117, 0.98) 50%, rgba(38, 12, 67, 1) 100%); box-shadow: inset 0 16px 24px rgba(255,255,255,0.08),
+      inset 0 -22px 28px rgba(0,0,0,0.32),
+      0 0 0 6px rgba(74, 25, 123, 0.45); } .venus-reel-window::before { content: ""; position: absolute; inset: 0; border-radius: inherit; background: linear-gradient(180deg, rgba(255,255,255,0.12), transparent 22%, transparent 75%, rgba(0,0,0,0.22)),
+      radial-gradient(circle at center, rgba(255,214,114,0.14), transparent 42%); pointer-events: none; z-index: 2; } .venus-center-glow { width: 170px; height: 170px; border-radius: 999px; background: radial-gradient(circle, rgba(255,224,137,0.3) 0%, rgba(255,196,74,0.12) 40%, transparent 72%); filter: blur(12px); animation: venusPulse 2.6s ease-in-out infinite; } .venus-window-shadow-left, .venus-window-shadow-right { position: absolute; top: 0; bottom: 0; width: 90px; z-index: 3; pointer-events: none; } .venus-window-shadow-left { left: 0; background: linear-gradient(90deg, rgba(14,7,23,0.55), transparent); } .venus-window-shadow-right { right: 0; background: linear-gradient(270deg, rgba(14,7,23,0.55), transparent); } .venus-case-item { position: relative; } .venus-segment { position: relative; width: 132px; height: 148px; display: flex; align-items: center; justify-content: center; border-radius: 22px; background: linear-gradient(180deg, rgba(255,255,255,0.08), transparent 18%),
+      linear-gradient(180deg, rgba(110, 48, 183, 0.95) 0%, rgba(73, 24, 129, 1) 58%, rgba(42, 12, 75, 1) 100%); border: 1px solid rgba(255, 214, 114, 0.14); box-shadow: inset 0 12px 18px rgba(255,255,255,0.05),
+      inset 0 -16px 18px rgba(0,0,0,0.28); } .venus-segment-divider { position: absolute; top: 16px; bottom: 16px; width: 3px; border-radius: 999px; background: linear-gradient(180deg, rgba(255, 233, 162, 0.75), rgba(191, 111, 11, 0.55)); opacity: 0.5; box-shadow: 0 0 8px rgba(255, 211, 102, 0.25); } .venus-segment-divider-left { left: -7px; } .venus-segment-divider-right { right: -7px; } .venus-token { width: 102px; height: 102px; display: flex; align-items: center; justify-content: center; border-radius: 20px; background: radial-gradient(circle at 50% 20%, rgba(255,255,255,0.14), transparent 42%),
+      linear-gradient(180deg, rgba(210, 117, 255, 0.22) 0%, rgba(77, 20, 132, 0.52) 100%); border: 1px solid rgba(255, 225, 152, 0.2); box-shadow: inset 0 4px 12px rgba(255,255,255,0.07),
+      0 10px 20px rgba(0,0,0,0.22); } .venus-result-pill { display: inline-flex; align-items: center; justify-content: center; min-width: 260px; min-height: 64px; padding: 12px 20px; border-radius: 18px; background: linear-gradient(180deg, rgba(122, 48, 205, 0.32), rgba(51, 18, 88, 0.68)); border: 1px solid rgba(255,255,255,0.08); box-shadow: inset 0 1px 0 rgba(255,255,255,0.06),
+      0 10px 30px rgba(0,0,0,0.24); } .venus-spin-btn { position: relative; overflow: hidden; border-radius: 18px; border: 1px solid rgba(255, 233, 160, 0.35); background: linear-gradient(180deg, #ffe48b 0%, #ffc93c 28%, #ffaf17 58%, #d97706 100%); color: #512700; box-shadow: inset 0 2px 0 rgba(255,255,255,0.5),
+      inset 0 -4px 0 rgba(125, 61, 0, 0.35),
+      0 14px 32px rgba(255, 174, 17, 0.28); } .venus-spin-btn::before { content: ""; position: absolute; inset: 0; background: linear-gradient(110deg, transparent 20%, rgba(255,255,255,0.35) 45%, transparent 70%); transform: translateX(-130%); animation: venusShine 3.2s linear infinite; pointer-events: none; } .venus-spin-btn:hover { transform: translateY(-1px) scale(1.02); box-shadow: inset 0 2px 0 rgba(255,255,255,0.55),
+      inset 0 -4px 0 rgba(125, 61, 0, 0.38),
+      0 18px 36px rgba(255, 174, 17, 0.34); } .venus-crown-dot { width: 8px; height: 8px; border-radius: 999px; background: #ffd86f; box-shadow: 0 0 10px rgba(255, 216, 111, 0.9); animation: venusBlink 2s ease-in-out infinite; } @keyframes venusPulse { 0%, 100% {  opacity: 0.7;  transform: translate(-50%, -50%) scale(0.96); }  50% {  opacity: 1;  transform: translate(-50%, -50%) scale(1.06); } } @keyframes venusBlink { 0%, 100% {  transform: scale(1);  opacity: 0.8; }  50% {  transform: scale(1.35);  opacity: 1; } } @keyframes venusShine { 0% {  transform: translateX(-130%); }  100% {  transform: translateX(130%); } }</style>
+        <main class="pt-20 px-4 sm:px-6 md:px-10 lg:px-12 pb-20
+  md:ml-64 overflow-x-hidden transition-all duration-300 w-full">
+            <style>::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: #0f0d16; } ::-webkit-scrollbar-thumb { background: #272431; border-radius: 10px; } ::-webkit-scrollbar-thumb:hover { background: #cc97ff; }</style>
+            <div class="w-full flex flex-col gap-8">
+                <section class="venus-panel p-6 md:p-8 lg:p-10">
+                    <div class="absolute top-0 left-[8%] right-[8%] h-px bg-gradient-to-r from-transparent via-[#B493FF]/60 to-transparent"></div>
+                    <div class="absolute -top-24 -right-24 w-72 h-72 bg-primary/10 rounded-full blur-[100px] pointer-events-none"></div>
+                    <div class="absolute -bottom-24 -left-24 w-64 h-64 bg-primary/5 rounded-full blur-[90px] pointer-events-none"></div>
+                    <div class="relative z-10">
+                        
+                        <div class="relative z-50 flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-8">
+                            <div>
+                                <div class="flex items-center gap-2 mb-2"><span class="material-symbols-outlined text-primary text-xl">casino</span><span class="text-[10px] font-bold uppercase tracking-[0.24em] text-primary">NEW GAMES</span>
+                                </div>
+                                <h2 class="text-3xl md:text-5xl font-black tracking-tight venus-title">
+          Wheel of Venus </h2>
+                                <p class="text-sm text-on-surface-variant mt-2">
+          Spin the reel and discover your reward </p>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <div class="text-xs text-on-surface-variant whitespace-nowrap" id="spins">0 spins available</div>
+                                <div class="relative z-50">
+                                    <button id="rewards-toggle" class="group flex items-center gap-2 px-4 py-2 rounded-full bg-surface-container-low/70 border border-white/10 text-sm font-medium text-on-surface-variant hover:text-primary hover:border-primary/20 hover:bg-primary/[0.06] transition-all duration-200"><span class="material-symbols-outlined text-primary text-[17px]">info</span><span>Rewards</span><span id="rewards-chevron" class="material-symbols-outlined text-[16px] transition-transform duration-300">expand_more</span>
+                                    </button>
+                                    <div id="rewards-dropdown" class="absolute z-[100] right-0 top-full mt-2 w-[360px] sm:w-[420px] origin-top-right opacity-0 scale-95 -translate-y-2 pointer-events-none transition-all duration-200">
+                                        <div class="relative overflow-hidden rounded-lg bg-surface-container-high/95 backdrop-blur-3xl border border-white/10 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.65)] px-5 py-5">
+                                            <div class="absolute -top-16 -right-16 w-40 h-40 bg-primary/10 rounded-full blur-[70px] pointer-events-none"></div>
+                                            <div class="relative z-10">
+                                                <div class="flex items-center justify-between mb-4 px-1">
+                                                    <div>
+                                                        <div class="text-base font-bold">Available Rewards</div>
+                                                        <div class="text-xs text-on-surface-variant mt-1">Four possible crate drops</div>
+                                                    </div>
+                                                </div>
+                                                <div class="grid grid-cols-2 gap-3">
+                                                    <div class="flex items-center gap-3 p-3.5 rounded-lg bg-surface-container-low/60 border border-white/5">
+                                                        <div class="w-14 h-14 shrink-0 rounded-lg bg-white/[0.03] border border-white/5 flex items-center justify-center">
+                                                            <img src="1.png" alt="Basic" class="w-10 h-10 object-contain">
+                                                        </div>
+                                                        <div class="min-w-0">
+                                                            <div class="text-sm font-bold">Basic</div>
+                                                            <div class="text-xs text-on-surface-variant mt-1">Common reward</div>
+                                                            <div class="text-[10px] text-on-surface-variant/50 mt-1">94.15%</div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="flex items-center gap-3 p-3.5 rounded-lg bg-surface-container-low/60 border border-white/5">
+                                                        <div class="w-14 h-14 shrink-0 rounded-lg bg-white/[0.03] border border-white/5 flex items-center justify-center">
+                                                            <img src="3.png" alt="Platinum" class="w-10 h-10 object-contain">
+                                                        </div>
+                                                        <div class="min-w-0">
+                                                            <div class="text-sm font-bold">Platinum</div>
+                                                            <div class="text-xs text-on-surface-variant mt-1">Rare reward</div>
+                                                            <div class="text-[10px] text-primary/70 mt-1">5.00%</div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="flex items-center gap-3 p-3.5 rounded-lg bg-primary/[0.04] border border-primary/10">
+                                                        <div class="w-14 h-14 shrink-0 rounded-lg bg-primary/[0.07] border border-primary/10 flex items-center justify-center">
+                                                            <img src="2.png" alt="Tether" class="w-10 h-10 object-contain">
+                                                        </div>
+                                                        <div class="min-w-0">
+                                                            <div class="text-sm font-bold">Tether</div>
+                                                            <div class="text-xs text-on-surface-variant mt-1">Very rare reward</div>
+                                                            <div class="text-[10px] text-primary/70 mt-1">0.80%</div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="flex items-center gap-3 p-3.5 rounded-lg bg-white/[0.02] border border-white/5">
+                                                        <div class="w-14 h-14 shrink-0 rounded-lg bg-white/[0.03] border border-white/5 flex items-center justify-center">
+                                                            <img src="4.png" alt="Supreme" class="w-10 h-10 object-contain">
+                                                        </div>
+                                                        <div class="min-w-0">
+                                                            <div class="text-sm font-bold">Supreme</div>
+                                                            <div class="text-xs text-on-surface-variant mt-1">Ultra rare reward</div>
+                                                            <div class="text-[10px] text-primary/70 mt-1">0.05%</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="relative z-0">
+                            <div class="venus-reel-stage">
+                                <div class="venus-reel-rim venus-reel-rim-left"></div>
+                                <div class="venus-reel-rim venus-reel-rim-right"></div>
+                                
+                                <div id="case-window" class="relative overflow-hidden venus-reel-window h-[190px] md:h-[220px]">
+                                    <div class="venus-window-shadow-left"></div>
+                                    <div class="venus-window-shadow-right"></div>
+                                    
+                                    <div class="absolute z-20 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[138px] md:w-[148px] h-[156px] md:h-[174px] rounded-[24px] border border-[#ffd877]/80 shadow-[0_0_28px_rgba(255,214,110,0.30),inset_0_0_24px_rgba(255,255,255,0.08)] pointer-events-none"></div>
+                                    
+                                    <div class="absolute z-30 left-1/2 top-0 bottom-0 -translate-x-1/2 pointer-events-none">
+                                        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[2px] h-full bg-[#ffd35c] shadow-[0_0_18px_rgba(255,211,92,0.9)]"></div>
+                                        <div class="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-0 h-0 border-l-[11px] border-r-[11px] border-t-[15px] border-l-transparent border-r-transparent border-t-[#ffd35c]"></div>
+                                        <div class="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-0 h-0 border-l-[11px] border-r-[11px] border-b-[15px] border-l-transparent border-r-transparent border-b-[#ffd35c]"></div>
+                                    </div>
+                                    
+                                    <div class="absolute z-10 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 venus-center-glow pointer-events-none"></div>
+                                    
+                                    <div id="case-reel" class="absolute inset-y-0 left-0 flex items-center will-change-transform"></div>
+                                </div>
+                            </div>
+                            
+                            <div id="case-result" class="mt-5 text-center min-h-[72px]">
+                                <div class="venus-result-pill">
+                                    <div id="case-result-placeholder" class="text-xs text-on-surface-variant">
+                                        Press Roll to begin
+</div>
+                                    <div id="case-result-content" class="hidden">
+                                        <div class="text-[10px] uppercase tracking-[0.22em] text-primary mb-1">Your Reward</div>
+                                        <div id="case-result-name" class="text-xl font-black venus-title">Reward</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex justify-center mt-6">
+                                <button id="case-play" class="venus-spin-btn group inline-flex items-center justify-center gap-2 min-w-[210px] px-8 py-4 font-black transition-all duration-200"><span class="material-symbols-outlined text-[22px] group-hover:rotate-180 transition-transform duration-500">autorenew</span><span id="case-play-text">Roll</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+        <div id="receiveModal" class="fixed inset-0 z-50 flex items-center justify-center hidden">
+            <div id="receiveBackdrop" class="absolute inset-0 bg-black/60 backdrop-blur-md opacity-0 transition-opacity duration-300"></div>
+            <div id="receiveContent" class="relative rounded-2xl bg-surface-container-high/40 backdrop-blur-2xl p-8 border border-outline-variant/20 max-w-md w-full mx-4 transform scale-95 opacity-0 transition-all duration-300">
+                <h2 class="text-3xl font-bold text-center mb-2">Deposit</h2>
+                <p class="text-slate-400 text-center mb-6">Choose asset</p>
+                <div class="grid grid-cols-2 gap-4">
+                    <button class="coin-btn" data-coin="vnr">
+                        <img src="assets/images/vg.png" class="w-8 mx-auto mb-2">
+                        VNR
+                    </button>
+                    <button class="coin-btn" data-coin="usdt">
+                        <img src="assets/images/usdt.png" class="w-8 mx-auto mb-2">
+                        USDT
+                    </button>
+                    <button class="coin-btn" data-coin="usdc">
+                        <img src="assets/images/usdc.png" class="w-8 mx-auto mb-2">
+                        USDC
+                    </button>
+                    <button class="coin-btn" data-coin="bnb">
+                        <img src="assets/images/bnb.png" class="w-8 mx-auto mb-2">
+                        BNB
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div id="addressModal" class="fixed inset-0 z-50 flex items-center justify-center hidden">
+            <div id="addressBackdrop" class="absolute inset-0 bg-black/60 backdrop-blur-md opacity-0 transition-opacity duration-300"></div>
+            <div id="addressContent" class="relative rounded-2xl bg-surface-container-high/40 backdrop-blur-2xl p-8 border border-outline-variant/20 max-w-md w-full mx-4 transform scale-95 opacity-0 transition-all duration-300">
+                <h2 class="text-3xl font-bold text-center mb-2">Deposit Address</h2>
+                <p class="text-slate-400 text-sm text-center mb-6">Send assets to this address</p>
+                <div class="flex justify-center mb-6">
+                    <div class="p-4 rounded-xl bg-surface-container/40 border border-outline-variant/20">
+                        <canvas id="qr-code" class="w-[180px] h-[180px] flex items-center justify-center"></canvas>
+                    </div>
+                </div>
+                <div class="flex items-center justify-between bg-surface-container/40 border border-outline-variant/20 rounded-xl px-4 py-3 font-mono text-sm text-slate-300">
+                    <span id="deposit-address" class="truncate pr-3"></span>
+                    <button id="copy-address-btn" class="w-9 h-9 flex items-center justify-center rounded-lg bg-primary/10 hover:bg-primary/20 transition-all"><span id="copy-icon" class="material-symbols-outlined text-primary text-lg">content_copy</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <button id="mobileMenuBtn" class="md:hidden fixed bottom-5 left-1/2 -translate-x-1/2 bg-[#CA94FD]/25 backdrop-blur-xl
+text-[#cc97ff] font-bold py-2.5 px-8 rounded-full flex items-center gap-2 shadow-[0_0_30px_rgba(204,151,255,0.25)] z-50"><span class="material-symbols-outlined">menu</span>
+            Menu
+        </button>
+        <div id="mobileMenu" class="hidden fixed inset-0 z-40 bg-surface-container-low/95 backdrop-blur-3xl transition-all duration-300">
+            <div id="mobileMenuContentWrapper" class="w-full h-full flex flex-col">
+                <div class="flex items-center justify-between px-6 py-5 border-b border-white/5">
+                    <div>
+                        <div class="text-[10px] uppercase tracking-[0.2em] text-primary font-semibold">Menu</div>
+                        <div class="text-lg font-semibold text-on-surface mt-1">Venera Wallet</div>
+                    </div>
+                    <button type="button" onclick="closeMenu()" class="w-10 h-10 rounded-lg bg-white/5 border border-white/5 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-all duration-200"><span class="material-symbols-outlined text-[20px]">close</span>
+                    </button>
+                </div>
+                <div id="mobileMenuContent" class="flex-1 flex flex-col justify-start px-5 space-y-2">
+                    <a class="menu-item flex items-center gap-4 px-4 py-4 rounded-lg opacity-0 translate-y-6 transition-all duration-500 text-slate-400 hover:text-white hover:bg-white/5" href="account.html"> <span class="w-11 h-11 rounded-lg bg-white/5 border border-white/5 flex items-center justify-center"> <span class="material-symbols-outlined text-[22px]">account_balance_wallet</span> </span> <span class="flex-1 text-base font-medium">Assets</span> <span class="material-symbols-outlined text-[20px] opacity-40">chevron_right</span> </a>
+                    <a class="menu-item flex items-center gap-4 px-4 py-4 rounded-lg opacity-0 translate-y-6 transition-all duration-500 text-slate-400 hover:text-white hover:bg-white/5" href="staking.html"> <span class="w-11 h-11 rounded-lg bg-white/5 border border-white/5 flex items-center justify-center"> <span class="material-symbols-outlined text-[22px]">lock</span> </span> <span class="flex-1 text-base font-medium">Staking</span> <span class="material-symbols-outlined text-[20px] opacity-40">chevron_right</span> </a>
+                    <a class="menu-item flex items-center gap-4 px-4 py-4 rounded-lg opacity-0 translate-y-6 transition-all duration-500 bg-primary/10 border border-primary/10 text-primary" href="rewards.html"> <span class="w-11 h-11 rounded-lg bg-primary/10 border border-primary/10 flex items-center justify-center"> <span class="material-symbols-outlined text-[22px]">workspace_premium</span> </span> <span class="flex-1 text-base font-semibold">Rewards</span> <span class="material-symbols-outlined text-[20px] opacity-60">chevron_right</span> </a>
+                    <a class="menu-item flex items-center gap-4 px-4 py-4 rounded-lg opacity-0 translate-y-6 transition-all duration-500 text-slate-400 hover:text-white hover:bg-white/5" href="games.html"> <span class="w-11 h-11 rounded-lg bg-primary/10 border border-primary/10 flex items-center justify-center"> <span class="material-symbols-outlined text-[22px]">joystick</span> </span> <span class="flex-1 text-base font-semibold">Games</span> <span class="material-symbols-outlined text-[20px] opacity-60">chevron_right</span> </a>
+                    <a class="menu-item flex items-center gap-4 px-4 py-4 rounded-lg opacity-0 translate-y-6 transition-all duration-500 text-slate-400 hover:text-white hover:bg-white/5" href="history.html"> <span class="w-11 h-11 rounded-lg bg-white/5 border border-white/5 flex items-center justify-center"> <span class="material-symbols-outlined text-[22px]">history</span> </span> <span class="flex-1 text-base font-medium">History</span> <span class="material-symbols-outlined text-[20px] opacity-40">chevron_right</span> </a>
+                    <a class="menu-item flex items-center gap-4 px-4 py-4 rounded-lg opacity-0 translate-y-6 transition-all duration-500 text-slate-600" href="#"> <span class="w-11 h-11 rounded-lg bg-white/[0.03] border border-white/5 flex items-center justify-center"> <span class="material-symbols-outlined text-[22px]">layers</span> </span> <span class="flex-1 text-base font-medium">Bridge <span class="text-[10px] uppercase tracking-wider ml-1">Soon</span></span> <span class="material-symbols-outlined text-[20px] opacity-20">chevron_right</span> </a>
+                    <a class="menu-item flex items-center gap-4 px-4 py-4 rounded-lg opacity-0 translate-y-6 transition-all duration-500 text-slate-400 hover:text-white hover:bg-white/5" href="settings.html"> <span class="w-11 h-11 rounded-lg bg-white/5 border border-white/5 flex items-center justify-center"> <span class="material-symbols-outlined text-[22px]">settings</span> </span> <span class="flex-1 text-base font-medium">Settings</span> <span class="material-symbols-outlined text-[20px] opacity-40">chevron_right</span> </a>
+                </div>
+                <div class="px-6 py-5 border-t border-white/5 text-center"><span class="text-[10px] uppercase tracking-[0.18em] text-slate-600">Venera Wallet · v0.2.1</span>
+                </div>
+            </div>
+        </div>
+        <style>@keyframes floaty { 0%, 100% {  transform: translate(-50%, 0) translateY(0); }  50% {  transform: translate(-50%, 0) translateY(-6px); } } #mobileMenuBtn { animation: floaty 3s ease-in-out infinite; }</style>
+        <script>
+const btn = document.getElementById("mobileMenuBtn");
+const menu = document.getElementById("mobileMenu");
+const items = document.querySelectorAll(".menu-item");
+
+function openMenu() {
+   
+    btn.style.animation = "none";
+    btn.style.opacity = "0";
+    btn.style.transform = "translate(-50%, 100px)";
+
+    menu.classList.remove("hidden");
+
+    items.forEach((item, i) => {
+        setTimeout(() => {
+            item.classList.remove("opacity-0", "translate-y-6");
+            item.classList.add("opacity-100", "translate-y-0");
+        }, i * 80);
+    });
+}
+
+function closeMenu() {
+    items.forEach(item => {
+        item.classList.add("opacity-0", "translate-y-6");
+        item.classList.remove("opacity-100", "translate-y-0");
+    });
+
+    setTimeout(() => {
+        menu.classList.add("hidden");
+
+        btn.style.transform = "translate(-50%, 0)";
+        btn.style.opacity = "1";
+        btn.style.animation = "floaty 3s ease-in-out infinite";
+    }, 300);
+}
+btn.addEventListener("click", openMenu);
+
+document.getElementById("mobileMenuContentWrapper").addEventListener("click", (e) => {
+    if (e.target === e.currentTarget) {
+        closeMenu();
+    }
+});
+</script>
+        <style>.coin-btn { background: rgba(255,255,255,0.05); padding: 14px; border-radius: 12px; text-align: center; font-weight: bold; transition: 0.2s; } .coin-btn:hover { background: rgba(255,255,255,01); transform: scale(1.05); } #qr-code canvas { border-radius: 12px; }</style>
+        <script id="electron-window-controls">
+(() => {
+  const min = document.getElementById('min-btn');
+  const close = document.getElementById('close-btn');
+  min?.addEventListener('click', () => window.electronAPI?.minimize());
+  close?.addEventListener('click', () => window.electronAPI?.close());
+})();
+</script>
+    </body>
+    <script src="assets/js/wheel.js"></script>     
+</html>

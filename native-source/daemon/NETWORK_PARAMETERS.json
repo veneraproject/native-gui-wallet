@@ -1,0 +1,7 @@
+{
+  "approval_public_key": "807595e10f4d4a0c033434740dd14af448ea0315eaea07a19013a6e5bda2985d",
+  "approval_activation_height": 574969,
+  "emission_cap_height": 575928,
+  "source": "Uploaded build/portable-static/CMakeCache.txt; verify against the live installed binary/config before rollout",
+  "signature_domain": "Venera block approval v1"
+}

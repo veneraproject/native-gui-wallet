@@ -1,0 +1,11 @@
+(() => {
+ document.addEventListener('DOMContentLoaded',()=>{
+  const parent=document.getElementById('wallet-settings-cards');if(!parent)return;
+  const template=document.getElementById('importtrust');
+  const add=(id,title,description,icon,handler)=>{const card=template.cloneNode(true);card.id=id;card.querySelector('h3').textContent=title;card.querySelector('p').textContent=description;card.querySelector('.material-symbols-outlined').textContent=icon;card.onclick=handler;parent.append(card);};
+  add('native-backup','Backup wallet','Save a CLI-compatible encrypted .keys file','encrypted',async()=>{const password=await nativeDialog('Export wallet backup','Enter your wallet password to save an encrypted, CLI-compatible .keys backup.',{password:true,size:'large',confirm:'Choose backup location'});if(password===null)return;try{await veneraAPI.call('wallet.backup',{password});}catch(e){await nativeDialog('Backup failed',e.message,{size:'large'});}});
+  add('native-seed','Show recovery seed','Reveal the local 25-word VNR recovery phrase','key',async()=>{const password=await nativeDialog('Show recovery seed','Keep your seed private. Anyone with it can restore both local accounts.',{password:true,confirm:'Reveal seed'});if(password===null)return;try{const d=await veneraAPI.call('wallet.exportSeed',{password});await nativeDialog('Recovery seed',d.seed,{confirm:'Close',size:'large'});d.seed='';}catch(e){await nativeDialog('Unable to reveal seed',e.message);}});
+  add('native-receipt','Inspect BSC receipt','Check a locally signed transaction by its hash','receipt_long',async()=>{const hash=await nativeDialog('Inspect BSC receipt','Enter the full BSC transaction hash.',{textInput:true,confirm:'Check receipt',size:'large'});if(hash===null)return;try{const d=await veneraAPI.call('wallet.receipt',{hash:hash.trim()});await nativeDialog('BSC receipt',d.receipt?JSON.stringify(d.receipt,null,2):'No receipt yet. The transaction may be pending, unknown or dropped.',{size:'large',confirm:'Close'});}catch(e){await nativeDialog('Receipt unavailable',e.message,{size:'large'});}});
+  const description=document.getElementById('trust-description');if(description)description.textContent='Generate a private-key QR code locally for your BSC account. Only scan it with a trusted wallet.';
+ });
+})();

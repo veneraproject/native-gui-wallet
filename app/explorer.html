@@ -1,0 +1,1391 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+    <head>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' https://veneralabs.org https://pool.veneralabs.org; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'"/>
+<link rel="stylesheet" href="assets/css/native.css"/>
+<script src="assets/js/native-api.js"></script>
+<script src="assets/js/wallet-session.js"></script>
+<script src="assets/js/ui-errors.js"></script>
+        <title>Venera GUI</title>         
+        <meta charset="utf-8"/>
+        <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+        <meta name="description" content="Real-time Venera Blockchain Explorer"/> 
+        <meta name="viewport" content="width=device-width, initial-scale=1"/> 
+        <link rel="shortcut icon" type="image/x-icon" href="assets/images/fav.ico"/> 
+        <meta property="og:title" content="Venera Explorer">
+        <meta property="og:description" content="Real-time Venera Blockchain Explorer">
+        <meta property="og:image" content="https://veneralabs.org/assets/images/wti.png">
+        <meta property="og:url" content="https://veneralabs.org/explorer">
+        <meta property="og:type" content="website">
+        <link rel="stylesheet" href="assets/css/tailwind-explorer.css"/>
+        
+        <style>body { background-color: #100c17; color: #f6eefd; font-family: 'Manrope', sans-serif; overflow-x: hidden; } .glass-panel { background: rgba(40, 35, 51, 0.4); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border: 1px solid rgba(186, 158, 255, 0.1); } .glass-card { background: rgba(21, 17, 29, 0.6); backdrop-filter: blur(12px); border-top: 1px solid rgba(186, 158, 255, 0.2); border-left: 1px solid rgba(186, 158, 255, 0.2); } .primary-gradient-btn { background: linear-gradient(135deg, #9714FD 0%, #ae8dff 100%); } .text-glow { text-shadow: 0 0 20px rgba(186, 158, 255, 0.4); } .asymmetric-blob { position: absolute; filter: blur(120px); z-index: -1; border-radius: 9999px; }</style>
+        <style>.material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; } .glass-edge { border-top: 1px solid rgba(255, 255, 255, 0.1); border-left: 1px solid rgba(255, 255, 255, 0.1); } .no-scrollbar::-webkit-scrollbar { display: none; } .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }</style>
+        <style>body { min-height: max(884px, 100dvh); }</style>
+        <style>.explorer-scroll::-webkit-scrollbar { width: 5px; height: 5px; } .explorer-scroll::-webkit-scrollbar-track { background: transparent; } .explorer-scroll::-webkit-scrollbar-thumb { background: rgba(180,147,255,.18); border-radius: 999px; } .explorer-scroll::-webkit-scrollbar-thumb:hover { background: rgba(180,147,255,.32); } .explorer-kv-value { overflow-wrap: anywhere; word-break: break-word; } .explorer-clickable { cursor: pointer; } .explorer-clickable:focus-visible { outline: 2px solid rgba(180,147,255,.8); outline-offset: 2px; } .explorer-json { tab-size: 2; white-space: pre-wrap; overflow-wrap: anywhere; word-break: break-word; } @keyframes explorerStatPulse { 0%, 100% {  opacity: .35;  transform: translateY(0); }  50% {  opacity: 1;  transform: translateY(-1px); } } .stat-loading { display: inline-flex; align-items: center; gap: 6px; color: rgba(246,238,253,.38); } .stat-loading-dot { width: 5px; height: 5px; border-radius: 9999px; background: #B493FF; animation: explorerStatPulse 1.1s ease-in-out infinite; box-shadow: 0 0 10px rgba(180,147,255,.28); } .stat-loading-dot:nth-child(2) { animation-delay: .14s; } .stat-loading-dot:nth-child(3) { animation-delay: .28s; }</style>
+    <style>@font-face { font-family:'Space Grotesk'; font-style:normal; font-weight:300; font-display:swap; src:url('assets/fonts/space-grotesk-latin-300-normal.woff2') format('woff2'); }
+@font-face { font-family:'Space Grotesk'; font-style:normal; font-weight:400; font-display:swap; src:url('assets/fonts/space-grotesk-latin-400-normal.woff2') format('woff2'); }
+@font-face { font-family:'Space Grotesk'; font-style:normal; font-weight:500; font-display:swap; src:url('assets/fonts/space-grotesk-latin-500-normal.woff2') format('woff2'); }
+@font-face { font-family:'Space Grotesk'; font-style:normal; font-weight:600; font-display:swap; src:url('assets/fonts/space-grotesk-latin-600-normal.woff2') format('woff2'); }
+@font-face { font-family:'Space Grotesk'; font-style:normal; font-weight:700; font-display:swap; src:url('assets/fonts/space-grotesk-latin-700-normal.woff2') format('woff2'); }
+@font-face { font-family:'Material Symbols Outlined'; font-style:normal; font-weight:400; font-display:block; src:url('assets/fonts/material-symbols-outlined-latin-400-normal.woff2') format('woff2'); }
+.material-symbols-outlined { font-family:'Material Symbols Outlined'; font-weight:400; font-style:normal; line-height:1; letter-spacing:normal; text-transform:none; display:inline-block; white-space:nowrap; word-wrap:normal; direction:ltr; font-feature-settings:'liga'; -webkit-font-feature-settings:'liga'; -webkit-font-smoothing:antialiased; flex-shrink:0; }
+body { font-family:'Space Grotesk',sans-serif; }
+
+html.embedded-explorer, .embedded-explorer body { margin:0!important; min-height:0!important; height:auto!important; background:#14121c!important; overflow-x:hidden; }
+.embedded-explorer body > :not(main):not(script):not(style), .embedded-explorer main > :not(#lookup-result-section) { display:none!important; }
+.embedded-explorer main { padding:12px!important; margin:0!important; max-width:none!important; }
+.embedded-explorer #lookup-result-section { margin:0!important; border-radius:18px; }
+.embedded-explorer #close-lookup-result { display:none; }
+.embedded-explorer * { backdrop-filter:none!important; -webkit-backdrop-filter:none!important; }
+</style>
+<style>
+body, button, input, .font-body, .font-headline, .font-mono {font-family:'Space Grotesk',sans-serif!important;}
+html.embedded-explorer, .embedded-explorer body {background:transparent!important;color:#f5eefc;}
+.embedded-explorer .glass-panel, .embedded-explorer .glass-card {background:linear-gradient(135deg,rgba(180,147,255,.08),rgba(25,20,35,.55));border:1px solid rgba(207,181,255,.14);border-radius:20px;}
+.embedded-explorer main {padding:18px!important;}
+</style><style>.utility-titlebar{position:fixed;top:0;left:0;right:0;height:34px;z-index:999999;background:#201a2b;color:#bdb0cb;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:26px 26px 0 0;-webkit-app-region:drag;font:11px Arial,sans-serif}.utility-titlebar img{width:16px;height:16px}.utility-titlebar-actions{position:absolute;right:12px;display:flex;gap:6px;-webkit-app-region:no-drag}.utility-titlebar button{border:0;border-radius:50%;width:23px;height:23px;color:white;background:#30263d}body{padding-top:34px!important}.navbar-area{top:34px!important}</style></head>
+    <style>::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: #0f0d16; } ::-webkit-scrollbar-thumb { background: #272431; border-radius: 10px; } ::-webkit-scrollbar-thumb:hover { background: #cc97ff; }</style>
+    <body class="bg-background text-on-background font-body min-h-screen selection:bg-primary selection:text-on-primary"><div class="utility-titlebar"><img src="assets/images/vg.png" alt=""><span style="color:#bdb0cb">Venera GUI</span><div class="utility-titlebar-actions"><button type="button" data-wallet-window-action="minimize" aria-label="Minimize">—</button><button type="button" data-wallet-window-action="close" aria-label="Close">✕</button></div></div>
+        <header class="fixed top-4 left-0 right-0 z-50 px-4 sm:px-6 lg:px-8">
+            <nav class="venera-glass-nav relative max-w-7xl mx-auto overflow-hidden rounded-[30px]">
+                <div class="relative z-10 h-[76px] px-4 sm:px-6 lg:px-7">
+                    
+                    <div class="hidden lg:grid grid-cols-[1fr_auto_1fr] items-center h-full">
+                        
+                        <div class="flex items-center justify-start gap-1.5">
+                            <a href="account.html" class="nav-link ">Home</a>
+                            <a href="https://pool.veneralabs.org/" class="nav-link">Mining</a>
+                            <a href="explorer.html" class="nav-link nav-link-active">Explorer</a>
+                            <a href="account.html" class="nav-link">Wallet</a>
+                        </div>
+                        
+                        <a href="account.html" class="relative flex items-center justify-center px-8 group"> <div class="absolute h-16 w-20 rounded-full bg-[#B493FF]/15 blur-2xl opacity-70 transition-all duration-500 group-hover:opacity-100 group-hover:scale-125"></div> <div class="absolute h-12 w-12 rounded-full bg-[#B493FF]/5 blur-md"></div> <img src="assets/images/vg.png" alt="Venera Labs" class="relative z-10 h-[44px] w-auto
+                               drop-shadow-[0_0_14px_rgba(180,147,255,0.35)]
+                               transition-all duration-300
+                               group-hover:scale-105
+                               group-hover:drop-shadow-[0_0_22px_rgba(180,147,255,0.55)]"> </a>
+                        
+                        <div class="flex items-center justify-end gap-1.5">
+                            <a href="https://veneralabs.org/whitepaper" class="nav-link">Whitepaper</a>
+                            <a href="roadmap.html" class="nav-link">Roadmap</a>
+                            <button id="community" type="button" class="nav-link">
+                                Community
+</button>
+                            <a href="account.html" target="_blank" rel="noopener noreferrer" class="launch-btn ml-2"> <span class="launch-btn-shine"></span> <span class="relative z-10">Launch App</span> </a>
+                        </div>
+                    </div>
+                    
+                    <div class="lg:hidden flex items-center justify-between h-full">
+                        
+                        <a href="account.html" class="relative flex items-center z-[70]"> <div class="absolute left-1/2 top-1/2
+                                -translate-x-1/2 -translate-y-1/2
+                                h-12 w-16 rounded-full
+                                bg-[#B493FF]/15 blur-xl">
+</div> <img src="assets/images/vg.png" alt="Venera Labs" class="relative z-10 h-[42px] w-auto
+                               drop-shadow-[0_0_12px_rgba(180,147,255,0.3)]"> </a>
+                        <button id="mobileMenuButton" type="button" aria-label="Open navigation menu" aria-expanded="false" class="mobile-menu-btn">
+                            <span class="mobile-menu-lines"> <span></span> <span></span> <span></span> </span>
+                        </button>
+                    </div>
+                </div>
+            </nav>
+        </header>
+        <div id="mobileMenu" class="mobile-fullscreen-menu lg:hidden" aria-hidden="true">
+            
+            <div class="mobile-menu-glow mobile-menu-glow-one"></div>
+            <div class="mobile-menu-glow mobile-menu-glow-two"></div>
+            <div class="mobile-menu-content mt-10">
+                
+                <div id="mobileMenuContent" class="flex-1 flex flex-col justify-start px-5 space-y-2">
+                    <a href="account.html" class="menu-item flex items-center gap-4 px-4 py-4 rounded-lg
+                       opacity-0 translate-y-6 transition-all duration-500
+                       bg-[#B493FF]/10 border border-[#B493FF]/10
+                       text-[#B493FF]"> <span class="w-11 h-11 rounded-lg
+                           bg-[#B493FF]/10 border border-[#B493FF]/10
+                           flex items-center justify-center"> <span class="material-symbols-outlined text-[22px]">
+                        home </span> </span> <span class="flex-1 text-base font-semibold">
+                    Home </span> <span class="material-symbols-outlined text-[20px] opacity-60">
+                    chevron_right </span> </a>
+                    <a href="https://pool.veneralabs.org/" class="menu-item flex items-center gap-4 px-4 py-4 rounded-lg
+                       opacity-0 translate-y-6 transition-all duration-500
+                       text-slate-400
+                       hover:text-white hover:bg-white/5"> <span class="w-11 h-11 rounded-lg
+                           bg-white/5 border border-white/5
+                           flex items-center justify-center"> <span class="material-symbols-outlined text-[22px]">
+                        memory </span> </span> <span class="flex-1 text-base font-medium">
+                    Mining </span> <span class="material-symbols-outlined text-[20px] opacity-40">
+                    chevron_right </span> </a>
+                    <a href="explorer.html" class="menu-item flex items-center gap-4 px-4 py-4 rounded-lg
+                       opacity-0 translate-y-6 transition-all duration-500
+                       text-slate-400
+                       hover:text-white hover:bg-white/5"> <span class="w-11 h-11 rounded-lg
+                           bg-white/5 border border-white/5
+                           flex items-center justify-center"> <span class="material-symbols-outlined text-[22px]">
+                        travel_explore </span> </span> <span class="flex-1 text-base font-medium">
+                    Explorer </span> <span class="material-symbols-outlined text-[20px] opacity-40">
+                    chevron_right </span> </a>
+                    <a href="account.html" class="menu-item flex items-center gap-4 px-4 py-4 rounded-lg
+                       opacity-0 translate-y-6 transition-all duration-500
+                       text-slate-400
+                       hover:text-white hover:bg-white/5"> <span class="w-11 h-11 rounded-lg
+                           bg-white/5 border border-white/5
+                           flex items-center justify-center"> <span class="material-symbols-outlined text-[22px]">
+                        account_balance_wallet </span> </span> <span class="flex-1 text-base font-medium">
+                    Wallet </span> <span class="material-symbols-outlined text-[20px] opacity-40">
+                    chevron_right </span> </a>
+                    <a href="https://veneralabs.org/whitepaper" class="menu-item flex items-center gap-4 px-4 py-4 rounded-lg
+                       opacity-0 translate-y-6 transition-all duration-500
+                       text-slate-400
+                       hover:text-white hover:bg-white/5"> <span class="w-11 h-11 rounded-lg
+                           bg-white/5 border border-white/5
+                           flex items-center justify-center"> <span class="material-symbols-outlined text-[22px]">
+                        description </span> </span> <span class="flex-1 text-base font-medium">
+                    Whitepaper </span> <span class="material-symbols-outlined text-[20px] opacity-40">
+                    chevron_right </span> </a>
+                    <a href="roadmap.html" class="menu-item flex items-center gap-4 px-4 py-4 rounded-lg
+                       opacity-0 translate-y-6 transition-all duration-500
+                       text-slate-400
+                       hover:text-white hover:bg-white/5"> <span class="w-11 h-11 rounded-lg
+                           bg-white/5 border border-white/5
+                           flex items-center justify-center"> <span class="material-symbols-outlined text-[22px]">
+                        route </span> </span> <span class="flex-1 text-base font-medium">
+                    Roadmap </span> <span class="material-symbols-outlined text-[20px] opacity-40">
+                    chevron_right </span> </a>
+                    
+                    <button id="mobileCommunity" type="button" class="menu-item flex items-center gap-4 px-4 py-4 rounded-lg
+                       opacity-0 translate-y-6 transition-all duration-500
+                       text-slate-400
+                       hover:text-white hover:bg-white/5
+                       w-full text-left"><span class="w-11 h-11 rounded-lg
+                           bg-white/5 border border-white/5
+                           flex items-center justify-center"> <span class="material-symbols-outlined text-[22px]">
+                        groups </span> </span><span class="flex-1 text-base font-medium">
+                    Community </span><span class="material-symbols-outlined text-[20px] opacity-40">
+                    chevron_right </span>
+                    </button>
+                </div>
+                
+                <div class="px-5 pt-3"><a href="account.html" target="_blank" rel="noopener noreferrer" class="menu-item flex items-center gap-4 px-4 py-4 rounded-lg
+           opacity-0 translate-y-6 transition-all duration-500
+           bg-gradient-to-r from-[#8E6BE8] via-[#9C78F2] to-[#8A63E6]
+           border border-[#B493FF]/35
+           text-[#F3ECFF]
+           shadow-[0_10px_30px_rgba(126,87,214,0.22)]
+           hover:from-[#9873EF] hover:via-[#A17DF5] hover:to-[#9069EA]
+           hover:border-[#C5AEFF]/45"> <span class="w-11 h-11 rounded-lg
+               bg-[#6E49C7]/35
+               border border-[#C0A7FF]/20
+               flex items-center justify-center
+               text-[#F2EBFF]"> <span class="material-symbols-outlined text-[22px]">
+            rocket_launch </span> </span> <span class="flex-1 text-base font-semibold">
+        Launch App </span> <span class="w-9 h-9 rounded-lg
+               bg-[#6F4AC9]/30
+               border border-[#C0A7FF]/18
+               flex items-center justify-center
+               text-[#F2EBFF]"> <span class="material-symbols-outlined text-[20px]">
+            north_east </span> </span></a>
+                </div>
+                
+                <div class="mobile-menu-footer px-5"><span>Privacy • Payments • Zero Knowledge</span><span>Venera Labs</span>
+                </div>
+            </div>
+        </div>
+        <main class="relative pt-36 pb-24 px-4 sm:px-6 max-w-7xl mx-auto">
+            <div class="pointer-events-none absolute -top-20 left-[5%] w-[420px] h-[420px] bg-[#B493FF]/10 rounded-full blur-[140px]"></div>
+            <div class="pointer-events-none absolute top-[420px] right-[2%] w-[360px] h-[360px] bg-[#7757FF]/8 rounded-full blur-[130px]"></div>
+            
+            <section class="relative mb-10 overflow-hidden rounded-[32px] border border-white/[0.07] bg-white/[0.025] backdrop-blur-2xl shadow-[0_30px_80px_rgba(0,0,0,0.3)]">
+                <div class="absolute inset-0 bg-[radial-gradient(circle_at_20%_0%,rgba(180,147,255,0.13),transparent_35%),radial-gradient(circle_at_90%_100%,rgba(119,87,255,0.09),transparent_35%)]"></div>
+                <div class="absolute top-0 left-[8%] right-[8%] h-px bg-gradient-to-r from-transparent via-[#B493FF]/60 to-transparent"></div>
+                <div class="relative px-6 py-12 md:px-12 md:py-16 text-center">
+                    <div class="inline-flex items-center gap-2 px-4 py-2 mb-6 rounded-full border border-[#B493FF]/15 bg-[#B493FF]/[0.07] text-[#CDB8FF] text-[11px] font-bold uppercase tracking-[0.18em]">
+                        <span class="relative flex h-2 w-2"><span class="absolute inline-flex h-full w-full rounded-full bg-[#B493FF] opacity-40 animate-ping"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-[#B493FF]"></span></span>
+                        Venera Mainnet
+                    </div>
+                    <h1 class="font-headline text-5xl sm:text-6xl md:text-7xl font-bold tracking-[-0.04em] text-white">Venera <span class="bg-gradient-to-r from-[#D8C7FF] via-[#B493FF] to-[#916AFF] bg-clip-text text-transparent">Explorer</span></h1>
+                    <p class="mt-5 text-base md:text-lg text-white/45 max-w-3xl mx-auto">Search blocks, transactions and addresses across the Venera network in real time</p>
+                    <div class="mt-9 max-w-3xl mx-auto relative group">
+                        <div class="absolute -inset-[1px] rounded-[22px] bg-gradient-to-r from-[#B493FF]/35 via-white/10 to-[#7E5CFF]/30 opacity-50 blur-[8px] group-focus-within:opacity-100 transition duration-500"></div>
+                        <div class="relative flex items-center gap-2 p-2 rounded-[22px] border border-white/[0.08] bg-[#0E0A18]/75 backdrop-blur-2xl shadow-[inset_0_1px_0_rgba(255,255,255,0.07),0_18px_45px_rgba(0,0,0,0.28)]">
+                            <div class="pl-4 flex items-center justify-center text-[#B493FF]"><span class="material-symbols-outlined text-[22px]">search</span>
+                            </div>
+                            <input id="searchbar" type="text" placeholder="Block height or transaction hash..." class="w-full min-w-0 bg-transparent border-0 outline-none ring-0 focus:ring-0 px-3 py-3.5 text-sm sm:text-base text-white placeholder:text-white/25 font-body">
+                            <button id="lookup" class="shrink-0 flex items-center gap-2 rounded-[16px] bg-gradient-to-br from-[#C5AEFF] via-[#B493FF] to-[#9772FF] px-5 sm:px-7 py-3.5 text-[#150C25] font-headline font-bold text-sm shadow-[0_8px_25px_rgba(180,147,255,0.22),inset_0_1px_0_rgba(255,255,255,0.45)] hover:-translate-y-0.5 hover:shadow-[0_12px_32px_rgba(180,147,255,0.32)] active:scale-[0.98] transition-all">
+                                <span class="hidden sm:inline">Search</span>
+                                <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="lookup-result-section" class="hidden relative mb-10 overflow-hidden rounded-[28px] border border-white/[0.06] bg-white/[0.02] backdrop-blur-xl shadow-[0_25px_70px_rgba(0,0,0,0.22)]">
+                <div class="absolute top-0 left-10 right-10 h-px bg-gradient-to-r from-transparent via-[#B493FF]/45 to-transparent"></div>
+                <div class="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between px-5 sm:px-6 py-5 border-b border-white/[0.05]">
+                    <div class="flex items-center gap-3 min-w-0">
+                        <div id="lookup-result-icon" class="w-10 h-10 rounded-[14px] bg-[#B493FF]/10 border border-[#B493FF]/10 text-[#B493FF] flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-[20px]">manage_search</span>
+                        </div>
+                        <div class="min-w-0">
+                            <div class="flex flex-wrap items-center gap-2">
+                                <h2 id="lookup-result-title" class="font-headline text-lg sm:text-xl font-bold text-white">Lookup Result</h2><span id="lookup-result-type" class="hidden rounded-full border border-[#B493FF]/15 bg-[#B493FF]/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-[#CDB8FF]"></span>
+                            </div>
+                            <p id="lookup-result-subtitle" class="text-xs text-white/30 mt-1 truncate"></p>
+                        </div>
+                    </div>
+                    <button id="close-lookup-result" type="button" class="self-start sm:self-auto flex items-center gap-2 rounded-[13px] border border-white/[0.06] bg-white/[0.025] px-3 py-2 text-xs font-bold text-white/45 hover:text-white hover:border-[#B493FF]/20 hover:bg-[#B493FF]/[0.05] transition"><span class="material-symbols-outlined text-[17px]">close</span><span>Close</span>
+                    </button>
+                </div>
+                <div id="lookup-loading" class="hidden px-6 py-10">
+                    <div class="flex items-center justify-center gap-3 text-white/40"><span class="w-5 h-5 rounded-full border-2 border-white/10 border-t-[#B493FF] animate-spin"></span><span class="text-sm">Looking up network data…</span>
+                    </div>
+                </div>
+                <div id="lookup-error" class="hidden px-5 sm:px-6 py-7">
+                    <div class="rounded-[18px] border border-red-400/10 bg-red-400/[0.04] px-5 py-4">
+                        <div class="flex items-start gap-3"><span class="material-symbols-outlined text-red-300/80 text-[21px] mt-0.5">error</span>
+                            <div>
+                                <p class="font-headline font-bold text-white">Lookup failed</p>
+                                <p id="lookup-error-text" class="mt-1 text-sm text-white/40"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="lookup-result-content" class="hidden p-4 sm:p-6">
+                    <div id="lookup-summary-grid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3"></div>
+                </div>
+            </section>
+            
+            <section class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3 md:gap-4 mb-12">
+                <div class="group relative overflow-hidden rounded-[24px] border border-white/[0.06] bg-white/[0.025] backdrop-blur-xl p-5 hover:border-[#B493FF]/20 hover:bg-[#B493FF]/[0.035] transition-all duration-300">
+                    <div class="absolute -top-14 -right-14 w-32 h-32 rounded-full bg-[#B493FF]/10 blur-[45px] group-hover:bg-[#B493FF]/20 transition"></div>
+                    <div class="relative flex items-start justify-between gap-3">
+                        <div class="min-w-0">
+                            <p class="text-[10px] uppercase tracking-[0.16em] font-bold text-white/30">Market Price</p>
+                            <h3 id="token-price" class="mt-2 text-xl md:text-2xl font-headline font-bold text-white whitespace-nowrap">$—</h3>
+                        </div>
+                        <div class="w-9 h-9 rounded-[13px] border border-[#B493FF]/10 bg-[#B493FF]/10 flex items-center justify-center text-[#B493FF] shrink-0"><span class="material-symbols-outlined text-[19px]">show_chart</span>
+                        </div>
+                    </div>
+                    <div class="relative mt-4 text-[11px] text-white/25">Latest VNR price</div>
+                </div>
+                <div class="group relative overflow-hidden rounded-[24px] border border-white/[0.06] bg-white/[0.025] backdrop-blur-xl p-5 hover:border-[#B493FF]/20 hover:bg-[#B493FF]/[0.035] transition-all duration-300">
+                    <div class="absolute -top-14 -right-14 w-32 h-32 rounded-full bg-[#B493FF]/10 blur-[45px] group-hover:bg-[#B493FF]/20 transition"></div>
+                    <div class="relative flex items-start justify-between gap-3">
+                        <div class="min-w-0">
+                            <p class="text-[10px] uppercase tracking-[0.16em] font-bold text-white/30">Market Cap</p>
+                            <h3 id="mkt_cap" class="mt-2 text-xl md:text-2xl font-headline font-bold text-white whitespace-nowrap">$—</h3>
+                        </div>
+                        <div class="w-9 h-9 rounded-[13px] border border-[#B493FF]/10 bg-[#B493FF]/10 flex items-center justify-center text-[#B493FF] shrink-0"><span class="material-symbols-outlined text-[19px]">account_balance_wallet</span>
+                        </div>
+                    </div>
+                    <div class="relative mt-4 text-[11px] text-white/25">Network valuation</div>
+                </div>
+                <div class="group relative overflow-hidden rounded-[24px] border border-white/[0.06] bg-white/[0.025] backdrop-blur-xl p-5 hover:border-[#B493FF]/20 hover:bg-[#B493FF]/[0.035] transition-all duration-300">
+                    <div class="absolute -top-14 -right-14 w-32 h-32 rounded-full bg-[#B493FF]/10 blur-[45px] group-hover:bg-[#B493FF]/20 transition"></div>
+                    <div class="relative flex items-start justify-between gap-3">
+                        <div class="min-w-0">
+                            <p class="text-[10px] uppercase tracking-[0.16em] font-bold text-white/30">Hashrate</p>
+                            <h3 id="nethash" class="mt-2 text-xl md:text-2xl font-headline font-bold text-white whitespace-nowrap">—</h3>
+                        </div>
+                        <div class="w-9 h-9 rounded-[13px] border border-[#B493FF]/10 bg-[#B493FF]/10 flex items-center justify-center text-[#B493FF] shrink-0"><span class="material-symbols-outlined text-[19px]">speed</span>
+                        </div>
+                    </div>
+                    <div class="relative mt-4 text-[11px] text-white/25">Mining power</div>
+                </div>
+                <div class="group relative overflow-hidden rounded-[24px] border border-white/[0.06] bg-white/[0.025] backdrop-blur-xl p-5 hover:border-[#B493FF]/20 hover:bg-[#B493FF]/[0.035] transition-all duration-300">
+                    <div class="absolute -top-14 -right-14 w-32 h-32 rounded-full bg-[#B493FF]/10 blur-[45px] group-hover:bg-[#B493FF]/20 transition"></div>
+                    <div class="relative flex items-start justify-between gap-3">
+                        <div class="min-w-0">
+                            <p class="text-[10px] uppercase tracking-[0.16em] font-bold text-white/30">Block Height</p>
+                            <h3 id="chain-height" class="mt-2 text-xl md:text-2xl font-headline font-bold text-white whitespace-nowrap">—</h3>
+                        </div>
+                        <div class="w-9 h-9 rounded-[13px] border border-[#B493FF]/10 bg-[#B493FF]/10 flex items-center justify-center text-[#B493FF] shrink-0"><span class="material-symbols-outlined text-[19px]">deployed_code</span>
+                        </div>
+                    </div>
+                    <div class="relative mt-4 flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-[#B493FF] shadow-[0_0_10px_#B493FF] animate-pulse"></span><span class="text-[11px] text-white/25">PoW Mainnet</span>
+                    </div>
+                </div>
+                <div class="group relative overflow-hidden rounded-[24px] border border-white/[0.06] bg-white/[0.025] backdrop-blur-xl p-5 hover:border-[#B493FF]/20 hover:bg-[#B493FF]/[0.035] transition-all duration-300">
+                    <div class="absolute -top-14 -right-14 w-32 h-32 rounded-full bg-[#B493FF]/10 blur-[45px] group-hover:bg-[#B493FF]/20 transition"></div>
+                    <div class="relative flex items-start justify-between gap-3">
+                        <div class="min-w-0">
+                            <p class="text-[10px] uppercase tracking-[0.16em] font-bold text-white/30">Circulating</p>
+                            <h3 id="circulating-supply" class="mt-2 text-xl md:text-2xl font-headline font-bold text-white whitespace-nowrap">—</h3>
+                        </div>
+                        <div class="w-9 h-9 rounded-[13px] border border-[#B493FF]/10 bg-[#B493FF]/10 flex items-center justify-center text-[#B493FF] shrink-0"><span class="material-symbols-outlined text-[19px]">currency_exchange</span>
+                        </div>
+                    </div>
+                    <div class="relative mt-4 text-[11px] text-white/25">Circulating VNR</div>
+                </div>
+                <div class="group relative overflow-hidden rounded-[24px] border border-white/[0.06] bg-white/[0.025] backdrop-blur-xl p-5 hover:border-[#B493FF]/20 hover:bg-[#B493FF]/[0.035] transition-all duration-300">
+                    <div class="absolute -top-14 -right-14 w-32 h-32 rounded-full bg-[#B493FF]/10 blur-[45px] group-hover:bg-[#B493FF]/20 transition"></div>
+                    <div class="relative flex items-start justify-between gap-3">
+                        <div class="min-w-0">
+                            <p class="text-[10px] uppercase tracking-[0.16em] font-bold text-white/30">Staked Supply</p>
+                            <h3 id="staked-supply" class="mt-2 text-xl md:text-2xl font-headline font-bold text-white whitespace-nowrap">—</h3>
+                        </div>
+                        <div class="w-9 h-9 rounded-[13px] border border-[#B493FF]/10 bg-[#B493FF]/10 flex items-center justify-center text-[#B493FF] shrink-0"><span class="material-symbols-outlined text-[19px]">savings</span>
+                        </div>
+                    </div>
+                    <div id="staked-data" class="relative mt-4 text-[11px] text-white/25 truncate">Incl. illiquid supply</div>
+                </div>
+            </section>
+            
+            <section class="grid grid-cols-1 lg:grid-cols-2 gap-5 md:gap-6">
+                <div class="relative overflow-hidden rounded-[28px] border border-white/[0.06] bg-white/[0.02] backdrop-blur-xl">
+                    <div class="absolute top-0 left-12 right-12 h-px bg-gradient-to-r from-transparent via-[#B493FF]/35 to-transparent"></div>
+                    <div class="flex items-center justify-between px-6 py-5 border-b border-white/[0.05]">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-[13px] bg-[#B493FF]/10 text-[#B493FF] flex items-center justify-center"><span class="material-symbols-outlined text-[19px]">deployed_code</span>
+                            </div>
+                            <div>
+                                <h2 class="font-headline text-lg font-bold text-white">Latest Blocks</h2>
+                                <p class="text-[11px] text-white/25 mt-0.5">Recently mined blocks</p>
+                            </div>
+                        </div>
+                        <button id="refresh-blocks" type="button" class="flex items-center gap-1.5 text-[#B493FF] text-xs font-bold uppercase tracking-wider hover:text-white transition"><span>Refresh</span><span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+                        </button>
+                    </div>
+                    <div id="blocks-container" class="p-3 md:p-4 space-y-2 max-h-[540px] overflow-y-auto no-scrollbar">
+                        <div class="px-3 py-8 text-center text-sm text-white/25">Loading recent blocks…</div>
+                    </div>
+                </div>
+                <div class="relative overflow-hidden rounded-[28px] border border-white/[0.06] bg-white/[0.02] backdrop-blur-xl">
+                    <div class="absolute top-0 left-12 right-12 h-px bg-gradient-to-r from-transparent via-[#B493FF]/35 to-transparent"></div>
+                    <div class="flex items-center justify-between px-6 py-5 border-b border-white/[0.05]">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-[13px] bg-[#B493FF]/10 text-[#B493FF] flex items-center justify-center"><span class="material-symbols-outlined text-[19px]">swap_horiz</span>
+                            </div>
+                            <div>
+                                <h2 class="font-headline text-lg font-bold text-white">Latest Transactions</h2>
+                                <p class="text-[11px] text-white/25 mt-0.5">Activity from the latest block</p>
+                            </div>
+                        </div>
+                        <button id="refresh-transactions" type="button" class="flex items-center gap-1.5 text-[#B493FF] text-xs font-bold uppercase tracking-wider hover:text-white transition"><span>Refresh</span><span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+                        </button>
+                    </div>
+                    <div id="tx-container" class="p-3 md:p-4 space-y-2 max-h-[540px] overflow-y-auto no-scrollbar">
+                        <div class="px-3 py-8 text-center text-sm text-white/25">Loading recent transactions…</div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </body>     
+    <script>
+    (() => {
+        "use strict";
+
+        const TOKENINFO_INTERVAL_MS = 48000;
+        const RECENT_BLOCK_COUNT = 19;
+        const RECENT_TX_COUNT = 12;
+        const VNR_ATOMIC_UNITS = 1000000000n;
+        const TX_TYPE_BURN = 5;
+
+        const TX_TYPE_LABELS = {
+            0: "Unset",
+            1: "Miner",
+            2: "Protocol",
+            3: "Transfer",
+            4: "Convert",
+            5: "Burn",
+            6: "Stake",
+            7: "Return",
+            8: "Audit",
+            9: "Create Token",
+            10: "Rollup"
+        };
+
+        const $ = (id) => document.getElementById(id);
+
+        const els = {
+            searchbar: $("searchbar"),
+            lookup: $("lookup"),
+            resultSection: $("lookup-result-section"),
+            resultTitle: $("lookup-result-title"),
+            resultType: $("lookup-result-type"),
+            resultSubtitle: $("lookup-result-subtitle"),
+            resultIcon: $("lookup-result-icon"),
+            resultContent: $("lookup-result-content"),
+            resultGrid: $("lookup-summary-grid"),
+            loading: $("lookup-loading"),
+            error: $("lookup-error"),
+            errorText: $("lookup-error-text"),
+            closeResult: $("close-lookup-result"),
+            blocks: $("blocks-container"),
+            txs: $("tx-container"),
+            refreshBlocks: $("refresh-blocks"),
+            refreshTxs: $("refresh-transactions"),
+            tokenPrice: $("token-price"),
+            marketCap: $("mkt_cap"),
+            hashrate: $("nethash"),
+            height: $("chain-height"),
+            circulating: $("circulating-supply"),
+            staked: $("staked-supply"),
+            stakedData: $("staked-data")
+        };
+
+        let currentHeight = null;
+        let latestBlockTxHashes = [];
+        let refreshingLatest = false;
+
+        function escapeHtml(value) {
+            return String(value ?? "")
+                .replaceAll("&", "&amp;")
+                .replaceAll("<", "&lt;")
+                .replaceAll(">", "&gt;")
+                .replaceAll('"', "&quot;")
+                .replaceAll("'", "&#039;");
+        }
+
+        function formatNumber(value, maximumFractionDigits = 2) {
+            const n = Number(value);
+            if (!Number.isFinite(n)) return "—";
+            return new Intl.NumberFormat("en-US", {
+                maximumFractionDigits
+            }).format(n);
+        }
+
+        function formatCompact(value, maximumFractionDigits = 2) {
+            const n = Number(value);
+            if (!Number.isFinite(n)) return "—";
+
+            const abs = Math.abs(n);
+            if (abs >= 1e12) return `${formatNumber(n / 1e12, maximumFractionDigits)}T`;
+            if (abs >= 1e9) return `${formatNumber(n / 1e9, maximumFractionDigits)}B`;
+            if (abs >= 1e6) return `${formatNumber(n / 1e6, maximumFractionDigits)}M`;
+            if (abs >= 1e3) return `${formatNumber(n / 1e3, maximumFractionDigits)}K`;
+            return formatNumber(n, maximumFractionDigits);
+        }
+
+        function formatUsd(value) {
+            const n = Number(value);
+            if (!Number.isFinite(n)) return "$—";
+            if (Math.abs(n) >= 1000) return "$" + formatCompact(n, 2);
+            if (Math.abs(n) >= 1) return "$" + formatNumber(n, 4);
+            return "$" + n.toLocaleString("en-US", { maximumFractionDigits: 8 });
+        }
+
+        function formatHashrate(value) {
+            let n = Number(value);
+            if (!Number.isFinite(n)) return "—";
+
+                                                               
+            const units = ["KH/s", "MH/s", "GH/s", "TH/s", "PH/s"];
+            let unit = 0;
+
+            while (Math.abs(n) >= 1000 && unit < units.length - 1) {
+                n /= 1000;
+                unit++;
+            }
+
+            const digits = Math.abs(n) >= 100 ? 0 : Math.abs(n) >= 10 ? 1 : 2;
+            return `${formatNumber(n, digits)} ${units[unit]}`;
+        }
+
+        function formatDate(timestamp) {
+            const n = Number(timestamp);
+            if (!Number.isFinite(n) || n <= 0) return "—";
+            const date = new Date(n < 1e12 ? n * 1000 : n);
+            return date.toLocaleString();
+        }
+
+        function parseJsonObject(value) {
+            if (value && typeof value === "object") return value;
+            if (typeof value !== "string" || !value.trim()) return {};
+            try {
+                const parsed = JSON.parse(value);
+                return parsed && typeof parsed === "object" ? parsed : {};
+            } catch (_) {
+                return {};
+            }
+        }
+
+        function toAtomicBigInt(value) {
+            if (typeof value === "bigint") return value >= 0n ? value : 0n;
+
+            if (typeof value === "string") {
+                const trimmed = value.trim();
+                if (/^\d+$/.test(trimmed)) {
+                    try { return BigInt(trimmed); } catch (_) { return 0n; }
+                }
+            }
+
+            const n = Number(value);
+            if (!Number.isFinite(n) || n <= 0) return 0n;
+            return BigInt(Math.trunc(n));
+        }
+
+        function formatAtomicVnr(value) {
+            const atomic = toAtomicBigInt(value);
+            const whole = atomic / VNR_ATOMIC_UNITS;
+            const fraction = (atomic % VNR_ATOMIC_UNITS)
+                .toString()
+                .padStart(9, "0")
+                .replace(/0+$/, "");
+
+            return `${whole.toLocaleString("en-US")}${fraction ? `.${fraction}` : ""} VNR`;
+        }
+
+        function getParsedTx(tx) {
+            return parseJsonObject(tx?.parsed_json ?? tx?.as_json ?? tx?.json ?? {});
+        }
+
+        function getBurnAmountAtomic(tx, parsed = getParsedTx(tx)) {
+            return toAtomicBigInt(
+                tx?.amount_burnt ??
+                tx?.amount_burned ??
+                parsed?.amount_burnt ??
+                parsed?.amount_burned ??
+                0
+            );
+        }
+
+        function getTxTypeValue(tx, parsed = getParsedTx(tx)) {
+            const value = parsed?.type ?? tx?.type;
+            const n = Number(value);
+            return Number.isInteger(n) ? n : null;
+        }
+
+        function getTxTypeLabel(tx, parsed = getParsedTx(tx)) {
+            const burnAmount = getBurnAmountAtomic(tx, parsed);
+            const type = getTxTypeValue(tx, parsed);
+
+            if (burnAmount > 0n || type === TX_TYPE_BURN) return "Burn";
+            if (type != null && TX_TYPE_LABELS[type]) return TX_TYPE_LABELS[type];
+            return "Transfer";
+        }
+
+        function getRingctFeeAtomic(tx, parsed = getParsedTx(tx)) {
+            const burn = getBurnAmountAtomic(tx, parsed);
+            const serializedFee =
+                parsed?.ringct?.txnFee ??
+                parsed?.rct_signatures?.txnFee ??
+                parsed?.fee;
+
+            if (serializedFee != null) return toAtomicBigInt(serializedFee);
+
+                                                                            
+                                                                                          
+            return toAtomicBigInt(tx?.fee ?? 0) + burn;
+        }
+
+        function getMinerFeeAtomic(tx, parsed = getParsedTx(tx)) {
+            const burn = getBurnAmountAtomic(tx, parsed);
+            const serializedFee =
+                parsed?.ringct?.txnFee ??
+                parsed?.rct_signatures?.txnFee ??
+                parsed?.fee;
+
+            if (serializedFee != null) {
+                const total = toAtomicBigInt(serializedFee);
+                return total >= burn ? total - burn : 0n;
+            }
+
+            return toAtomicBigInt(tx?.fee ?? 0);
+        }
+
+        function statLoadingMarkup() {
+            return `
+                <span class="stat-loading" aria-label="Loading">
+                    <span class="stat-loading-dot"></span>
+                    <span class="stat-loading-dot"></span>
+                    <span class="stat-loading-dot"></span>
+                </span>`;
+        }
+
+        function setStatsLoading(isLoading) {
+            const statElements = [
+                els.tokenPrice,
+                els.marketCap,
+                els.hashrate,
+                els.height,
+                els.circulating,
+                els.staked
+            ].filter(Boolean);
+
+            if (isLoading) {
+                statElements.forEach(el => {
+                    el.innerHTML = statLoadingMarkup();
+                });
+                if (els.stakedData) {
+                    els.stakedData.textContent = "Loading network data…";
+                }
+            }
+        }
+
+        function timeAgo(timestamp) {
+            const n = Number(timestamp);
+            if (!Number.isFinite(n) || n <= 0) return "Unknown time";
+            const seconds = Math.max(0, Math.floor((Date.now() - (n < 1e12 ? n * 1000 : n)) / 1000));
+            if (seconds < 60) return `${seconds}s ago`;
+            const minutes = Math.floor(seconds / 60);
+            if (minutes < 60) return `${minutes}m ago`;
+            const hours = Math.floor(minutes / 60);
+            if (hours < 24) return `${hours}h ago`;
+            const days = Math.floor(hours / 24);
+            return `${days}d ago`;
+        }
+
+        function shortHash(hash, left = 10, right = 8) {
+            const s = String(hash || "");
+            if (s.length <= left + right + 3) return s || "—";
+            return `${s.slice(0, left)}…${s.slice(-right)}`;
+        }
+
+        function getBlockHeader(blockData) {
+            return blockData?.block_header || {};
+        }
+
+        function getTxHashes(blockData) {
+            if (Array.isArray(blockData?.tx_hashes)) return blockData.tx_hashes;
+            try {
+                const parsed = typeof blockData?.json === "string" ? JSON.parse(blockData.json) : blockData?.json;
+                if (Array.isArray(parsed?.tx_hashes)) return parsed.tx_hashes;
+            } catch (_) {}
+            return [];
+        }
+
+        async function fetchJson(url, options = {}) {
+            const response = await fetch(`https://veneralabs.org/api/${String(url).replace(/^\//, "")}`, {
+                cache: "no-store",
+                headers: { "Accept": "application/json", ...(options.headers || {}) },
+                ...options
+            });
+
+            let data;
+            try {
+                data = await response.json();
+            } catch (_) {
+                throw new Error(`Server returned ${response.status} without valid JSON`);
+            }
+
+            if (!response.ok) {
+                throw new Error(data?.error || `Request failed (${response.status})`);
+            }
+            return data;
+        }
+
+        async function getNetworkStatsPage(page = 0) {
+            const data = await fetchJson(`/network_stats?page=${encodeURIComponent(page)}`);
+
+            if (!Array.isArray(data)) {
+                throw new Error("Invalid /network_stats response.");
+            }
+
+            return data;
+        }
+
+        async function findBlockSummaryByHeight(height) {
+            const wantedHeight = Number(height);
+
+            if (!Number.isInteger(wantedHeight) || wantedHeight < 0) {
+                throw new Error("Invalid block height.");
+            }
+
+            const firstPage = await getNetworkStatsPage(0);
+
+            if (!firstPage.length) {
+                throw new Error("No blocks returned by /network_stats.");
+            }
+
+            const tipHeight = Number(firstPage[0].height);
+
+            if (!Number.isFinite(tipHeight) || wantedHeight > tipHeight) {
+                throw new Error(`Block #${wantedHeight} does not exist yet.`);
+            }
+
+            const firstPageMatch = firstPage.find(
+                block => Number(block.height) === wantedHeight
+            );
+
+            if (firstPageMatch) {
+                return firstPageMatch;
+            }
+
+                                              
+            const page = Math.floor((tipHeight - wantedHeight) / 20);
+            const pageData = page === 0
+                ? firstPage
+                : await getNetworkStatsPage(page);
+
+            const match = pageData.find(
+                block => Number(block.height) === wantedHeight
+            );
+
+            if (!match) {
+                throw new Error(`Block #${wantedHeight} was not found.`);
+            }
+
+            return match;
+        }
+
+        async function lookupBlockByHeight(height) {
+            const q = String(height);
+
+                                                                               
+            try {
+                const payload = await fetchJson(
+                    `/lookup_hash?q=${encodeURIComponent(q)}`
+                );
+
+                if (payload?.type === "block") {
+                    return payload;
+                }
+            } catch (error) {
+                console.warn(`Direct block-height lookup failed for #${q}:`, error);
+            }
+
+                                                                                   
+            const summary = await findBlockSummaryByHeight(Number(q));
+
+            if (!summary?.hash) {
+                throw new Error(`Block #${q} did not include a hash.`);
+            }
+
+            const payload = await fetchJson(
+                `/lookup_hash?q=${encodeURIComponent(summary.hash)}`
+            );
+
+            if (payload?.type !== "block") {
+                throw new Error(`Block #${q} could not be loaded.`);
+            }
+
+            return payload;
+        }
+
+        function setLookupState(state, message = "") {
+            els.resultSection.classList.remove("hidden");
+            els.loading.classList.toggle("hidden", state !== "loading");
+            els.error.classList.toggle("hidden", state !== "error");
+            els.resultContent.classList.toggle("hidden", state !== "result");
+
+            if (state === "error") {
+                els.errorText.textContent = safeWalletError(message, "Transaction details are temporarily unavailable. Please try again.");
+                els.resultTitle.textContent = "Lookup Error";
+                els.resultSubtitle.textContent = "";
+                els.resultType.classList.add("hidden");
+                els.resultIcon.innerHTML = '<span class="material-symbols-outlined text-[20px]">error</span>';
+            }
+
+            if (state === "loading") {
+                els.resultTitle.textContent = "Searching Venera";
+                els.resultSubtitle.textContent = message || "Querying the network…";
+                els.resultType.classList.add("hidden");
+                els.resultIcon.innerHTML = '<span class="material-symbols-outlined text-[20px] animate-pulse">manage_search</span>';
+            }
+        }
+
+        function summaryCard(label, value, options = {}) {
+            const mono = options.mono ? "font-mono text-[12px] sm:text-[13px]" : "font-body text-sm";
+            const copyValue = options.copyValue;
+            const valueId = options.valueId ? ` id="${escapeHtml(options.valueId)}"` : "";
+            const copyButton = copyValue ? `
+                <button type="button"
+                        class="copy-value shrink-0 w-8 h-8 rounded-[10px] border border-white/[0.05] bg-white/[0.025] text-white/25 hover:text-[#B493FF] hover:border-[#B493FF]/20 transition"
+                        data-copy="${escapeHtml(copyValue)}"
+                        title="Copy">
+                    <span class="material-symbols-outlined text-[16px]">content_copy</span>
+                </button>` : "";
+
+            return `
+                <div class="rounded-[18px] border border-white/[0.05] bg-white/[0.018] px-4 py-4 min-w-0">
+                    <p class="text-[10px] uppercase tracking-[0.15em] font-bold text-white/25">${escapeHtml(label)}</p>
+                    <div class="mt-2 flex items-start gap-2 min-w-0">
+                        <p${valueId} class="explorer-kv-value ${mono} font-semibold text-white/75 min-w-0 flex-1">${escapeHtml(value ?? "—")}</p>
+                        ${copyButton}
+                    </div>
+                </div>`;
+        }
+
+        async function resolveBlockBurnSummary(txHashes) {
+            const hashes = Array.isArray(txHashes) ? txHashes : [];
+            if (!hashes.length) {
+                return { amount: 0n, complete: true, failed: 0, byHash: new Map() };
+            }
+
+            let total = 0n;
+            let failed = 0;
+            const byHash = new Map();
+            const concurrency = 6;
+
+            for (let i = 0; i < hashes.length; i += concurrency) {
+                const batch = hashes.slice(i, i + concurrency);
+                const results = await Promise.all(
+                    batch.map(async hash => {
+                        try {
+                            const payload = await fetchJson(
+                                `/lookup_hash?q=${encodeURIComponent(hash)}`
+                            );
+
+                            if (payload?.type !== "tx") {
+                                throw new Error("Not a transaction response");
+                            }
+
+                            const { tx, parsed } = extractTxData(payload.data || {});
+                            return [hash, getBurnAmountAtomic(tx, parsed), true];
+                        } catch (error) {
+                            console.warn(`Could not read burn amount for tx ${hash}:`, error);
+                            return [hash, 0n, false];
+                        }
+                    })
+                );
+
+                for (const [hash, amount, ok] of results) {
+                    if (!ok) {
+                        failed++;
+                        continue;
+                    }
+                    byHash.set(hash, amount);
+                    total += amount;
+                }
+            }
+
+            return {
+                amount: total,
+                complete: failed === 0,
+                failed,
+                byHash
+            };
+        }
+
+        async function renderBlockLookup(query, data) {
+            const header = getBlockHeader(data);
+            const hash = header.hash || data?.hash || (String(query).length === 64 ? query : "");
+            const txHashes = getTxHashes(data);
+            const height = header.height ?? (String(query).match(/^\d+$/) ? Number(query) : "—");
+
+            els.resultTitle.textContent = `Block #${height}`;
+            els.resultSubtitle.textContent = hash || "Venera block";
+            els.resultType.textContent = "Block";
+            els.resultType.classList.remove("hidden");
+            els.resultIcon.innerHTML = '<span class="material-symbols-outlined text-[20px]">deployed_code</span>';
+
+            const fields = [
+                ["Height", formatNumber(height, 0)],
+                ["Block Hash", hash || "—", { mono: true, copyValue: hash }],
+                ["Timestamp", formatDate(header.timestamp)],
+                ["Age", timeAgo(header.timestamp)],
+                ["Confirmations / Depth", header.depth ?? "—"],
+                ["Difficulty", formatNumber(header.difficulty ?? header.wide_difficulty, 0)],
+                ["Transactions", txHashes.length],
+                ["Burned", txHashes.length ? "Calculating…" : "0 VNR", { valueId: "lookup-block-burned" }],
+                ["Reward", header.reward != null ? formatNumber(header.reward, 0) : "—"],
+                ["Block Size", header.block_size != null ? `${formatNumber(header.block_size, 0)} bytes` : "—"],
+                ["Block Weight", header.block_weight != null ? formatNumber(header.block_weight, 0) : "—"],
+                ["Nonce", header.nonce ?? "—"],
+                ["Previous Hash", header.prev_hash || "—", { mono: true, copyValue: header.prev_hash || "" }]
+            ];
+
+            els.resultGrid.innerHTML = fields.map(([label, value, opts]) => summaryCard(label, value, opts)).join("");
+
+            let burnSummary = { amount: 0n, complete: true, failed: 0, byHash: new Map() };
+            if (txHashes.length) {
+                burnSummary = await resolveBlockBurnSummary(txHashes);
+                const burnedEl = $("lookup-block-burned");
+                if (burnedEl) {
+                    burnedEl.textContent = burnSummary.complete
+                        ? formatAtomicVnr(burnSummary.amount)
+                        : `${formatAtomicVnr(burnSummary.amount)} (partial)`;
+                    burnedEl.title = burnSummary.complete
+                        ? "Total amount permanently burned by transactions in this block"
+                        : `${burnSummary.failed} transaction lookup(s) failed; displayed burn total is partial`;
+                }
+            }
+
+            if (txHashes.length) {
+                els.resultGrid.insertAdjacentHTML("beforeend", `
+                    <div class="sm:col-span-2 xl:col-span-3 rounded-[18px] border border-white/[0.05] bg-white/[0.018] px-4 py-4">
+                        <div class="flex flex-wrap items-center justify-between gap-3">
+                            <p class="text-[10px] uppercase tracking-[0.15em] font-bold text-white/25">Transactions in block</p>
+                            ${burnSummary.amount > 0n ? `
+                                <span class="inline-flex items-center gap-1.5 rounded-full border border-orange-300/15 bg-orange-300/[0.06] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-orange-200/80">
+                                    <span class="material-symbols-outlined text-[14px]">local_fire_department</span>
+                                    ${escapeHtml(formatAtomicVnr(burnSummary.amount))} burned
+                                </span>` : ""}
+                        </div>
+                        <div class="mt-3 flex flex-wrap gap-2">
+                            ${txHashes.slice(0, 30).map(hash => {
+                                const burnAmount = burnSummary.byHash.get(hash) || 0n;
+                                return `
+                                    <button type="button"
+                                            class="lookup-inline rounded-[11px] border ${burnAmount > 0n ? "border-orange-300/15 bg-orange-300/[0.06] text-orange-100/80" : "border-[#B493FF]/10 bg-[#B493FF]/[0.05] text-[#CDB8FF]"} px-3 py-2 font-mono text-[11px] hover:bg-[#B493FF]/10 hover:border-[#B493FF]/20 transition"
+                                            data-query="${escapeHtml(hash)}">
+                                        <span>${escapeHtml(shortHash(hash, 12, 10))}</span>
+                                        ${burnAmount > 0n ? `<span class="ml-1.5 font-body text-[9px] font-bold uppercase tracking-wider">Burn ${escapeHtml(formatAtomicVnr(burnAmount))}</span>` : ""}
+                                    </button>`;
+                            }).join("")}
+                        </div>
+                        ${txHashes.length > 30 ? `<p class="mt-3 text-[11px] text-white/25">Showing 30 of ${txHashes.length} transaction hashes.</p>` : ""}
+                        ${!burnSummary.complete ? `<p class="mt-3 text-[11px] text-orange-200/45">Burn total is partial because ${burnSummary.failed} transaction lookup(s) could not be loaded.</p>` : ""}
+                    </div>
+                `);
+            }
+        }
+
+        function extractTxData(data) {
+            const tx = data?.txs?.[0] || data?.tx || {};
+            const parsed = getParsedTx(tx);
+            return { tx, parsed };
+        }
+
+        function renderTxLookup(query, data) {
+            const { tx, parsed } = extractTxData(data);
+            const txHash = tx.tx_hash || tx.hash || query;
+            const burnAmount = getBurnAmountAtomic(tx, parsed);
+            const txType = getTxTypeLabel(tx, parsed);
+            const rawRingctFee = getRingctFeeAtomic(tx, parsed);
+            const minerFee = getMinerFeeAtomic(tx, parsed);
+            const isBurn = burnAmount > 0n || getTxTypeValue(tx, parsed) === TX_TYPE_BURN;
+
+            els.resultTitle.textContent = isBurn ? "Burn Transaction" : "Transaction";
+            els.resultSubtitle.textContent = txHash;
+            els.resultType.textContent = isBurn ? "Burn" : "Transaction";
+            els.resultType.classList.remove("hidden");
+            els.resultIcon.innerHTML = isBurn
+                ? '<span class="material-symbols-outlined text-[20px]">local_fire_department</span>'
+                : '<span class="material-symbols-outlined text-[20px]">swap_horiz</span>';
+
+            const version = parsed.version ?? tx.version;
+            const unlockTime = parsed.unlock_time ?? tx.unlock_time;
+            const inputs = parsed.inputs ?? parsed.vin;
+            const outputs = parsed.outputs ?? parsed.vout;
+            const vinCount = Array.isArray(inputs) ? inputs.length : "—";
+            const voutCount = Array.isArray(outputs) ? outputs.length : "—";
+
+            const fields = [
+                ["Transaction Hash", txHash || "—", { mono: true, copyValue: txHash }],
+                ["Transaction Type", txType],
+                ["Block Height", tx.block_height != null ? formatNumber(tx.block_height, 0) : "Unconfirmed"],
+                ["Confirmations", tx.confirmations ?? (tx.in_pool ? "In pool" : "—")],
+                ["Timestamp", formatDate(tx.block_timestamp)],
+                ["Miner Fee", formatAtomicVnr(minerFee)],
+                ["Burned", formatAtomicVnr(burnAmount)],
+                ...(isBurn && rawRingctFee > 0n ? [["Fee + Burn Commitment", formatAtomicVnr(rawRingctFee)]] : []),
+                ["Version", version ?? "—"],
+                ["Unlock Time", unlockTime ?? "—"],
+                ["Inputs", vinCount],
+                ["Outputs", voutCount],
+                ["Double Spend", tx.double_spend_seen === true ? "Yes" : tx.double_spend_seen === false ? "No" : "—"],
+                ["In Pool", tx.in_pool === true ? "Yes" : tx.in_pool === false ? "No" : "—"],
+                ["Prunable Hash", tx.prunable_hash || "—", { mono: true, copyValue: tx.prunable_hash || "" }]
+            ];
+
+            els.resultGrid.innerHTML = fields.map(([label, value, opts]) => summaryCard(label, value, opts)).join("");
+
+            if (isBurn) {
+                els.resultGrid.insertAdjacentHTML("afterbegin", `
+                    <div class="sm:col-span-2 xl:col-span-3 rounded-[18px] border border-orange-300/10 bg-orange-300/[0.035] px-4 py-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-[13px] border border-orange-300/10 bg-orange-300/[0.06] text-orange-200/80 flex items-center justify-center shrink-0">
+                                <span class="material-symbols-outlined text-[20px]">local_fire_department</span>
+                            </div>
+                            <div>
+                                <p class="text-[10px] uppercase tracking-[0.15em] font-bold text-orange-200/45">Protocol Burn</p>
+                                <p class="mt-1 font-headline text-lg font-bold text-orange-100/90">${escapeHtml(formatAtomicVnr(burnAmount))} permanently removed</p>
+                            </div>
+                        </div>
+                    </div>
+                `);
+            }
+
+            if (tx.block_height != null) {
+                els.resultGrid.insertAdjacentHTML("beforeend", `
+                    <div class="sm:col-span-2 xl:col-span-3">
+                        <button type="button"
+                                class="lookup-inline w-full rounded-[18px] border border-[#B493FF]/10 bg-[#B493FF]/[0.04] px-4 py-3.5 flex items-center justify-between gap-3 text-left hover:bg-[#B493FF]/[0.08] hover:border-[#B493FF]/20 transition"
+                                data-query="${escapeHtml(tx.block_height)}">
+                            <span>
+                                <span class="block text-[10px] uppercase tracking-[0.15em] font-bold text-white/25">Containing block</span>
+                                <span class="block mt-1 font-headline font-bold text-white/70">Block #${escapeHtml(formatNumber(tx.block_height, 0))}</span>
+                            </span>
+                            <span class="material-symbols-outlined text-[#B493FF]">arrow_forward</span>
+                        </button>
+                    </div>
+                `);
+            }
+        }
+
+        async function lookupQuery(query, { scroll = true } = {}) {
+            const q = String(query ?? "").trim();
+
+            if (!q) {
+                setLookupState("error", "Enter a block height or 64-character transaction/block hash.");
+                if (scroll) {
+                    els.resultSection.scrollIntoView({ behavior: "smooth", block: "start" });
+                }
+                return;
+            }
+
+            const isBlockHeight = /^\d+$/.test(q);
+            const isHash = /^[a-fA-F0-9]{64}$/.test(q);
+
+            if (!isBlockHeight && !isHash) {
+                setLookupState(
+                    "error",
+                    "Enter a numeric block height such as 15, or a 64-character transaction/block hash."
+                );
+
+                if (scroll) {
+                    els.resultSection.scrollIntoView({ behavior: "smooth", block: "start" });
+                }
+                return;
+            }
+
+            els.searchbar.value = q;
+
+            setLookupState(
+                "loading",
+                isBlockHeight ? `Loading block #${q}…` : `Looking up ${q}…`
+            );
+
+            if (scroll) {
+                els.resultSection.scrollIntoView({ behavior: "smooth", block: "start" });
+            }
+
+            els.lookup.disabled = true;
+            els.lookup.classList.add("opacity-60", "pointer-events-none");
+
+            try {
+                if (isBlockHeight) {
+                    const payload = await lookupBlockByHeight(q);
+                    await renderBlockLookup(q, payload.data || {});
+                } else {
+                    const payload = await fetchJson(
+                        `/lookup_hash?q=${encodeURIComponent(q)}`
+                    );
+
+                    if (payload.type === "block") {
+                        await renderBlockLookup(q, payload.data || {});
+                    } else if (payload.type === "tx") {
+                        renderTxLookup(q, payload.data || {});
+                    } else {
+                        throw new Error("Hash was not recognized as a block or transaction.");
+                    }
+                }
+
+                setLookupState("result");
+            } catch (error) {
+                setLookupState("error", error?.message || "Lookup failed.");
+            } finally {
+                els.lookup.disabled = false;
+                els.lookup.classList.remove("opacity-60", "pointer-events-none");
+            }
+        }
+
+        function blockCard(block) {
+            const height = block?.height ?? "—";
+            const hash = block?.hash || "—";
+            const timestamp = block?.timestamp;
+
+            return `
+                <button type="button"
+                        class="lookup-inline explorer-clickable w-full rounded-[18px] border border-white/[0.045] bg-white/[0.018] hover:bg-[#B493FF]/[0.045] hover:border-[#B493FF]/15 transition-all px-4 py-4 text-left"
+                        data-query="${escapeHtml(height)}">
+                    <div class="flex items-center justify-between gap-4">
+                        <div class="min-w-0 flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-[13px] bg-[#B493FF]/10 border border-[#B493FF]/10 text-[#B493FF] flex items-center justify-center shrink-0">
+                                <span class="material-symbols-outlined text-[19px]">deployed_code</span>
+                            </div>
+
+                            <div class="min-w-0">
+                                <div class="flex items-center gap-2 min-w-0">
+                                    <span class="font-headline font-bold text-sm text-white">#${escapeHtml(formatNumber(height, 0))}</span>
+                                    <span class="text-[10px] text-white/20">•</span>
+                                    <span class="font-mono text-[11px] text-white/30 truncate">${escapeHtml(shortHash(hash, 10, 8))}</span>
+                                </div>
+
+                                <div class="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-white/25">
+                                    <span>${escapeHtml(timeAgo(timestamp))}</span>
+                                    <span>${escapeHtml(formatDate(timestamp))}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <span class="material-symbols-outlined text-[18px] text-white/18 shrink-0">chevron_right</span>
+                    </div>
+                </button>`;
+        }
+
+        function txCard(hash, txData = null) {
+            const { tx, parsed } = extractTxData(txData || {});
+            const confirmations = tx.confirmations;
+            const burnAmount = getBurnAmountAtomic(tx, parsed);
+            const isBurn = burnAmount > 0n || getTxTypeValue(tx, parsed) === TX_TYPE_BURN;
+
+            return `
+                <button type="button"
+                        class="lookup-inline explorer-clickable w-full rounded-[18px] border ${isBurn ? "border-orange-300/10 bg-orange-300/[0.025] hover:bg-orange-300/[0.05] hover:border-orange-300/20" : "border-white/[0.045] bg-white/[0.018] hover:bg-[#B493FF]/[0.045] hover:border-[#B493FF]/15"} transition-all px-4 py-4 text-left"
+                        data-query="${escapeHtml(hash)}">
+                    <div class="flex items-center justify-between gap-4">
+                        <div class="min-w-0 flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-[13px] ${isBurn ? "bg-orange-300/[0.06] border border-orange-300/10 text-orange-200/80" : "bg-[#B493FF]/10 border border-[#B493FF]/10 text-[#B493FF]"} flex items-center justify-center shrink-0">
+                                <span class="material-symbols-outlined text-[19px]">${isBurn ? "local_fire_department" : "swap_horiz"}</span>
+                            </div>
+                            <div class="min-w-0">
+                                <div class="flex flex-wrap items-center gap-2 min-w-0">
+                                    <span class="font-mono text-[11px] sm:text-xs text-white/65 truncate">${escapeHtml(shortHash(hash, 15, 12))}</span>
+                                    ${isBurn ? `<span class="rounded-full border border-orange-300/10 bg-orange-300/[0.06] px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-orange-200/70">Burn</span>` : ""}
+                                </div>
+                                <div class="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-white/25">
+                                    <span>${tx.block_height != null ? `Block #${escapeHtml(formatNumber(tx.block_height, 0))}` : "Pending"}</span>
+                                    <span>${confirmations != null ? `${escapeHtml(confirmations)} confirmation${Number(confirmations) === 1 ? "" : "s"}` : "Transaction"}</span>
+                                    ${isBurn ? `<span class="text-orange-200/55">${escapeHtml(formatAtomicVnr(burnAmount))} burned</span>` : ""}
+                                </div>
+                            </div>
+                        </div>
+                        <span class="material-symbols-outlined text-[18px] text-white/18 shrink-0">chevron_right</span>
+                    </div>
+                </button>`;
+        }
+
+        async function loadRecentTransactions(hashes) {
+            const unique = [...new Set(Array.isArray(hashes) ? hashes : [])];
+            const list = unique.slice(0, RECENT_TX_COUNT);
+
+            if (!list.length) {
+                els.txs.innerHTML = '<div class="px-3 py-8 text-center text-sm text-white/25">No recent transactions found in the displayed blocks.</div>';
+                return;
+            }
+
+                                                                             
+            els.txs.innerHTML = list.map(hash => txCard(hash)).join("");
+
+            const resolved = await Promise.all(
+                list.map(async hash => {
+                    try {
+                        const payload = await fetchJson(
+                            `/lookup_hash?q=${encodeURIComponent(hash)}`
+                        );
+
+                        return [
+                            hash,
+                            payload.type === "tx" ? payload.data : null
+                        ];
+                    } catch (error) {
+                        console.warn(`Could not enrich tx ${hash}:`, error);
+                        return [hash, null];
+                    }
+                })
+            );
+
+            els.txs.innerHTML = resolved
+                .map(([hash, data]) => txCard(hash, data))
+                .join("");
+        }
+
+        async function collectRecentTransactionHashes(blocks) {
+            const hashes = [];
+            const seen = new Set();
+
+                                                                         
+                                                            
+            for (const block of blocks) {
+                if (hashes.length >= RECENT_TX_COUNT) {
+                    break;
+                }
+
+                if (!block?.hash) {
+                    continue;
+                }
+
+                try {
+                                                               
+                    const payload = await fetchJson(
+                        `/lookup_hash?q=${encodeURIComponent(block.hash)}`
+                    );
+
+                    if (payload.type !== "block") {
+                        continue;
+                    }
+
+                    const blockTxHashes = getTxHashes(payload.data || {});
+
+                    for (const txHash of blockTxHashes) {
+                        if (!seen.has(txHash)) {
+                            seen.add(txHash);
+                            hashes.push(txHash);
+                        }
+
+                        if (hashes.length >= RECENT_TX_COUNT) {
+                            break;
+                        }
+                    }
+                } catch (error) {
+                    console.warn(
+                        `Could not load transactions for block ${block.hash}:`,
+                        error
+                    );
+                }
+            }
+
+            return hashes;
+        }
+
+        async function loadRecentBlocks() {
+            if (refreshingLatest) {
+                return;
+            }
+
+            refreshingLatest = true;
+
+            els.blocks.innerHTML = `
+                <div class="px-3 py-8 flex items-center justify-center gap-3 text-sm text-white/25">
+                    <span class="w-4 h-4 rounded-full border-2 border-white/10 border-t-[#B493FF] animate-spin"></span>
+                    Loading recent blocks…
+                </div>`;
+
+            els.txs.innerHTML = `
+                <div class="px-3 py-8 flex items-center justify-center gap-3 text-sm text-white/25">
+                    <span class="w-4 h-4 rounded-full border-2 border-white/10 border-t-[#B493FF] animate-spin"></span>
+                    Loading recent transactions…
+                </div>`;
+
+            try {
+                                                                     
+                const networkBlocks = await getNetworkStatsPage(0);
+
+                                                                            
+                                                                 
+                const blocks = networkBlocks.slice(1, RECENT_BLOCK_COUNT + 1);
+
+                if (!blocks.length) {
+                    throw new Error("No recent blocks returned.");
+                }
+
+                els.blocks.innerHTML = blocks
+                    .map(block => blockCard(block))
+                    .join("");
+
+                                                              
+                                                                            
+
+                                                                             
+                                                               
+                latestBlockTxHashes = await collectRecentTransactionHashes(blocks);
+
+                await loadRecentTransactions(latestBlockTxHashes);
+            } catch (error) {
+                console.error("Failed to load latest explorer activity:", error);
+
+                els.blocks.innerHTML = `
+                    <div class="px-4 py-8 text-center">
+                        <p class="text-sm text-white/35">Unable to load recent blocks.</p>
+                        <p class="mt-1 text-[11px] text-white/20">${escapeHtml("Please try again shortly.")}</p>
+                    </div>`;
+
+                els.txs.innerHTML = `
+                    <div class="px-4 py-8 text-center">
+                        <p class="text-sm text-white/35">Unable to load recent transactions.</p>
+                        <p class="mt-1 text-[11px] text-white/20">Recent transactions are read from the newest blocks.</p>
+                    </div>`;
+            } finally {
+                refreshingLatest = false;
+            }
+        }
+
+        function describeStakedData(value) {
+            if (value == null) return "Network staking";
+            if (typeof value === "string" || typeof value === "number") return String(value);
+            if (Array.isArray(value)) return `${value.length} staking entr${value.length === 1 ? "y" : "ies"}`;
+            if (typeof value === "object") {
+                const count = Object.keys(value).length;
+                return `${count} staking data field${count === 1 ? "" : "s"}`;
+            }
+            return "Network staking";
+        }
+
+        async function loadTokenInfo({ refreshLatest = true } = {}) {
+            setStatsLoading(true);
+
+            try {
+                const data = await fetchJson("/tokeninfo");
+
+                els.tokenPrice.textContent = formatUsd(data.last_price);
+                els.marketCap.textContent = formatUsd(data.market_cap);
+                els.hashrate.textContent = formatHashrate(data.hashrate);
+                els.height.textContent = formatNumber(data.height, 0);
+                els.circulating.textContent = `${formatCompact(data.circulating_supply, 2)} VNR`;
+                els.staked.textContent = `${formatCompact(Number(data.staked_supply || 0) + 7000000, 2)} VNR`;
+                els.stakedData.textContent = describeStakedData(data.staked_data);
+                els.stakedData.title = typeof data.staked_data === "object"
+                    ? JSON.stringify(data.staked_data)
+                    : String(data.staked_data ?? "");
+
+                const newHeight = Number(data.height);
+                currentHeight = Number.isFinite(newHeight) ? newHeight : currentHeight;
+            } catch (error) {
+                console.error("Failed to load /tokeninfo:", error);
+
+                [els.tokenPrice, els.marketCap, els.hashrate, els.height, els.circulating, els.staked]
+                    .filter(Boolean)
+                    .forEach(el => { el.textContent = "—"; });
+
+                if (els.stakedData) {
+                    els.stakedData.textContent = "Network data unavailable";
+                }
+            }
+        }
+
+        document.addEventListener("click", async (event) => {
+            const lookupButton = event.target.closest(".lookup-inline");
+            if (lookupButton?.dataset.query) {
+                lookupQuery(lookupButton.dataset.query);
+                return;
+            }
+
+            const copyButton = event.target.closest(".copy-value");
+            if (copyButton?.dataset.copy) {
+                try {
+                    await navigator.clipboard.writeText(copyButton.dataset.copy);
+                    const icon = copyButton.querySelector(".material-symbols-outlined");
+                    if (icon) {
+                        const old = icon.textContent;
+                        icon.textContent = "check";
+                        setTimeout(() => { icon.textContent = old; }, 1200);
+                    }
+                } catch (_) {}
+            }
+        });
+
+        els.lookup?.addEventListener("click", () => lookupQuery(els.searchbar.value));
+
+        els.searchbar?.addEventListener("keydown", (event) => {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                lookupQuery(els.searchbar.value);
+            }
+        });
+
+        els.closeResult?.addEventListener("click", () => {
+            els.resultSection.classList.add("hidden");
+        });
+
+        els.refreshBlocks?.addEventListener("click", async () => {
+            await loadRecentBlocks();
+        });
+
+        els.refreshTxs?.addEventListener("click", async () => {
+            await loadRecentBlocks();
+        });
+
+        async function refreshExplorer() {
+            await Promise.all([
+                loadTokenInfo({ refreshLatest: false }),
+                loadRecentBlocks()
+            ]);
+        }
+
+                                                                                      
+        const queryParams = new URLSearchParams(location.search);
+        if (queryParams.get("embed") === "1") {
+            document.documentElement.classList.add("embedded-explorer");
+            const initialQuery = queryParams.get("q");
+            if (initialQuery) lookupQuery(initialQuery, { scroll: false });
+        } else {
+            refreshExplorer();
+            setInterval(refreshExplorer, TOKENINFO_INTERVAL_MS);
+        }
+    })();
+    </script>
+    
+</html>

@@ -1,0 +1,79 @@
+.native-dialog{border:1px solid #cc97ff44;border-radius:24px;padding:26px;background:#211a2b;color:#f5eefc;max-width:min(560px,92vw);font-family:'Space Grotesk',sans-serif;box-shadow:0 20px 80px #0009}.native-dialog::backdrop{background:#08050cbb;backdrop-filter:blur(8px)}.native-dialog h2{font-size:22px;margin:0 0 14px}.native-dialog p{white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px;line-height:1.65;color:#c3b4cf}.native-dialog input{display:block;width:100%;padding:13px 15px;border-radius:12px;border:1px solid #cc97ff44;background:#15111e;color:#f5eefc;margin:18px 0}.native-dialog-actions{display:flex;justify-content:flex-end;gap:12px;margin-top:20px}.native-dialog button{border:0;border-radius:12px;padding:12px 18px;color:#d7c4e7;background:#352940;cursor:pointer}.native-dialog button.native-primary{background:linear-gradient(135deg,#cc97ff,#c088f4);color:#24063c;font-weight:700}#native-sync-status{position:fixed;right:24px;bottom:8px;z-index:500;background:#211a2be8;border:1px solid #cc97ff22;border-radius:999px;padding:5px 12px;color:#beadcc;font-size:10px;font-family:inherit;cursor:pointer}.native-local-note{font-size:11px;color:#aa98bb;line-height:1.5}
+
+@font-face {
+    font-family: 'Material Symbols Outlined';
+    font-style: normal;
+    font-weight: 400;
+    font-display: block;
+    src: url('../fonts/material-symbols-outlined-latin-400-normal.woff2') format('woff2');
+}
+
+.material-symbols-outlined {
+    font-family: 'Material Symbols Outlined';
+    font-weight: 400;
+    font-style: normal;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-block;
+    white-space: nowrap;
+    word-wrap: normal;
+    direction: ltr;
+    font-feature-settings: 'liga';
+    -webkit-font-feature-settings: 'liga';
+    -webkit-font-smoothing: antialiased;
+    flex-shrink: 0;
+}
+
+@font-face{font-family:Manrope;font-style:normal;font-weight:200;font-display:swap;src:url('../fonts/manrope-latin-200-normal.woff2') format('woff2')}
+@font-face{font-family:Manrope;font-style:normal;font-weight:300;font-display:swap;src:url('../fonts/manrope-latin-300-normal.woff2') format('woff2')}
+@font-face{font-family:Manrope;font-style:normal;font-weight:400;font-display:swap;src:url('../fonts/manrope-latin-400-normal.woff2') format('woff2')}
+@font-face{font-family:Manrope;font-style:normal;font-weight:500;font-display:swap;src:url('../fonts/manrope-latin-500-normal.woff2') format('woff2')}
+@font-face{font-family:Manrope;font-style:normal;font-weight:600;font-display:swap;src:url('../fonts/manrope-latin-600-normal.woff2') format('woff2')}
+@font-face{font-family:Manrope;font-style:normal;font-weight:700;font-display:swap;src:url('../fonts/manrope-latin-700-normal.woff2') format('woff2')}
+@font-face{font-family:Manrope;font-style:normal;font-weight:800;font-display:swap;src:url('../fonts/manrope-latin-800-normal.woff2') format('woff2')}
+
+
+                                                             
+.native-dialog {
+    width: min(620px, calc(100vw - 64px));
+    max-width: calc(100vw - 32px);
+    min-height: 240px;
+    max-height: calc(100dvh - 80px);
+    padding: 32px;
+    overflow: auto;
+    box-sizing: border-box;
+}
+.native-dialog.native-dialog-large { width: min(760px, calc(100vw - 64px)); min-height: 310px; }
+.native-dialog form { display: flex; flex-direction: column; min-height: 175px; }
+.native-dialog.native-dialog-large form { min-height: 245px; }
+.native-dialog h2 { font-size: 26px; line-height: 1.25; }
+.native-dialog p { font-size: 14px; line-height: 1.7; }
+.native-dialog input { box-sizing: border-box; min-height: 50px; font-size: 15px; }
+.native-dialog-actions { margin-top: auto; padding-top: 24px; flex-wrap: wrap; }
+.native-dialog[open] { animation: wallet-modal-in .26s cubic-bezier(.2,.8,.2,1) both; }
+.native-dialog[open]::backdrop { background: rgba(6,4,13,.64); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); animation: wallet-backdrop-in .26s ease both; }
+.native-dialog[open].is-closing { animation: wallet-modal-out .22s ease both; pointer-events: none; }
+.native-dialog[open].is-closing::backdrop { animation: wallet-backdrop-out .22s ease both; }
+.wallet-modal-overlay, #trust-modal, #otp-modal {
+    background: rgba(6,4,13,.60)!important;
+    backdrop-filter: blur(16px) saturate(.85)!important;
+    -webkit-backdrop-filter: blur(16px) saturate(.85)!important;
+    transition: opacity .22s ease!important;
+}
+.wallet-modal-overlay > [id$="Backdrop"] { background: transparent!important; backdrop-filter: none!important; -webkit-backdrop-filter: none!important; }
+.wallet-modal-overlay:not(.hidden):not(.opacity-0) .wallet-modal-panel { animation: wallet-modal-in .26s cubic-bezier(.2,.8,.2,1) both; }
+.wallet-modal-overlay.opacity-0 .wallet-modal-panel,
+.wallet-modal-overlay.is-closing .wallet-modal-panel { animation: wallet-modal-out .22s ease both; }
+.wallet-modal-overlay:has(> [id$="Backdrop"].opacity-0) .wallet-modal-panel { animation: wallet-modal-out .22s ease both; }
+.wallet-modal-overlay:not(.hidden):has(> [id$="Backdrop"].opacity-0) { animation: wallet-backdrop-out .22s ease both; }
+.wallet-modal-overlay:not(.hidden):has(> [id$="Backdrop"]:not(.opacity-0)) { animation: wallet-backdrop-in .26s ease both; }
+.explorer-overlay.is-closing .explorer-panel { animation: wallet-modal-out .18s ease both; }
+@keyframes wallet-modal-in { from { opacity:0; transform:translateY(14px) scale(.95); } to { opacity:1; transform:translateY(0) scale(1); } }
+@keyframes wallet-modal-out { from { opacity:1; transform:translateY(0) scale(1); } to { opacity:0; transform:translateY(10px) scale(.96); } }
+@keyframes wallet-backdrop-in { from { opacity:0; } to { opacity:1; } }
+@keyframes wallet-backdrop-out { from { opacity:1; } to { opacity:0; } }
+@media (prefers-reduced-motion:reduce) {
+    .native-dialog[open], .native-dialog[open]::backdrop, .wallet-modal-overlay, .wallet-modal-panel,
+    .wallet-modal-overlay .wallet-modal-panel { animation-duration:.01ms!important; transition-duration:.01ms!important; }
+}

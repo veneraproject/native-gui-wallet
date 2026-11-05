@@ -1,0 +1,241 @@
+<!DOCTYPE html> 
+<html class="no-js" lang="zxx"> 
+    <head>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' https://veneralabs.org https://pool.veneralabs.org; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'"/>
+<link rel="stylesheet" href="assets/css/native.css"/>
+<script src="assets/js/native-api.js"></script>
+<script src="assets/js/wallet-session.js"></script> 
+        <meta charset="utf-8"/> 
+        <meta http-equiv="x-ua-compatible" content="ie=edge"/> 
+        <title>Venera GUI</title>         
+        <meta name="description" content=""/> 
+        <meta name="viewport" content="width=device-width, initial-scale=1"/> 
+        <link rel="shortcut icon" type="image/x-icon" href="assets/images/icon.ico"/> 
+                 
+        <meta property="og:title" content="Venera">
+        <meta property="og:description" content="Merging scalability, payments & privacy">
+        <meta property="og:image" content="https://veneralabs.org">
+        <meta property="og:url" content="https://veneralabs.org">
+        <meta property="og:type" content="website">
+        <link rel="stylesheet" href="assets/css/bootstrap.min.css"/> 
+        
+        <link rel="stylesheet" href="assets/css/LineIcons.3.0.css"/> 
+        <link rel="stylesheet" href="assets/css/animate.css"/> 
+        <link rel="stylesheet" href="assets/css/roadmap.css"/> 
+         
+        <link rel="stylesheet" href="assets/css/glightbox.min.css"/> 
+        <link rel="stylesheet" href="assets/css/main.css"/> 
+    <style>.utility-titlebar{position:fixed;top:0;left:0;right:0;height:34px;z-index:999999;background:#201a2b;color:#bdb0cb;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:26px 26px 0 0;-webkit-app-region:drag;font:11px Arial,sans-serif}.utility-titlebar img{width:16px;height:16px}.utility-titlebar-actions{position:absolute;right:12px;display:flex;gap:6px;-webkit-app-region:no-drag}.utility-titlebar button{border:0;border-radius:50%;width:23px;height:23px;color:white;background:#30263d}body{padding-top:34px!important}.navbar-area{top:34px!important}</style></head>     
+    <body><div class="utility-titlebar"><img src="assets/images/vg.png" alt=""><span style="color:#bdb0cb">Venera GUI</span><div class="utility-titlebar-actions"><button type="button" data-wallet-window-action="minimize" aria-label="Minimize">—</button><button type="button" data-wallet-window-action="close" aria-label="Close">✕</button></div></div> 
+        <header class="header navbar-area sticky" id="navbar-h" style="backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);background-color: rgba(13, 13, 13, 0.7);"> 
+            <div> 
+                <div class="row align-items-center "> 
+                    <div id="navbar" class="col-lg-12"> 
+                        <div class="nav-inner "> 
+                                                         
+                            <nav class="navbar navbar-expand-lg" id="navbar-z"> <a class="navbar-brand" href="https://veneralabs.org/"> <img src="assets/images/vg.png" style="margin-left: 130px" alt="Logo"> </a> 
+                                <button class="navbar-toggler mobile-menu-btn" style="z-index: 999; margin-right: 20px" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"> <span class="toggler-icon"></span> <span class="toggler-icon"></span> <span class="toggler-icon"></span> 
+                                </button>                                 
+                                <div class="collapse navbar-collapse sub-menu-bar" id="navbarSupportedContent" style="overflow:hidden; justify-content: flex-end;"> 
+                                    <ul id="nav" class="navbar-nav ms-auto"> 
+                                        <li class="nav-item"> <a href="https://veneralabs.org/" style="font-size: 16px;">Home</a> 
+                                        </li>                                         
+                                        <li class="nav-item nav-spacing"> <a href="https://veneralabs.org/network" style="font-size: 16px">Network</a> 
+                                        </li>                                         
+                                        <li class="nav-item nav-spacing"> <a href="roadmap.html" style="font-size: 16px">Roadmap</a> 
+                                        </li>                                         
+                                        <li class="nav-item nav-spacing"> <a href="https://veneralabs.org" style="font-size: 16px">Litepaper</a> 
+                                        </li>                                         
+                                        <li class="nav-item nav-spacing"> <a href="https://veneralabs.org" style="font-size: 16px" id="wallets">Wallets 	&#9660;</a> 
+                                        </li>                                         
+                                        <li class="nav-item nav-spacing"> <a style="font-size: 16px" aria-label="Toggle navigation">Blog</a> 
+                                        </li>                                         
+                                        <li class="nav-item nav-spacing"> <a style="font-size: 16px" aria-label="Toggle navigation">FAQs</a> 
+                                        </li>                                         
+                                    </ul>                                     
+                                </div>                                 
+                                                                 
+                                <div class="button"> <a href="account.html" class="btn" style="margin-right: 30px;background-image: linear-gradient(57deg, #ca2bd0, #ffc619); color: #fff"><strong>Launch App</strong></a> 
+                                </div>                                 
+                            </nav>                             
+                                                         
+                        </div>                         
+                    </div>                     
+                </div>                 
+                                 
+            </div>             
+                         
+        </header>         
+                 
+                 
+                 
+                 
+        <div class="feature section" style="background-color: #0D0D0D; padding-top: 200px; padding-bottom: 600px"> 
+            <div class="bg-animation">
+                <div id="stars"></div>
+            </div>             
+            <div class="container"> 
+                <div class="row"> 
+                    <div class="col-lg-4 col-md-6 col-12 wow fadeInUp" data-wow-delay=".2s"> 
+                        <div class="feature-box glow-on-hover"> 
+                            <h4 class="text-white mb-2 gradient-title">2024 Q4</h4> 
+                            <div class="separator"></div>
+                            <h5 class="text-white mb-2 desc-color">Venera Launch</h5> 
+                            <p style="color: #999">Launch of Venera mainnet and enabling of user mining</p><i class="mt-20 rdsa fa-solid fa-check"></i> <a class="rdsa">Complete</a>
+                        </div>                         
+                    </div>                     
+                    <div class="col-lg-4 col-md-6 col-12 wow fadeInUp" data-wow-delay=".4s"> 
+                        <div class="feature-box glow-on-hover"> 
+                            <h4 class="text-white mb-2 gradient-title">2024 Q4</h4> 
+                            <div class="separator"></div>
+                            <h5 class="text-white mb-2 desc-color">Website Revamp</h5> 
+                            <p style="color: #999">Major design changes to the main Venera website</p><i class="mt-20 rdsa fa-solid fa-check"></i> <a class="rdsa">Complete</a>
+                        </div>                         
+                    </div>                     
+                    <div class="col-lg-4 col-md-6 col-12 wow fadeInUp" data-wow-delay=".6s"> 
+                        <div class="feature-box glow-on-hover"> 
+                            <h4 class="text-white mb-2 gradient-title">2024 Q4</h4> 
+                            <div class="separator"></div>
+                            <h5 class="text-white mb-2 desc-color">Explorer Launch</h5> 
+                            <p style="color: #999">Launch of a custom blockchain explorer for Venera</p><i class="mt-20 rdsa fa-solid fa-check"></i> <a class="rdsa">Complete</a>
+                        </div>                         
+                    </div>                     
+                    <div class="col-lg-4 col-md-6 col-12 wow fadeInUp" data-wow-delay=".6s"> 
+                        <div class="feature-box glow-on-hover"> 
+                            <h4 class="text-white mb-2 gradient-title">2025 Q1</h4> 
+                            <div class="separator"></div>
+                            <h5 class="text-white mb-2 desc-color">First Listings</h5> 
+                            <p style="color: #999">Listing on exchanges to create a desireable initial liquidity</p>
+                        </div>                         
+                    </div>                     
+                    <div class="col-lg-4 col-md-6 col-12 wow fadeInUp" data-wow-delay=".6s"> 
+                        <div class="feature-box glow-on-hover"> 
+                            <h4 class="text-white mb-2 gradient-title">2025 Q1-2</h4> 
+                            <div class="separator"></div>
+                            <h5 class="text-white mb-2 desc-color">Swap Launch</h5> 
+                            <p style="color: #999">Launching Swap DEX to enable staking and swaps</p>
+                        </div>                         
+                    </div>                     
+                    <div class="col-lg-4 col-md-6 col-12 wow fadeInUp" data-wow-delay=".6s"> 
+                        <div class="feature-box glow-on-hover"> 
+                            <h4 class="text-white mb-2 gradient-title">2025 Q1-Q2</h4> 
+                            <div class="separator"></div>
+                            <h5 class="text-white mb-2 desc-color">Wallet Launch</h5> 
+                            <p style="color: #999">Launching Wallet, a browser extension wallet & payment processor</p>
+                        </div>                         
+                    </div>                     
+                    <div class="col-lg-4 col-md-6 col-12 wow fadeInUp" data-wow-delay=".6s"> 
+                        <div class="feature-box glow-on-hover"> 
+                            <h4 class="text-white mb-2 gradient-title">2025 Q2</h4> 
+                            <div class="separator"></div>
+                            <h5 class="text-white mb-2 desc-color">Additional Listings</h5> 
+                            <p style="color: #999">Listing Venera on high tier exchanges to allow for wider adoption</p>
+                        </div>                         
+                    </div>                     
+                    <div class="col-lg-4 col-md-6 col-12 wow fadeInUp" data-wow-delay=".6s"> 
+                        <div class="feature-box glow-on-hover"> 
+                            <h4 class="text-white mb-2 gradient-title">2025 Q2-3</h4> 
+                            <div class="separator"></div>
+                            <h5 class="text-white mb-2 desc-color">USDV Stablecoin</h5> 
+                            <p style="color: #999">Launching USDV on ERC-20 and BSC-20 protocols</p>
+                        </div>                         
+                    </div>                     
+                    <div class="col-lg-4 col-md-6 col-12 wow fadeInUp" data-wow-delay=".6s"> 
+                        <div class="feature-box glow-on-hover"> 
+                            <h4 class="text-white mb-2 gradient-title">2025 Q3</h4> 
+                            <div class="separator"></div>
+                            <h5 class="text-white mb-2 desc-color">Wallet USDV support</h5> 
+                            <p style="color: #999">Adding USDV support to Wallet for instant stablecoin payments</p>
+                        </div>                         
+                    </div>                     
+                </div>                 
+            </div>             
+        </div>         
+                 
+                 
+                 
+                 
+        <footer class="footer section" style="background-color: #291D2B"> 
+                         
+            <div class="footer-top"> 
+                <div class="container"> 
+                    <div class="inner-content"> 
+                        <div class="row"> 
+                            <div class="col-lg-4 col-md-6 col-12"> 
+                                                                 
+                                <div class="single-footer f-about"> 
+                                    <div class="logo"> <a href="https://veneralabs.org/"> <img src="assets/images/vg.png" alt="#"> </a> 
+                                    </div>                                     
+                                    <p>Merging scalability, payments & privacy</p> 
+                                    <ul class="social"> 
+                                        <li>
+                                            <a href="https://veneralabs.org"><i class="lni lni-twitter-original"></i></a>
+                                        </li>                                         
+                                        <li>
+                                            <a href="https://discord.gg/ehXf6tKU"><i class="lni lni-discord"></i></a>
+                                        </li>                                         
+                                        <li>
+                                            <a href="https://veneralabs.org"><i class="lni lni-medium"></i></a>
+                                        </li>                                         
+                                        <li>
+                                            <a href="https://veneralabs.org"><i class="lni lni-telegram"></i></a>
+                                        </li>                                         
+                                    </ul>                                     
+                                </div>                                 
+                                                                 
+                            </div>                             
+                            <div class="col-lg-2 col-md-6 col-12"> 
+                                <div class="single-footer f-link"> 
+                                    <h3>Community</h3> 
+                                    <ul> 
+                                        <li>
+                                            <a href="https://veneralabs.org">Telegram</a>
+                                        </li>                                         
+                                        <li>
+                                            <a href="https://discord.gg/ehXf6tKU">Discord</a>
+                                        </li>                                         
+                                        <li>
+                                            <a href="https://veneralabs.org">Twitter (X)</a>
+                                        </li>                                         
+                                        <li>
+                                            <a href="https://veneralabs.org">Medium</a>
+                                        </li>                                         
+                                    </ul>                                     
+                                </div>                                 
+                                                                 
+                            </div>                             
+                                                         
+                            <div class="col-lg-4 col-md-6 col-12"> 
+                                                                 
+                                                                 
+                            </div>                             
+                        </div>                         
+                    </div>                     
+                </div>                 
+            </div>             
+                         
+                         
+            <div class="copyright-area"> 
+                <div class="container"> 
+                    <div class="inner-content"> 
+                        <div class="row"> 
+                            <div class="col-lg-6 col-md-6 col-12"> 
+                                <p class="copyright-text">© Copyright 2024 Venera</p> 
+                            </div>                             
+                        </div>                         
+                    </div>                     
+                </div>                 
+            </div>             
+                         
+        </footer>         
+                 
+                 <a href="#" class="scroll-top"> <i class="lni lni-chevron-up"></i> </a> 
+                 
+        <script src="assets/js/bootstrap.min.js"></script>         
+                 
+                 
+                 
+        <script src="assets/js/count-up.min.js"></script>         
+                 
+    </body>     
+</html>

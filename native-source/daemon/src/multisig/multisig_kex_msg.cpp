@@ -1,0 +1,294 @@
+                                       
+                                              
+  
+                       
+  
+                                                                                       
+                                                            
+  
+                                                                                         
+                                              
+  
+                                                                                         
+                                                                                  
+                                               
+  
+                                                                                       
+                                                                                     
+                               
+  
+                                                                                      
+                                                                                          
+                                                                                         
+                                                                                       
+                                                                               
+                                                                                          
+                                                                                    
+                                                                                          
+                                                                               
+
+#include "multisig_kex_msg.h"
+#include "multisig_kex_msg_serialization.h"
+
+#include "common/base58.h"
+#include "crypto/crypto.h"
+extern "C"
+{
+#include "crypto/crypto-ops.h"
+}
+#include "cryptonote_basic/cryptonote_format_utils.h"
+#include "include_base_utils.h"
+#include "ringct/rctOps.h"
+#include "serialization/binary_archive.h"
+#include "serialization/serialization.h"
+
+#include <boost/utility/string_ref.hpp> 
+
+#include <sstream>
+#include <utility>
+#include <vector>
+
+
+#undef MONERO_DEFAULT_LOG_CATEGORY
+#define MONERO_DEFAULT_LOG_CATEGORY "multisig"
+
+const boost::string_ref MULTISIG_KEX_V1_MAGIC{"MultisigV1"};
+const boost::string_ref MULTISIG_KEX_MSG_V1_MAGIC{"MultisigxV1"};
+const boost::string_ref MULTISIG_KEX_MSG_V2_MAGIC_1{"MultisigxV2R1"};   
+const boost::string_ref MULTISIG_KEX_MSG_V2_MAGIC_N{"MultisigxV2Rn"};   
+
+namespace multisig
+{
+   
+   
+   
+  multisig_kex_msg::multisig_kex_msg(const std::uint32_t round,
+    const crypto::secret_key &signing_privkey,
+    std::vector<crypto::public_key> msg_pubkeys,
+    const crypto::secret_key &msg_privkey) :
+      m_kex_round{round}
+  {
+    CHECK_AND_ASSERT_THROW_MES(round > 0, "Kex round must be > 0.");
+    CHECK_AND_ASSERT_THROW_MES(sc_check((const unsigned char*)&signing_privkey) == 0 &&
+      signing_privkey != crypto::null_skey, "Invalid msg signing key.");
+
+    if (round == 1)
+    {
+      CHECK_AND_ASSERT_THROW_MES(sc_check((const unsigned char*)&msg_privkey) == 0 &&
+        msg_privkey != crypto::null_skey, "Invalid msg privkey.");
+
+      m_msg_privkey = msg_privkey;
+    }
+    else
+    {
+      for (const auto &pubkey : msg_pubkeys)
+      {
+        CHECK_AND_ASSERT_THROW_MES(pubkey != crypto::null_pkey && pubkey != rct::rct2pk(rct::identity()),
+          "Pubkey for message was invalid.");
+        CHECK_AND_ASSERT_THROW_MES((rct::scalarmultKey(rct::pk2rct(pubkey), rct::curveOrder()) == rct::identity()),
+          "Pubkey for message was not in prime subgroup.");
+      }
+
+      m_msg_pubkeys = std::move(msg_pubkeys);
+    }
+    CHECK_AND_ASSERT_THROW_MES(crypto::secret_key_to_public_key(signing_privkey, m_signing_pubkey),
+      "Failed to derive public key");
+
+     
+    construct_msg(signing_privkey);
+  }
+   
+   
+   
+  multisig_kex_msg::multisig_kex_msg(std::string msg) : m_msg{std::move(msg)}
+  {
+    parse_and_validate_msg();
+  }
+   
+   
+   
+  crypto::hash multisig_kex_msg::get_msg_to_sign() const
+  {
+     
+     
+     
+     
+
+    std::string data;
+    CHECK_AND_ASSERT_THROW_MES(MULTISIG_KEX_MSG_V2_MAGIC_1.size() == MULTISIG_KEX_MSG_V2_MAGIC_N.size(),
+      "Multisig kex msg magic inconsistency.");
+    data.reserve(MULTISIG_KEX_MSG_V2_MAGIC_1.size() + 4 + 32*(1 + (m_kex_round == 1 ? 1 : 0) + m_msg_pubkeys.size()));
+
+     
+    if (m_kex_round == 1)
+      data.append(MULTISIG_KEX_MSG_V2_MAGIC_1.data(), MULTISIG_KEX_MSG_V2_MAGIC_1.size());
+    else
+      data.append(MULTISIG_KEX_MSG_V2_MAGIC_N.data(), MULTISIG_KEX_MSG_V2_MAGIC_N.size());
+
+     
+    for (std::size_t i{0}; i < 4; ++i)
+    {
+      data += static_cast<char>(m_kex_round >> i*8);
+    }
+
+     
+    data.append((const char *)&m_signing_pubkey, sizeof(crypto::public_key));
+
+     
+    if (m_kex_round == 1)
+      data.append((const char *)&m_msg_privkey, sizeof(crypto::secret_key));
+    else
+    {
+       
+
+       
+      for (const auto &key : m_msg_pubkeys)
+        data.append((const char *)&key, sizeof(crypto::public_key));
+    }
+
+     
+    crypto::hash hash;
+    crypto::cn_fast_hash(data.data(), data.size(), hash);
+
+    return hash;
+  }
+   
+   
+   
+  void multisig_kex_msg::construct_msg(const crypto::secret_key &signing_privkey)
+  {
+     
+     
+     
+     
+     
+
+     
+    crypto::signature msg_signature;
+    crypto::hash msg_to_sign{get_msg_to_sign()};
+    crypto::generate_signature(msg_to_sign, m_signing_pubkey, signing_privkey, msg_signature);
+
+     
+    m_msg.clear();
+
+    std::stringstream serialized_msg_ss;
+    binary_archive<true> b_archive(serialized_msg_ss);
+
+    if (m_kex_round == 1)
+    {
+      m_msg.append(MULTISIG_KEX_MSG_V2_MAGIC_1.data(), MULTISIG_KEX_MSG_V2_MAGIC_1.size());
+
+      multisig_kex_msg_serializable_round1 msg_serializable;
+      msg_serializable.msg_privkey    = m_msg_privkey;
+      msg_serializable.signing_pubkey = m_signing_pubkey;
+      msg_serializable.signature      = msg_signature;
+
+      CHECK_AND_ASSERT_THROW_MES(::serialization::serialize(b_archive, msg_serializable),
+        "Failed to serialize multisig kex msg");
+    }
+    else
+    {
+      m_msg.append(MULTISIG_KEX_MSG_V2_MAGIC_N.data(), MULTISIG_KEX_MSG_V2_MAGIC_N.size());
+
+      multisig_kex_msg_serializable_general msg_serializable;
+      msg_serializable.kex_round      = m_kex_round;
+      msg_serializable.msg_pubkeys    = m_msg_pubkeys;
+      msg_serializable.signing_pubkey = m_signing_pubkey;
+      msg_serializable.signature      = msg_signature;
+
+      CHECK_AND_ASSERT_THROW_MES(::serialization::serialize(b_archive, msg_serializable),
+        "Failed to serialize multisig kex msg");
+    }
+
+    m_msg.append(tools::base58::encode(serialized_msg_ss.str()));
+  }
+   
+   
+   
+  void multisig_kex_msg::parse_and_validate_msg()
+  {
+    CHECK_AND_ASSERT_THROW_MES(MULTISIG_KEX_MSG_V2_MAGIC_1.size() == MULTISIG_KEX_MSG_V2_MAGIC_N.size(),
+      "Multisig kex msg magic inconsistency.");
+    CHECK_AND_ASSERT_THROW_MES(MULTISIG_KEX_MSG_V2_MAGIC_1.size() >= MULTISIG_KEX_V1_MAGIC.size(),
+      "Multisig kex msg magic inconsistency.");
+
+     
+    CHECK_AND_ASSERT_THROW_MES(m_msg.size() >= MULTISIG_KEX_MSG_V2_MAGIC_1.size(), "Kex message unexpectedly small.");
+    CHECK_AND_ASSERT_THROW_MES(m_msg.substr(0, MULTISIG_KEX_V1_MAGIC.size()) != MULTISIG_KEX_V1_MAGIC,
+      "V1 multisig kex messages are deprecated (unsafe).");
+    CHECK_AND_ASSERT_THROW_MES(m_msg.substr(0, MULTISIG_KEX_MSG_V1_MAGIC.size()) != MULTISIG_KEX_MSG_V1_MAGIC,
+      "V1 multisig kex messages are deprecated (unsafe).");
+
+     
+    std::string msg_no_magic;
+    CHECK_AND_ASSERT_THROW_MES(tools::base58::decode(m_msg.substr(MULTISIG_KEX_MSG_V2_MAGIC_1.size()), msg_no_magic),
+      "Multisig kex msg decoding error.");
+    binary_archive<false> b_archive{epee::strspan<std::uint8_t>(msg_no_magic)};
+    crypto::signature msg_signature;
+
+    if (m_msg.substr(0, MULTISIG_KEX_MSG_V2_MAGIC_1.size()) == MULTISIG_KEX_MSG_V2_MAGIC_1)
+    {
+       
+      multisig_kex_msg_serializable_round1 kex_msg_rnd1;
+
+      if (::serialization::serialize(b_archive, kex_msg_rnd1))
+      {
+         
+         
+        m_kex_round      = 1;
+        m_msg_privkey    = kex_msg_rnd1.msg_privkey;
+        m_signing_pubkey = kex_msg_rnd1.signing_pubkey;
+        msg_signature    = kex_msg_rnd1.signature;
+      }
+      else
+      {
+        CHECK_AND_ASSERT_THROW_MES(false, "Deserializing kex msg failed.");
+      }
+    }
+    else if (m_msg.substr(0, MULTISIG_KEX_MSG_V2_MAGIC_N.size()) == MULTISIG_KEX_MSG_V2_MAGIC_N)
+    {
+       
+      multisig_kex_msg_serializable_general kex_msg_general;
+
+      if (::serialization::serialize(b_archive, kex_msg_general))
+      {
+        m_kex_round      = kex_msg_general.kex_round;
+        m_msg_privkey    = crypto::null_skey;
+        m_msg_pubkeys    = std::move(kex_msg_general.msg_pubkeys);
+        m_signing_pubkey = kex_msg_general.signing_pubkey;
+        msg_signature    = kex_msg_general.signature;
+
+        CHECK_AND_ASSERT_THROW_MES(m_kex_round > 1, "Invalid kex message round (must be > 1 for the general msg type).");
+      }
+      else
+      {
+        CHECK_AND_ASSERT_THROW_MES(false, "Deserializing kex msg failed.");
+      }
+    }
+    else
+    {
+       
+      CHECK_AND_ASSERT_THROW_MES(false, "Only v2 multisig kex messages are supported.");
+    }
+
+     
+    for (const auto &pubkey: m_msg_pubkeys)
+    {
+      CHECK_AND_ASSERT_THROW_MES(pubkey != crypto::null_pkey && pubkey != rct::rct2pk(rct::identity()),
+        "Pubkey from message was invalid.");
+      CHECK_AND_ASSERT_THROW_MES(rct::isInMainSubgroup(rct::pk2rct(pubkey)),
+        "Pubkey from message was not in prime subgroup.");
+    }
+
+    CHECK_AND_ASSERT_THROW_MES(m_signing_pubkey != crypto::null_pkey && m_signing_pubkey != rct::rct2pk(rct::identity()),
+      "Message signing key was invalid.");
+    CHECK_AND_ASSERT_THROW_MES(rct::isInMainSubgroup(rct::pk2rct(m_signing_pubkey)),
+      "Message signing key was not in prime subgroup.");
+
+     
+    crypto::hash signed_msg{get_msg_to_sign()};
+    CHECK_AND_ASSERT_THROW_MES(crypto::check_signature(signed_msg, m_signing_pubkey, msg_signature),
+      "Multisig kex msg signature invalid.");
+  }
+   
+}  

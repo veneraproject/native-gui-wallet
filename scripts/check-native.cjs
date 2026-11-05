@@ -1,0 +1,5 @@
+const fs=require('node:fs'),path=require('node:path'),{spawn}=require('node:child_process');
+const dir=path.resolve(__dirname,'../native/bin'),suffix=process.platform==='win32'?'.exe':'';
+for(const name of ['venerad','venera-rpc','venera-local-cli'])if(!fs.existsSync(path.join(dir,name+suffix)))throw new Error('Missing native/bin/'+name+suffix+'. Run scripts/build-windows-release.sh to build the native executables.');
+const child=spawn(path.join(dir,'venera-local-cli'+suffix),['--desktop-service'],{stdio:['pipe','pipe','pipe'],windowsHide:true});let text='';let ok=false;const timer=setTimeout(()=>{child.kill();console.error('CLI does not support desktop-service protocol');process.exitCode=1;},5000);
+child.stdout.on('data',data=>{text+=data;for(const line of text.split('\n')){try{const r=JSON.parse(line);if(r.result?.protocol==='venera-desktop-2'){ok=true;clearTimeout(timer);child.stdin.end();}}catch{}}});child.on('error',e=>{clearTimeout(timer);throw e;});child.on('exit',()=>{clearTimeout(timer);if(!ok)process.exitCode=1;});child.stdin.write('{"id":"packaging-check","method":"ping","params":{}}\n');

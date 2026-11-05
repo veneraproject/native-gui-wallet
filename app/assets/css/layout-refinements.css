@@ -1,0 +1,213 @@
+                                                            
+
+                                                                
+body:has(#sidebar) main.account-page {
+    top: 34px !important;
+    bottom: 0 !important;
+    height: calc(100dvh - 34px) !important;
+    padding-bottom: 44px !important;
+}
+.account-page .account-grid {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) !important;
+    gap: 16px !important;
+    align-items: stretch;
+}
+.account-page .account-grid > .account-overview {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    min-width: 0;
+    min-height: 0 !important;
+    padding: 20px 22px !important;
+}
+.account-page .account-grid > .account-staking-card {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    min-width: 0;
+    min-height: 0 !important;
+    padding: 20px 22px !important;
+}
+.account-page .account-overview #totalvalue {
+    font-size: clamp(28px, 3vw, 38px) !important;
+    line-height: 1.12;
+    letter-spacing: -.04em;
+    overflow-wrap: anywhere;
+}
+.account-page .account-overview .mb-4 { margin-bottom: 12px !important; }
+.account-page .account-overview :is(.mt-8, .sm\:mt-12) { margin-top: 18px !important; }
+.account-page .account-overview #sync-indicator { margin-top: 10px !important; font-size: 11px; }
+.account-page .account-overview #sync-indicator span { font-size: 11px !important; }
+.account-page .account-staking-card .text-4xl { font-size: 26px !important; line-height: 1.2; }
+.account-page .account-staking-card .text-4xl span { font-size: 13px !important; }
+.account-page .account-staking-card .mb-6 { margin-bottom: 12px !important; }
+.account-page .account-staking-card .mt-8 { margin-top: 16px !important; }
+.account-page :is(#send-btn, #receive-btn) { padding: 10px 21px !important; min-height: 42px; }
+
+                                                                                  
+.account-page .account-grid > .account-assets {
+    grid-column: 1 / -1 !important;
+    grid-row: 2 !important;
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px !important;
+    margin: 0 !important;
+}
+.account-page .account-assets > div:first-child {
+    grid-column: 1 / -1;
+    margin: 0 !important;
+    padding: 2px 2px 4px !important;
+}
+.account-page .account-assets > .account-asset-card {
+    min-width: 0;
+    min-height: 78px;
+    margin: 0 !important;
+    padding: 16px !important;
+    border-radius: 20px !important;
+    background: linear-gradient(135deg, rgba(43, 33, 58, .72), rgba(25, 21, 34, .85));
+    border: 1px solid rgba(207, 181, 255, .12);
+}
+.account-page .account-asset-card :is(#vnr-balance, #usdt-balance, #usdc-balance, #bnb-balance) {
+    font-size: 16px !important;
+    line-height: 1.35;
+    font-variant-numeric: tabular-nums;
+    overflow-wrap: anywhere;
+}
+.account-page .account-asset-card .text-right { min-width: 0; padding-left: 10px; }
+
+                                                                       
+.account-page .account-grid > .mining-widget {
+    grid-column: 1 / -1 !important;
+    grid-row: 3 !important;
+    position: static !important;
+    inset: auto !important;
+    z-index: auto !important;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    width: auto;
+    height: auto !important;
+    min-height: 60px;
+    padding: 12px 16px;
+    border: 1px solid rgba(207, 181, 255, .12);
+    border-radius: 18px;
+    background: rgba(30, 24, 41, .82);
+}
+.account-page .account-grid .mining-widget .mining-panel,
+.account-page .account-grid .mining-widget:hover .mining-panel {
+    position: static !important;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    width: auto !important;
+    height: auto !important;
+    padding: 0 !important;
+    opacity: 1 !important;
+    transform: none !important;
+    overflow: visible;
+    white-space: normal;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    font-size: 12px;
+}
+.account-page .account-grid .mining-widget .pickaxe-circle {
+    position: static !important;
+    width: 36px !important;
+    height: 36px !important;
+    flex-shrink: 0;
+    border-radius: 12px;
+    box-shadow: none;
+    background: rgba(180, 147, 255, .08);
+}
+.account-page .account-grid .mining-widget .pickaxe-icon { width: 20px; height: 20px; }
+.account-page .account-grid .mining-widget .outline-ring { display: none; }
+
+                                                                           
+.burn-layout {
+    height: auto !important;
+    max-height: none !important;
+    min-height: calc(100dvh - 100px);
+    align-items: start !important;
+}
+.burn-layout :is(#burn-card, #burn-stats-card) {
+    height: auto !important;
+    max-height: none !important;
+    min-height: 0;
+    align-self: start;
+}
+.burn-layout #burn-card > .relative.z-10 { height: auto !important; }
+#burn-stats-card #collect-yield-status {
+    position: relative !important;
+    height: auto !important;
+    max-height: none !important;
+    min-width: 0;
+    flex-shrink: 0;
+    margin: 0 16px 18px !important;
+    padding: 16px !important;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+#collect-yield-status > .flex { align-items: flex-start; }
+#collect-yield-status .min-w-0 { min-width: 0; max-width: 100%; }
+#collect-yield-status :is(a, code, pre, button, .burn-hash, .transfer-receipt) {
+    max-width: 100%;
+    white-space: normal !important;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+                                                                                   
+#sendFormModal #sendFormContent {
+    width: min(540px, calc(100vw - 40px)) !important;
+    max-width: 540px !important;
+    max-height: calc(100dvh - 76px);
+    overflow-y: auto;
+}
+#sendFormModal #sendFormContent > .relative.z-10 > div:first-child { padding: 24px 26px 18px !important; }
+#sendFormModal #sendFormContent > .relative.z-10 > div:nth-child(2) { padding: 10px 26px 26px !important; }
+#sendFormModal #sendFormContent :is(#recipient-box, #amount-box) {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    box-sizing: border-box !important;
+    min-height: 88px !important;
+    padding: 16px 18px !important;
+    border-radius: 18px !important;
+    background: rgba(17, 12, 25, .38);
+}
+#sendFormModal #sendFormContent #recipient-box { margin-bottom: 16px !important; }
+#sendFormModal #sendFormContent :is(#recipient-box, #amount-box) :is(.input-label, label) {
+    position: static !important;
+    inset: auto !important;
+    display: block;
+    margin: 0 !important;
+    padding: 0 !important;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 18px !important;
+    color: #c6b4d6;
+}
+#sendFormModal #sendFormContent :is(#recipient-box, #amount-box) input {
+    position: static !important;
+    display: block;
+    width: 100% !important;
+    height: 28px !important;
+    min-height: 28px;
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 28px !important;
+    font-size: 16px;
+    background: transparent;
+}
+
+@media (max-width: 900px) {
+    .account-page .account-grid { grid-template-columns: minmax(0, 1fr) !important; }
+    .account-page .account-grid > .account-staking-card { grid-column: 1 !important; grid-row: 2 !important; }
+    .account-page .account-grid > .account-assets { grid-row: 3 !important; }
+    .account-page .account-grid > .mining-widget { grid-row: 4 !important; }
+    .account-page .account-assets { grid-template-columns: minmax(0, 1fr) !important; }
+}
+#collect-yield-status { scroll-margin-block: 24px; }
